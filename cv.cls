@@ -242,13 +242,35 @@
 }
 
 % Sidebar versions of show commands
-\newcommand{\showsidebarlanguages}[2]{
+
+% Compact language display (human languages, like LinkedIn)
+\newcommand{\showsimplelanguages}[2]{
+    \ifthenelse{\getlength{#1} > 0}{
+        \sidebarsection{#2}
+        \foreach \n in {1,3,...,\getlength{#1}} {
+            {\small\getdata[\n]{#1}}%
+            \hspace{1mm}---\hspace{1mm}%
+            {\footnotesize\color{lightgrey}%
+            \begin{switch}{\getdata[\n+1]{#1}}%
+                \case{-1}{Native}%
+                \case{5}{Fluent}%
+                \case{4}{Advanced}%
+                \case{3}{Intermediate}%
+                \case{2}{Mediocre}%
+                \case{1}{Beginner}%
+            \end{switch}}\par
+        }
+    }{}
+}
+
+% Skills display (technical skills with proficiency ratings)
+\newcommand{\showsidebarskills}[2]{
     \ifthenelse{\getlength{#1} > 0}{
         \sidebarsection{#2}
         \foreach \i in {-1,5,4,3,2,1} {
             \foreach \n in {1,3,...,\getlength{#1}} {
                 \ifnum\getdata[\n+1]{#1}=\i\relax
-                    \cvskill{\getdata[\n]{#1}}{\i}{\languageflag{\getdata[\n]{#1}}}{S}
+                    \cvskill{\getdata[\n]{#1}}{\i}{}{S}
                 \fi
             }
         }
