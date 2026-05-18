@@ -14,34 +14,55 @@
 % Fetch user details
 \include{details}
 
-% headers
+% header (spans full width)
 \rhead{\header{\firstname}{\lastname}{\postnomial}{\pronoun}}
 
-% sidebar
-\sidebar{
-    \section{Contact}
-    \iconlink{\email}{mailto:}{envelope}
-    \iconlink{\phone}{}{mobile-alt}
-    \iconlink{\address}{}{map-marker-alt}
-    \section{Platforms}
-    \iconlink{\website}{https://}{link}
-    \iconlink{\linkedinusername}{https://www.linkedin.com/in/}{linkedin}
-    \iconlink{\githubusername}{https://github.com/}{github}
-    \iconlink{\orcidid}{https://orcid.org/}{orcid}
-    \showlanguages{languages}{Languages}{L}
-    \showlanguages{planguage}{Programming}{S}
-    \section{Hobbies and Interests}
-    \showhobbies
+% paracol for sidebar + main content flow
+\setcolumnwidth{0.18\paperwidth, 0.78\paperwidth}
+\setlength{\columnsep}{0.02\paperwidth}
+\begin{paracol}{2}
+
+% Left column -- Sidebar (ancillary & personality info)
+\columncolor{lightergrey}
+\thinfont\color{grey}
+\raggedleft
+
+\sidebarsection{Contact}
+\iconlink{\email}{mailto:}{envelope}
+\iconlink{\address}{}{map-marker-alt}
+
+\sidebarsection{Platforms}
+\iconlink{\website}{https://}{link}
+\iconlink{\linkedinusername}{https://www.linkedin.com/in/}{linkedin}
+\iconlink{\githubusername}{https://github.com/}{github}
+\iconlink{\orcidid}{https://orcid.org/}{orcid}
+
+\showsidebarlanguages{languages}{Languages}
+\showsidebarlanguages{planguage}{Programming}
+\showsidebarmemberships{}
+
+\sidebarsection{Education}
+{\small
+    \textbf{MPhys Physics, Astronomy, \& Cosmology}\par
+    University of Portsmouth, 2018--2022\par
+    First Class Honours\par
+    \vspace{1mm}
+    \textbf{A-Levels}\par
+    Peter Symonds College, 2016--2018\par
+    Physics (A), EPQ (A), Maths (B)\par
 }
+\showsidebarhobbies{}
 
-% main content
+\switchcolumn
 
+% Right column -- Main body content
 \mainsection{
     \showcategory{briefcase}{Experience}{jobcompanies}{jobpositions}
     \showcategory{user-graduate}{Education}{educationschools}{educationcourses}
-    \showcategory{id-card}{Memberships}{membership}{membershiptitle}
-    \showproject{trophy}{Awards}{awards}
     \showproject{book-open}{Projects and Publications}{projects}
+    \showproject{trophy}{Awards}{awards}
 }
+
+\end{paracol}
 
 \end{document}

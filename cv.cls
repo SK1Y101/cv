@@ -18,10 +18,11 @@
 \usepackage{fancyhdr}
 \usepackage{fontawesome5}
 \usepackage[T1]{fontenc}
-\usepackage[left=0.01\paperwidth,top=\titleheight,right=0.01\paperwidth,bottom=0.016\paperheight,nohead,nofoot]{geometry}
+\usepackage[headheight=12pt,footskip=10.25pt,left=0.01\paperwidth,top=\titleheight,right=0.01\paperwidth,bottom=0.016\paperheight]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{lmodern}
+\usepackage{paracol}
 \usepackage{pgffor}
 % \usepackage{ragged2e}
 \usepackage{scrextend}
@@ -34,6 +35,18 @@
 \usepackage{xcolor}
 \usepackage{xifthen}
 \usepackage{xparse}
+
+% Sidebar background on every page
+\usepackage[pages=all]{background}
+\backgroundsetup{
+    contents={%
+        \begin{tikzpicture}[overlay,remember picture]
+            \fill[sidebarcolour] (current page.north west) rectangle ([xshift=0.2\paperwidth]current page.south west);
+        \end{tikzpicture}%
+    },
+    opacity=1,
+    scale=1,
+}
 
 % Package settings
 
@@ -125,7 +138,7 @@
       \fontsize{14pt}{24pt}\color{header}%
       {\bodyfont #3}
     };
-    \node [anchor=left] (pronoun) at ([yshift=-2.5mm, xshift=20mm] name.east) {%
+    \node [anchor=west] (pronoun) at ([yshift=-2.5mm, xshift=20mm] name.east) {%
       \fontsize{14pt}{24pt}\color{header}%
       {\bodyfont #4}
     };
@@ -212,7 +225,7 @@
 
 \ExplSyntaxOff
 
-% Define sidebar
+% Define sidebar environment
 
 \newcommand{\parbreak}{\par\vspace{2mm}}
 % \newcommand{\ifexists}[2]{\ifdefempty{#1}{}{#2}}
@@ -221,26 +234,51 @@
 \newcommand{\defaultexists}[2]{\ifthenelse{\equal{#1}{}}{#2}{#1}}
 
 
-\newcommand{\sidebar}[1]{
-    \begin{tikzpicture}[remember picture,overlay]
-        \node [rectangle, fill=sidebarcolour, anchor=west, minimum width=0.2\paperwidth, minimum height=\paperheight] (bar) at ([yshift=-\titleheight] current page.west){};
-        \node [anchor=north] (content) at ([yshift=-\titlepad] bar.north) {
-            \begin{minipage}{0.18\paperwidth}
-                \begin{flushright}
-                    \thinfont\color{grey}#1
-                \end{flushright}
-            \end{minipage}
-        };
-    \end{tikzpicture}
+% Sidebar section heading (compact, for the left column)
+\newcommand{\sidebarsection}[1]{
+    \par\vspace{2mm}
+    {\small\headingfont\color{grey}#1}
+    \par\vspace{1mm}
 }
 
-% Define main section
+% Sidebar versions of show commands
+\newcommand{\showsidebarlanguages}[2]{
+    \ifthenelse{\getlength{#1} > 0}{
+        \sidebarsection{#2}
+        \foreach \i in {-1,5,4,3,2,1} {
+            \foreach \n in {1,3,...,\getlength{#1}} {
+                \ifnum\getdata[\n+1]{#1}=\i\relax
+                    \cvskill{\getdata[\n]{#1}}{\i}{\languageflag{\getdata[\n]{#1}}}{S}
+                \fi
+            }
+        }
+    }{}
+}
+
+\newcommand{\showsidebarhobbies}{
+    \ifthenelse{\getlength{hobbies} > 0}{
+        \sidebarsection{Hobbies and Interests}
+        \foreach \c in {1,3,...,\getlength{hobbies}} {
+            \onehobby{\c}
+        }
+    }{}
+}
+
+% Compact membership rendering for sidebar
+\newcommand{\showsidebarmemberships}{
+    \ifthenelse{\getlength{membershiptitle} > 0}{
+        \sidebarsection{Professional Memberships}
+        \foreach \c in {1,7,...,\getlength{membershiptitle}} {
+            {\color{darkgrey}\getdata[\c]{membershiptitle}}%
+            \ifexists{\getdata[\c+1]{membershiptitle}}{\hspace{1mm}\textemdash\hspace{1mm}\getdata[\c+1]{membershiptitle}}{}%
+            \par\vspace{0.5mm}
+        }
+    }{}
+}
+
+% Define main section wrapper
 \newcommand{\mainsection}[1]{
-    \begin{adjustwidth}{0.2\paperwidth}{}{
-        \vspace{-0.25cm}
-        \thinfont\color{gray}#1
-    }
-    \end{adjustwidth}
+    #1
 }
 
 %  define heading styles
@@ -348,9 +386,9 @@
         \section{#2}
         \foreach \i in {-1,5,4,3,2,1} {
             \foreach \n in {1,3,...,\getlength{#1}} {
-                \ifthenelse{\getdata[\n+1]{#1} = \i}{
+                \ifnum\getdata[\n+1]{#1}=\i\relax
                     \cvskill{\getdata[\n]{#1}}{\i}{\languageflag{\getdata[\n]{#1}}}{#3}
-                }{}
+                \fi
             }
         }
     }{}
@@ -382,7 +420,7 @@
             \end{addmargin}%
         }%
     \end{tabularx}%
-    \ifexistselse{\getdata[#1+3]{\small#2}}{\vspace{-1.5em}\par}{\vspace{-1.4em}\par}%
+    \ifexistselse{\getdata[#1+3]{#2}}{\vspace{-1.5em}\par}{\vspace{-1.4em}\par}%
 }
 \newcommand{\oneitem}[2]{
     % entry number, entry name

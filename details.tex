@@ -9,15 +9,12 @@
 \renewcommand{\postnomial}{MPhys MInstP FRAS}
 \renewcommand{\pronoun}{She/They}
 % contact
-\renewcommand{\email}{lloydwaltersj@gmail.com}
-\renewcommand{\email}{skye@lloydwaltersj.co.uk}
 \renewcommand{\email}{skyecasolw@gmail.com}
-% \renewcommand{\phone}{phone number}
 \renewcommand{\address}{Havant, Hampshire, United Kingdom}
 
 % social details
 
-\renewcommand{\website}{sk1y101.github.com}
+\renewcommand{\website}{sk1y101.github.io}
 \renewcommand{\githubusername}{sk1y101}
 \renewcommand{\linkedinusername}{skye-owen-lloyd-walters}
 \renewcommand{\orcidid}{0000-0003-2186-1582}
@@ -33,7 +30,7 @@
 \renewcommand{\slimdates}{true}
 
 % Languages
-% \languageskill{language code}{proficciency}
+% \languageskill{language code}{proficiency}
 % Proficiency is rated: 1-5, where 1 is beginner, 5 is fluency. -1 is additionally used for a native language
 
 \languageskill{English}{-1}
@@ -50,10 +47,19 @@
 \programmingskill{HTML/CSS}{3}
 \programmingskill{Javascript}{3}
 \programmingskill{Kerboscript}{3}
-\programmingskill{SQL}{2}
-\programmingskill{Bash}{2}
+\programmingskill{SQL}{3}
+\programmingskill{Bash}{3}
 \programmingskill{Go}{3}
 \programmingskill{Terraform HCL}{3}
+\programmingskill{Jenkins / CI}{4}
+\programmingskill{Docker}{3}
+\programmingskill{Ansible}{3}
+\programmingskill{AWS}{3}
+\programmingskill{C++}{2}
+\programmingskill{Jupyter}{2}
+\programmingskill{OpenCV}{2}
+\programmingskill{TensorFlow / Keras}{2}
+\programmingskill{Selenium}{2}
 
 % Jobs
 % \addcompany{Company name}{logo path}
@@ -63,12 +69,31 @@
 \addposition{Canonical}
 {Software Engineer I}{Canonical MAAS (Metal-As-A-Service)}
 {2023-05}{}
-{Primarily handling internal automation resources, including our Jenkins CI, image promotion workflows, and spike into automated point releases and bug backporting. Implementing Ancillary MAAS products for automating bootstrapping and lifecycle of your MAAS cluster}
+{%
+\begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
+    \item Primary owner of internal automation infrastructure, managing Jenkins CI pipelines, image promotion workflows, and automated point release and bug backporting processes.
+    \item Developed \href{https://github.com/canonical/maas-terraform-modules}{Terraform modules} to bootstrap a complete MAAS topology from nothing on LXD, enabling infrastructure-as-code deployment workflows for field engineers.
+    \item Contributed to the \href{https://github.com/canonical/terraform-provider-maas}{MAAS Terraform Provider} enabling CRUD management of MAAS resources (networking, users, machines, VM hosts) through HashiCorp's Terraform.
+    \item Maintained the \href{https://github.com/canonical/maas-charms}{MAAS Charms} repository, developing charmed operators that automate operational procedures of running MAAS.
+    \item Worked on \href{https://github.com/canonical/maas-anvil}{MAAS Anvil}, a snap-based solution for managing charmed MAAS deployments with Terraform-driven configuration.
+    \item Created and delivered \href{https://github.com/SK1Y101/tf-charmed-maas-training}{Terraform-driven Charmed MAAS training} for the Berlin Commercial Sprint 2025, inducting field engineers in the new MAAS Anvil deployment approach.
+    \item Contributed to \href{https://github.com/SK1Y101/doc-linting-tools}{documentation linting tooling} for the wider MAAS team, providing CLI wrappers around aspell, proselint, linkchecker, and style for automated doc quality checks.
+\end{itemize}
+}
 
 \addposition{Canonical}
 {Associate Software Engineer}{Canonical MAAS (Metal-As-A-Service)}
 {2022-06}{2023-05}
-{Joined as part of the graduate fast track programme as a python backend developer.}
+{%
+\begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
+    \item Joined the MAAS team through Canonical's graduate fast track programme as a Python backend developer.
+    \item Developed and maintained \href{https://github.com/maas/MAAS-ansible-playbook}{MAAS Ansible Playbooks}, providing Ansible-based bootstrapping and configuration for MAAS deployments.
+    \item Created the \href{https://github.com/canonical/ansible-collection}{MAAS Ansible Collection}, published to Ansible Galaxy, enabling resource management of MAAS environments through Ansible automation.
+    \item Contributed to the \href{https://github.com/canonical/terraform-provider-maas}{MAAS Terraform Provider}, implementing OpenAPI-driven resource management for MAAS infrastructure.
+    \item Worked on the \href{https://maas.io/docs/api}{MAAS OpenAPI Schema}, documenting the full MAAS REST API in OpenAPI Specification format for language-agnostic client generation.
+    \item Developed \href{https://github.com/canonical/packer-maas}{Packer templates} for creating custom deployable OS images within MAAS environments.
+\end{itemize}
+}
 
 \addcompany{B\&M}{BM_logo.jpeg}
 \addposition{B\&M}
@@ -87,8 +112,8 @@
 {%
 \begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
     \item First year mean grade of 76.7\%, Final year mean grade of 79.2\%
-    \item \href{https://lloydwaltersj.com/assets/pdf/TransitProject/TransitDissertation.pdf}{Masters thesis} combining computational modelling, first hand observation, and supplemental data to measure exoplanet transits. Developed analytical models of transit timing variation to investigate the orbital properties of non-transiting planets. Results were summarised with a 6000 word dissertation, 10 minute presentation/discussion, and scientific poster.
-    \item \href{https://lloydwaltersj.com/assets/pdf/GWProject/GWProjectFinalReport.pdf}{Bachelors thesis} utilising computational modelling and signal processing to identify and model glitch events within the LIGO data set. Results were summarised with a 5000 word dissertation, 10 minute presentation/discussion, and LaTeX Compatible result list.
+    \item \href{https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf}{Masters thesis} combining computational modelling, first hand observation, and supplemental data to measure exoplanet transits. Developed analytical models of transit timing variation to investigate the orbital properties of non-transiting planets. Results were summarised with a 6000 word dissertation, 10 minute presentation/discussion, and scientific poster.
+    \item \href{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}{Bachelors thesis} utilising computational modelling and signal processing to identify and model glitch events within the LIGO data set. Results were summarised with a 5000 word dissertation, 10 minute presentation/discussion, and LaTeX Compatible result list.
 \end{itemize}
 }
 
@@ -96,13 +121,25 @@
 \addcourse{AiCore}
 {Ai and Data Engineering}{Certified in the practical application of AI and Data Engineering}
 {2022-01}{2022-06}
-{}
+{%
+\begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
+    \item Completed the course to the highest standard awarded in less than half the expected time.
+    \item Software engineering: Git \& GitHub, advanced Python, algorithms \& data structures.
+    \item Data engineering: SQL, data lakes, data warehousing, web scraping with Selenium.
+    \item Data science: Data cleaning, preprocessing \& visualisation, A/B testing, feature engineering, statistical modelling, model selection and implementation using sklearn.
+    \item Cloud engineering: cloud computing, designing and building APIs, Docker, Apache Airflow, AWS Serverless Stack (EC2, S3, RDS).
+\end{itemize}
+}
 
 \addeducation{Peter Symonds College}{petersymonds_logo.jpeg}
 \addcourse{Peter Symonds College}
 {A-Level}{Physics (A), EPQ (A), Maths (B), Further Maths (D), AS-Chemistry (A)}
 {2016-09}{2018-06}
-{}
+{%
+\begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
+    \item Produced a Level 3 Extended Project Qualification to a high standard titled \href{https://sk1y101.github.io/assets/pdf/EPQ.pdf}{`Is There A Possibility of Extrasolar Habitation?'}, studying the habitability of Earth-like exoplanets.
+\end{itemize}
+}
 
 \addeducation{Trafalgar School}{}
 \addcourse{Trafalgar School}
@@ -114,8 +151,8 @@
 % \addmembership{Location}{logo path}
 % \addmembershiptitle{Location}{Title}{onelinedetauks}{Start}{end}{details}
 
-\addmembership{British Astonomical Association}{baa_logo.jpeg}
-\addmembershiptitle{British Astonomical Association}
+\addmembership{British Astronomical Association}{baa_logo.jpeg}
+\addmembershiptitle{British Astronomical Association}
 {Member}{}
 {2022}{}
 {}
@@ -143,7 +180,7 @@
 {}
 
 % Awards
-% \addaward{award name}{affiliated location}{date recieved}{details}
+% \addaward{award name}{affiliated location}{date received}{details}
 
 \addaward{Graham Bryant Prize for Best Observatory Project}
 {University of Portsmouth}{2022-05}
@@ -152,91 +189,123 @@
 % Projects and Publications
 
 % \addproject{project name}{affiliated}{completion date}{details}{link}
+\addproject{YT-Automation}{}
+{SkiylianSoftware}{2026-01}
+{Python-based automation suite for YouTube channel management. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Uses the YouTube Data API via python-youtube and Google Calendar API with OAuth authentication.}{https://github.com/SkiylianSoftware/YT-automation}
+
+\addproject{Ambistream}{}
+{}{2026-01}
+{Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), adding an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
+
+\addproject{Terraform Charmed MAAS Training}{code}
+{Canonical}{2025-05}
+{Hands-on training material created and delivered for the Canonical Berlin Commercial Sprint 2025. Inducts field engineers in deploying and managing MAAS through the new Anvil approach using Terraform, Juju, and charmed operators, with step-by-step exercises for each deployment stage.}{https://github.com/SK1Y101/tf-charmed-maas-training}
+
+\addproject{Documentation Linting Tools}{code}
+{Canonical}{2025-05}
+{CLI tooling providing automated documentation quality checks for the MAAS team. Wraps aspell, proselint, linkchecker, and style-checking utilities in a unified interface, enabling CI pipeline integration for doc PRs.}{https://github.com/SK1Y101/doc-linting-tools}
+
+\addproject{KOS Flight Computer}{}
+{}{2024-12}
+{Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Provides a multi-size BootUI system for connection-loss displays, real-time telemetry (MET, power, orbit status, disk capacity), and a modular menu interface for controlling spacecraft functions. Written entirely in KerboScript with ~400B of code.}{https://github.com/SK1Y101/KOSFlightController}
+
+\addproject{Balanced Ternary Computer}{proj}
+{}{2024-02}
+{Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
+
+\addproject{Skiylia Programming Language}{proj}
+{}{2022-2024}
+{A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.}{https://github.com/SK1Y101/Skiylia}
+
+\addproject{Improved TTV Pipeline}{}
+{}{2022-07}
+{Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
+
 \addproject{Exoclock Data Release IV}{pub}
 {ExoClock}{2025-11}
-{ExoClock Project IV: A homogeneous catalogue of 620 updated exoplanet ephemerides}{https://arxiv.org/abs/2511.14407}
+{Peer-reviewed paper in the ExoClock collaboration's Data Release IV, presenting a homogeneous catalogue of 620 updated exoplanet ephemerides. Contributed observational data and transit timing analysis from the TransitProject pipeline. Published on arXiv.}{https://arxiv.org/abs/2511.14407}
 
 \addproject{Terraform MAAS bootstrap}{code}
 {Canonical}{}
-{Infrastructure as code to bootstrap a MAAS instance}{https://github.com/canonical/maas-terraform-modules}
+{Three-stage Terraform module to bootstrap Juju on LXD, deploy charmed MAAS, and configure the deployed MAAS instance — enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster.}{https://github.com/canonical/maas-terraform-modules}
 
 \addproject{MAAS Terraform provider}{code}
 {Canonical}{}
-{Infrastructure as code for your running MAAS instance}{https://github.com/canonical/terraform-provider-maas}
+{Terraform provider published on the official Terraform Registry enabling CRUD management of MAAS resources including networking, users, machines, VM hosts, and DNS.}{https://github.com/canonical/terraform-provider-maas}
 
 \addproject{Go MAAS Client}{code}
 {Canonical}{}
-{Go client wrapper around the MAAS API}{https://github.com/canonical/gomaasclient}
+{Go client library providing a typed wrapper around the full MAAS REST API, used internally by the Terraform provider and other Go-based MAAS tooling.}{https://github.com/canonical/gomaasclient}
 
 \addproject{MAAS Anvil}{code}
 {Canonical}{}
-{Charm based bootstrapping for your MAAS topology}{https://github.com/canonical/maas-anvil}
+{Snap-based charmed operator for deploying and managing MAAS as a Juju topology, orchestrated through Terraform-driven configuration workflows.}{https://github.com/canonical/maas-anvil}
 
 \addproject{MAAS Charms}{code}
 {Canonical}{}
-{Charmed MAAS}{https://github.com/canonical/maas-charms}
+{Charmed operators that automate the operational procedures of running MAAS — handling deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers.}{https://github.com/canonical/maas-charms}
 
 \addproject{MAAS Internal CI}{code}
 {Canonical}{}
-{Manages our Jenkins instance and acts as primary point of knowledge.}{https://maas.io}
+{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure, managing automated build, test, and release pipelines across multiple MAAS product repositories.}{https://maas.io}
 
 \addproject{Packer-MAAS}{code}
 {Canonical}{}
-{Custom images for your MAAS deployment}{https://github.com/canonical/packer-maas}
+{Packer templates, scripts, and configuration for building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration.}{https://github.com/canonical/packer-maas}
 
 \addproject{Metal As A Service}{code}
 {Canonical}{}
-{}{https://maas.io}
+{MAAS transforms physical servers into cloud-like resources, automating provisioning, monitoring, and management of bare metal. Enables remote OS deployment, DHCP, DNS, IPAM, and full lifecycle management of data center hardware.}{https://maas.io}
 
 \addproject{VisualNovel Template}{}
 {}{2025-11}
-{A lightweight web-based Visual Novel engine template, supporting many effects, branching stories, and variations to ensure every playthrough feels amazing.}{https://github.com/SK1Y101/vn-template}
+{A lightweight web-based Visual Novel engine template, supporting branching storylines, dynamic effects, and variations to ensure every playthrough feels unique. Stories are written in a simple markup format and compiled using a Python-based generator with built-in validation.}{https://github.com/SK1Y101/vn-template}
 
-\addproject{AutoBreezeBeats}{}
-{}{2024-06}
-{Web interface to play youtube video audio over a bluetooth connected device. Designed with a home "radio station" in mind }{https://github.com/SK1Y101/AutoBreezeBeats}
+\addproject{AutoBreezeBeats / Ambistream}{}
+{}{2026-01}
+{Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), Ambistream (2026) adds an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
 
 \addproject{Season Clock}{}
 {}{2024-03}
-{Fitbit Clock face showing the seasons on your wrist}{https://github.com/SK1Y101/SeasonsClock}
+{Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.}{https://github.com/SK1Y101/SeasonsClock}
 
 \addproject{'Variations on an Exoplanet theme` webinar}{talk}
 {British Astronomical Association}{2023-09}
 {Computational Modelling of Transit Timing Variations}{https://britastro.org/event/exoplanet-2023sep}
 
-\addproject{MAAS Ansible Playbooks}{}
+\addproject{MAAS Ansible Playbooks}{code}
 {Canonical}{2023-03}
-{}{https://github.com/maas/MAAS-ansible-playbook}
+{An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
 
 \addproject{Lloyd-Walters et al. 2022}{pub}
 {University of Portsmouth}{2022-05}
-{Masters: `Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://lloydwaltersj.com/assets/pdf/TransitProject/TransitDissertation.pdf}
+{Masters: `Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf}
 
 \addproject{Data Science Project}{}
 {AiCore}{2022-05}
-{Combined Data science and AI Pipeline for outcome prediction}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
+{End-to-end data science pipeline predicting football match outcomes, covering: EDA and data cleaning with Pandas; feature engineering for team performance metrics; remote database upload via AWS RDS, PostgreSQL, and SQLAlchemy; model training and selection using sklearn (Logistic Regression, MLP, Naive Bayes, Decision Tree) with feature selection via SelectKBest; and inference on new season data.}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
 
 \addproject{Data Collection Pipeline}{}
 {AiCore}{2022-03}
-{Industry grade data collection pipeline on AWS using Docker, Selenium4, Prometheus, and Grafana.}{https://github.com/SK1Y101/Data_Collection_Pipeline}
+{Full-stack cloud-based web scraper targeting the NASA Exoplanet Catalogue. Built with Selenium 4 for dynamic page interaction, UUID v4/JSON for data storage, and Boto3 for AWS S3 upload. Containerised with Docker and deployed on EC2 with Selenium Grid for distributed scraping. Monitored via Prometheus and Grafana dashboards with automated CI/CD and cron-based daily restarts. Scrapes all 4940+ known exoplanets.}{https://github.com/SK1Y101/Data_Collection_Pipeline}
 
 \addproject{Fitbit Pokétch}{}
 {}{2022-02}
-{A Fitbit clock-face in the style of the Pokémon Generation IV Pokétch.}{https://github.com/SK1Y101/PoketchFitbit}
+{Fitbit clock face replicating the Pokétch from Pokémon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).}{https://github.com/SK1Y101/PoketchFitbit}
 
 \addproject{Computer Vision Rock-Paper-Scissors}{}
 {AiCore}{2022-02}
-{TensorFlow based model to play Rock-Paper-Scissors in real time with a webcam and openCV}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
+{Interactive Rock-Paper-Scissors game using computer vision. A Keras/TensorFlow model trained via Google Teachable-Machine recognises four gestures (rock, paper, scissors, null) in real-time through a webcam feed processed with OpenCV. Includes both a terminal-based fallback and the full CV-enabled game loop.}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
 
 \addproject{Lloyd-Walters et al. 2021}{pub}
 {University of Portsmouth}{2021-05}
-{Bachelors: `Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://lloydwaltersj.com/assets/pdf/GWProject/GWProjectFinalReport.pdf}
+{Bachelors: `Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}
 
 \addproject{Lloyd-Walters J. 2017}{pub}
 {Peter Symonds College}{2017-12}
-{Extended Project: `Is There A Possibility of Extrasolar Habitation?'}{https://lloydwaltersj.com/assets/pdf/EPQ.pdf}
+{Extended Project: `Is There A Possibility of Extrasolar Habitation?'}{https://sk1y101.github.io/assets/pdf/EPQ.pdf}
 
 % hobbies and interests
 \addhobby{Space \& Spaceflight}{Natural or artificial, if it's found outside of earth's atmosphere, I probably like it. Exoplanets and space-probes are my favourite though.}
-\addhobby{Gaming}{I Love Factorio, Stellaris, modded Minecraft, and Kerbal Space Program.}
-\addhobby{Programming}{I build watch faces for my FitBit Versa, occasionally work on my custom programming language, and am slowly building a flight computer for Kerbal Space Program.}
+\addhobby{Gaming}{I Love Factorio, Stellaris, modded Minecraft, and Kerbal Space Program — the latter of which features heavily in my YouTube content creation.}
+\addhobby{Programming}{I build watch faces for my FitBit Versa, design programming languages, write flight computers for Kerbal Space Program, and experiment with esoteric hardware designs like balanced ternary logic.}
