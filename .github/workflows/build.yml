@@ -17,11 +17,16 @@ jobs:
           root_file: main.tex
           latexmk_use_xelatex: false
 
-      - name: Upload PDF artifact
+      - name: Generate resume.json
+        run: python3 tex2json.py
+
+      - name: Upload PDF and JSON artifacts
         uses: actions/upload-artifact@v4
         with:
           name: CV
-          path: main.pdf
+          path: |
+            main.pdf
+            resume.json
 
   release:
     if: github.ref == 'refs/heads/main'
@@ -39,6 +44,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          files: main.pdf
+          files: |
+            main.pdf
+            resume.json
           make_latest: true
           generate_release_notes: false

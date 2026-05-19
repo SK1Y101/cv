@@ -24,14 +24,11 @@
 \usepackage{lmodern}
 \usepackage{paracol}
 \usepackage{pgffor}
-% \usepackage{ragged2e}
 \usepackage{scrextend}
 \usepackage{setspace}
 \usepackage{tabularx}
-\usepackage{textpos}
 \usepackage{tikz}
 \usepackage{worldflags}
-\usepackage{wrapfig}
 \usepackage{xcolor}
 \usepackage{xifthen}
 \usepackage{xparse}
@@ -54,7 +51,6 @@
 \setlength{\parindent}{0pt}
 \hyphenpenalty=10000
 \exhyphenpenalty=10000
-% \renewcommand{\baselinestretch}{0.9}
 
 % Classes to print everything
 \newcommand{\firstname}{First name}
@@ -78,10 +74,6 @@
 \newcommand{\thinfont}{\normalfont}
 \newcommand{\headingfont}{\bfseries\fontfamily{lmss}\selectfont}
 
-\newcommand{\italica}[1]{%
-    {\color{gray}\itshape\bodyfont #1}%
-}
-
 % Define colours
 
 \definecolor{white}{RGB}{255,255,255}
@@ -103,21 +95,8 @@
 
 \definecolor{date}{HTML}{4A90D9}
 
-\ifdefined\@cv@print
-  \colorlet{blue}{gray}
-  \colorlet{red}{gray}
-  \colorlet{orange}{gray}
-  \colorlet{green}{gray}
-  \colorlet{lilac}{gray}
-  \colorlet{purple}{gray}
-  \colorlet{aquamarine}{gray}
-\definecolor{lightgrey}{HTML}{gray}
-  \colorlet{fillheader}{white}
-  \colorlet{header}{gray}
-\else
-  \colorlet{fillheader}{gray}
-  \colorlet{header}{white}
-\fi
+\colorlet{fillheader}{gray}
+\colorlet{header}{white}
 \colorlet{textcolor}{gray}
 \colorlet{headercolor}{darkgrey}
 
@@ -197,17 +176,6 @@
   \seq_count:c { l_bcp_data_#1_seq }
  }
 
-\NewDocumentCommand{\removelast}{om}
- {
-  \IfNoValueTF { #1 }
-   {
-    \bcp_remove_last:Nn \l_tmpa_tl { #2 }
-   }
-   {
-    \bcp_remove_last:Nn #1 { #2 }
-   }
- }
-
 \cs_new_protected:Npn \bcp_store_data:nn #1 #2
  {
   % create the sequence if it doesn't exist or clear it if it exists
@@ -240,17 +208,11 @@
   \seq_item:cn { l_bcp_data_#2_seq } { #1 }
  }
 
-\cs_new_protected:Nn \bcp_remove_last:Nn
- {
-  \seq_pop_right:cN { l_bcp_data_#2_seq } #1
- }
-
 \ExplSyntaxOff
 
 % Define sidebar environment
 
 \newcommand{\parbreak}{\par\vspace{2mm}}
-% \newcommand{\ifexists}[2]{\ifdefempty{#1}{}{#2}}
 \newcommand{\ifexists}[2]{\ifthenelse{\equal{#1}{}}{}{#2}}
 \newcommand{\ifexistselse}[3]{\ifthenelse{\equal{#1}{}}{#3}{#2}}
 \newcommand{\defaultexists}[2]{\ifthenelse{\equal{#1}{}}{#2}{#1}}
@@ -270,7 +232,8 @@
     \ifthenelse{\getlength{#1} > 0}{
         \sidebarsection{#2}
         \foreach \n in {1,3,...,\getlength{#1}} {
-            \makebox[0.4\linewidth][r]{\small\getdata[\n]{#1}}\hspace{0.1\linewidth}%
+            \makebox[0.35\linewidth][r]{\small\getdata[\n]{#1}}\hspace{1mm}%
+            \makebox[\langflagwidth][c]{\languageflag{\getdata[\n]{#1}}}\hspace{1mm}%
             \makebox[0.35\linewidth][l]{\footnotesize\color{lightgrey}%
             \begin{switch}{\getdata[\n+1]{#1}}%
                 \case{-1}{Native}%
@@ -376,7 +339,6 @@
     \ifexists{#1}{\ifexistselse{#2}{\href{#2#1}{#1}}{#1}~\faIcon{#3}\parbreak}
 }
 
-\newcommand{\point}{\textbullet\space}
 \newcommand{\ratingmarker}{\faCircle}
 \newcommand{\cvskill}[4]{
     % Skill name, profficiency, icon, language
@@ -409,7 +371,8 @@
     \appenddata{planguage}{{#1}{#2}}
 }
 
-\newcommand{\icowidth}{3mm}
+\newcommand{\icowidth}{2.2mm}
+\newcommand{\langflagwidth}{2.8mm}
 
 \newcommand{\languageflag}[1]{
     \begin{switch}{#1}
@@ -447,10 +410,7 @@
 \newcommand{\marginwidth}{2mm}
 \newcommand{\slimdates}{true}
 \newcommand{\slimdatewidth}{0.07\linewidth}
-\newcommand{\slimiconwidth}{0.001\linewidth}
-\newcommand{\slimsectionwidth}{0.865\linewidth}
 \newcommand{\widedatewidth}{0.16\linewidth}
-\newcommand{\widesectionwidth}{0.795\linewidth}
 
 \newcommand{\parsedate}[1]{{
     \IfSubStr{#1}{--}{
@@ -464,12 +424,10 @@
 \newcommand{\entrytabular}[4]{{
     \ifthenelse{\equal{\slimdates}{true}}{%
         \def\localdatewidth{\slimdatewidth}%
-        \def\localsectionwidth{\slimsectionwidth}%
     }{%
         \def\localdatewidth{\widedatewidth}%
-        \def\localsectionwidth{\widesectionwidth}%
     }%
-    \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{\localdatewidth}p{\localsectionwidth}}
+    \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{\localdatewidth}>{\raggedright\arraybackslash}X}
         \vspace{-0.7em}#1
         & {\vspace{-0.7em}\color{entrycolour}#2}\ifexists{#3}{\textit{\hfill\small#3}}
         \par
