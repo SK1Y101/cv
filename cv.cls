@@ -462,7 +462,7 @@
     }
 }}
 \newcommand{\entrytabular}[4]{{
-    \ifbool{\slimdates}{%
+    \ifthenelse{\equal{\slimdates}{true}}{%
         \def\localdatewidth{\slimdatewidth}%
         \def\localsectionwidth{\slimsectionwidth}%
     }{%
@@ -492,7 +492,7 @@
     \ifexistselse{\getdata[#1+3]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
 }
 \newcommand{\oneitem}[2]{
-    \ifbool{\slimdates}{
+    \ifthenelse{\equal{\slimdates}{true}}{
         \entrytabular
             {\defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}}
             {\getdata[#1+1]{#2}}
@@ -552,7 +552,7 @@
                 \oneinstance{\c}{#3}{#4}%
             }%
         }%
-        \ifbool{\slimdates}{
+        \ifthenelse{\equal{\slimdates}{true}}{
             \vspace{1.2em+0.5em}% add a little bit of extra spacing
         }{
             \vspace{0.3em+0.5em}% add a little bit of extra spacing
