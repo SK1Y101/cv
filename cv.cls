@@ -492,30 +492,12 @@
     \ifexistselse{\getdata[#1+3]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
 }
 \newcommand{\oneitem}[2]{
-    \ifthenelse{\equal{\slimdates}{true}}{
-        \entrytabular
-            {\defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}}
-            {\getdata[#1+1]{#2}}
-            {\getdata[#1+2]{#2}}
-            {\getdata[#1+5]{#2}}
-        \vspace{0.5em}
-        \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.2em}\par}{\vspace{0.5em}\par}
-    }{
-        \begin{tabularx}{\linewidth}{p{3.4em}p{0em}p{2.1em}p{\widesectionwidth}}%
-            \getdata[#1+3]{#2}&%
-            \hspace{-1em}\color{lightgrey}\scriptsize\faIcon{arrow-right}&%
-            \hspace{-1.3em}\defaultexists{\getdata[#1+4]{#2}}{Present}&%
-            {\vspace{-3mm}\color{entrycolour}\getdata[#1+1]{#2}}\ifexists{\getdata[#1+2]{#2}}{\textit{\hfill\small\getdata[#1+2]{#2}}}%
-            \par%
-            \ifexists{\getdata[#1+5]{#2}}{%
-                \vspace{-0.2em}%
-                \begin{addmargin}[0mm]{0mm}%
-                    \setstretch{0.9}\small\getdata[#1+5]{#2}%
-                \end{addmargin}%
-            }%
-        \end{tabularx}%
-        \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.2em}\par}{\vspace{0.5em}\par}%
-    }
+    \entrytabular
+        {\defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}}
+        {\getdata[#1+1]{#2}}
+        {\getdata[#1+2]{#2}}
+        {\getdata[#1+5]{#2}}
+    \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
 }
 \newcommand{\oneinstance}[3]{
     % instance number, instance name, entry name
