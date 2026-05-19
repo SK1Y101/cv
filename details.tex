@@ -5,9 +5,11 @@
 % Personal details
 
 \renewcommand{\firstname}{Skye}
+\renewcommand{\middlename}{Cassiopeia-Jacqueline}
 \renewcommand{\lastname}{Owen-Lloyd-Walters}
 \renewcommand{\postnomial}{MPhys MInstP FRAS}
 \renewcommand{\pronoun}{She/They}
+\renewcommand{\profilephoto}{profile.jpg}
 % contact
 \renewcommand{\email}{skyecasolw@gmail.com}
 \renewcommand{\address}{Havant, Hampshire, United Kingdom}
@@ -25,7 +27,7 @@
 \colorlet{titlecolour}{lightgrey}
 \colorlet{backgroundcolour}{white}
 \colorlet{sidebarcolour}{lightergrey}
-\colorlet{highlightcolour}{red}
+\colorlet{highlightcolour}{lilac}
 \colorlet{skillcolour}{lilac}
 \renewcommand{\slimdates}{true}
 
@@ -158,31 +160,36 @@
 
 \addmembership{British Astronomical Association}{baa_logo.jpeg}
 \addmembershiptitle{British Astronomical Association}
-{Member}{}
+{Member}{Exoplanet transit timing and observation}
 {2022}{}
 {}
+{https://britastro.org/}
 
 \addmembership{Institute of Physics}{IOP_logo.png}
 \addmembershiptitle{Institute of Physics}
 {Member}{Granted the use of the post-nomen `MInstP'}
 {2022}{}
 {}
+{https://www.iop.org/}
 \addmembershiptitle{Institute of Physics}
-{Associate Member}{}
+{Associate Member}{Affiliate membership during MPhys studies}
 {2018}{2022}
 {}
+{https://www.iop.org/}
 
 \addmembership{European Astronomical Society}{eas_logo.jpeg}
 \addmembershiptitle{European Astronomical Society}
-{Member}{}
+{Member}{European astronomy and astrophysics research}
 {2020}{}
 {}
+{https://eas.unige.ch/}
 
 \addmembership{Royal Astronomical Society}{ras_logo.jpeg}
 \addmembershiptitle{Royal Astronomical Society}
 {Fellow}{Granted the use of post-nomen `FRAS'}
 {2020}{}
 {}
+{https://ras.ac.uk/}
 
 % Awards
 % \addaward{award name}{affiliated location}{date received}{details}
@@ -193,122 +200,120 @@
 
 % Projects and Publications
 
-% \addproject{project name}{affiliated}{completion date}{details}{link}
+% \addproject{name}{icon}{affiliation}{date}{details}{link}
+% Ongoing entries, sorted by start date descending
+\addproject{Terraform MAAS bootstrap}{code}
+{Canonical}{2025-09--Present}
+{Three-stage Terraform module to bootstrap Juju on LXD, deploy charmed MAAS, and configure the deployed MAAS instance — enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster.}{https://github.com/canonical/maas-terraform-modules}
+
+\addproject{MAAS Terraform provider}{code}
+{Canonical}{2025-04--Present}
+{Terraform provider published on the official Terraform Registry enabling CRUD management of MAAS resources including networking, users, machines, VM hosts, and DNS.}{https://github.com/canonical/terraform-provider-maas}
+
+\addproject{MAAS Charms}{code}
+{Canonical}{2024-07--Present}
+{Charmed operators that automate the operational procedures of running MAAS — handling deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers.}{https://github.com/canonical/maas-charms}
+
+\addproject{MAAS Anvil}{code}
+{Canonical}{2024-07--Present}
+{Snap-based charmed operator for deploying and managing MAAS as a Juju topology, orchestrated through Terraform-driven configuration workflows.}{https://github.com/canonical/maas-anvil}
+
+\addproject{Go MAAS Client}{code}
+{Canonical}{2024-06--Present}
+{Go client library providing a typed wrapper around the full MAAS REST API, used internally by the Terraform provider and other Go-based MAAS tooling.}{https://github.com/canonical/gomaasclient}
+
+\addproject{MAAS Internal CI}{code}
+{Canonical}{2024-06--Present}
+{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure, managing automated build, test, and release pipelines across multiple MAAS product repositories.}{https://maas.io}
+
+\addproject{Packer-MAAS}{code}
+{Canonical}{2024-03--Present}
+{Packer templates, scripts, and configuration for building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration.}{https://github.com/canonical/packer-maas}
+
+\addproject{Metal As A Service}{code}
+{Canonical}{2024-03--Present}
+{MAAS transforms physical servers into cloud-like resources, automating provisioning, monitoring, and management of bare metal. Enables remote OS deployment, DHCP, DNS, IPAM, and full lifecycle management of data center hardware.}{https://maas.io}
+
+% Completed, sorted by end date descending
 \addproject{YT-Automation}{}
-{SkiylianSoftware}{2026-01}
+{SkiylianSoftware}{2025-02--2026-01}
 {Python-based automation suite for YouTube channel management. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Uses the YouTube Data API via python-youtube and Google Calendar API with OAuth authentication.}{https://github.com/SkiylianSoftware/YT-automation}
 
 \addproject{Ambistream}{}
 {}{2026-01}
 {Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), adding an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
 
-\addproject{Terraform Charmed MAAS Training}{code}
-{Canonical}{2025-05}
-{Hands-on training material created and delivered for the Canonical Berlin Commercial Sprint 2025. Inducts field engineers in deploying and managing MAAS through the new Anvil approach using Terraform, Juju, and charmed operators, with step-by-step exercises for each deployment stage.}{https://github.com/SK1Y101/tf-charmed-maas-training}
-
-\addproject{Documentation Linting Tools}{code}
-{Canonical}{2025-05}
-{CLI tooling providing automated documentation quality checks for the MAAS team. Wraps aspell, proselint, linkchecker, and style-checking utilities in a unified interface, enabling CI pipeline integration for doc PRs.}{https://github.com/SK1Y101/doc-linting-tools}
-
-\addproject{KOS Flight Computer}{}
-{}{2024-12}
-{Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Provides a multi-size BootUI system for connection-loss displays, real-time telemetry (MET, power, orbit status, disk capacity), and a modular menu interface for controlling spacecraft functions. Written entirely in KerboScript with ~400B of code.}{https://github.com/SK1Y101/KOSFlightController}
-
-\addproject{Balanced Ternary Computer}{proj}
-{}{2024-02}
-{Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
-
-\addproject{Skiylia Programming Language}{proj}
-{}{2022-2024}
-{A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.}{https://github.com/SK1Y101/Skiylia}
-
-\addproject{Improved TTV Pipeline}{}
-{}{2022-07}
-{Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
-
 \addproject{Exoclock Data Release IV}{pub}
 {ExoClock}{2025-11}
 {Peer-reviewed paper in the ExoClock collaboration's Data Release IV, presenting a homogeneous catalogue of 620 updated exoplanet ephemerides. Contributed observational data and transit timing analysis from the TransitProject pipeline. Published on arXiv.}{https://arxiv.org/abs/2511.14407}
-
-\addproject{Terraform MAAS bootstrap}{code}
-{Canonical}{}
-{Three-stage Terraform module to bootstrap Juju on LXD, deploy charmed MAAS, and configure the deployed MAAS instance — enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster.}{https://github.com/canonical/maas-terraform-modules}
-
-\addproject{MAAS Terraform provider}{code}
-{Canonical}{}
-{Terraform provider published on the official Terraform Registry enabling CRUD management of MAAS resources including networking, users, machines, VM hosts, and DNS.}{https://github.com/canonical/terraform-provider-maas}
-
-\addproject{Go MAAS Client}{code}
-{Canonical}{}
-{Go client library providing a typed wrapper around the full MAAS REST API, used internally by the Terraform provider and other Go-based MAAS tooling.}{https://github.com/canonical/gomaasclient}
-
-\addproject{MAAS Anvil}{code}
-{Canonical}{}
-{Snap-based charmed operator for deploying and managing MAAS as a Juju topology, orchestrated through Terraform-driven configuration workflows.}{https://github.com/canonical/maas-anvil}
-
-\addproject{MAAS Charms}{code}
-{Canonical}{}
-{Charmed operators that automate the operational procedures of running MAAS — handling deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers.}{https://github.com/canonical/maas-charms}
-
-\addproject{MAAS Internal CI}{code}
-{Canonical}{}
-{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure, managing automated build, test, and release pipelines across multiple MAAS product repositories.}{https://maas.io}
-
-\addproject{Packer-MAAS}{code}
-{Canonical}{}
-{Packer templates, scripts, and configuration for building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration.}{https://github.com/canonical/packer-maas}
-
-\addproject{Metal As A Service}{code}
-{Canonical}{}
-{MAAS transforms physical servers into cloud-like resources, automating provisioning, monitoring, and management of bare metal. Enables remote OS deployment, DHCP, DNS, IPAM, and full lifecycle management of data center hardware.}{https://maas.io}
 
 \addproject{VisualNovel Template}{}
 {}{2025-11}
 {A lightweight web-based Visual Novel engine template, supporting branching storylines, dynamic effects, and variations to ensure every playthrough feels unique. Stories are written in a simple markup format and compiled using a Python-based generator with built-in validation.}{https://github.com/SK1Y101/vn-template}
 
-\addproject{AutoBreezeBeats / Ambistream}{}
-{}{2026-01}
-{Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), Ambistream (2026) adds an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
+\addproject{Documentation Linting Tools}{code}
+{Canonical}{2025-05}
+{CLI tooling providing automated documentation quality checks for the MAAS team. Wraps aspell, proselint, linkchecker, and style-checking utilities in a unified interface, enabling CI pipeline integration for doc PRs.}{https://github.com/SK1Y101/doc-linting-tools}
+
+\addproject{Terraform Charmed MAAS Training}{code}
+{Canonical}{2025-05}
+{Hands-on training material created and delivered for the Canonical Berlin Commercial Sprint 2025. Inducts field engineers in deploying and managing MAAS through the new Anvil approach using Terraform, Juju, and charmed operators, with step-by-step exercises for each deployment stage.}{https://github.com/SK1Y101/tf-charmed-maas-training}
+
+\addproject{Skiylia Programming Language}{proj}
+{}{2022-12--2024}
+{A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.}{https://github.com/SK1Y101/Skiylia}
+
+\addproject{KOS Flight Computer}{}
+{}{2022-01--2024-12}
+{Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Provides a multi-size BootUI system for connection-loss displays, real-time telemetry (MET, power, orbit status, disk capacity), and a modular menu interface for controlling spacecraft functions. Written entirely in KerboScript with ~400B of code.}{https://github.com/SK1Y101/KOSFlightController}
 
 \addproject{Season Clock}{}
-{}{2024-03}
+{}{2022-09--2024-03}
 {Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.}{https://github.com/SK1Y101/SeasonsClock}
 
-\addproject{'Variations on an Exoplanet theme` webinar}{talk}
+\addproject{Balanced Ternary Computer}{proj}
+{}{2024-02}
+{Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
+
+\addproject{`Variations on an Exoplanet Theme' Webinar}{talk}
 {British Astronomical Association}{2023-09}
 {Computational Modelling of Transit Timing Variations}{https://britastro.org/event/exoplanet-2023sep}
 
-\addproject{MAAS Ansible Playbooks}{code}
-{Canonical}{2023-03}
-{An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
+\addproject{Improved TTV Pipeline}{}
+{}{2023-07}
+{Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
 
-\addproject{Lloyd-Walters et al. 2022}{pub}
-{University of Portsmouth}{2022-05}
-{Masters: `Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf}
+\addproject{MAAS Ansible Playbooks}{code}
+{Canonical}{2022-09--2023-03}
+{An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
 
 \addproject{Data Science Project}{}
 {AiCore}{2022-05}
 {End-to-end data science pipeline predicting football match outcomes, covering: EDA and data cleaning with Pandas; feature engineering for team performance metrics; remote database upload via AWS RDS, PostgreSQL, and SQLAlchemy; model training and selection using sklearn (Logistic Regression, MLP, Naive Bayes, Decision Tree) with feature selection via SelectKBest; and inference on new season data.}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
+
+\addproject{Exoplanet TTV Masters Thesis}{pub}
+{University of Portsmouth}{2022-05}
+{Masters: \`Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf}
 
 \addproject{Data Collection Pipeline}{}
 {AiCore}{2022-03}
 {Full-stack cloud-based web scraper targeting the NASA Exoplanet Catalogue. Built with Selenium 4 for dynamic page interaction, UUID v4/JSON for data storage, and Boto3 for AWS S3 upload. Containerised with Docker and deployed on EC2 with Selenium Grid for distributed scraping. Monitored via Prometheus and Grafana dashboards with automated CI/CD and cron-based daily restarts. Scrapes all 4940+ known exoplanets.}{https://github.com/SK1Y101/Data_Collection_Pipeline}
 
 \addproject{Fitbit Pokétch}{}
-{}{2022-02}
-{Fitbit clock face replicating the Pokétch from Pokémon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).}{https://github.com/SK1Y101/PoketchFitbit}
+{}{2021-08--2022-02}
+{Fitbit clock face replicating the Pok\'etch from Pok\'emon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).}{https://github.com/SK1Y101/PoketchFitbit}
 
 \addproject{Computer Vision Rock-Paper-Scissors}{}
 {AiCore}{2022-02}
 {Interactive Rock-Paper-Scissors game using computer vision. A Keras/TensorFlow model trained via Google Teachable-Machine recognises four gestures (rock, paper, scissors, null) in real-time through a webcam feed processed with OpenCV. Includes both a terminal-based fallback and the full CV-enabled game loop.}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
 
-\addproject{Lloyd-Walters et al. 2021}{pub}
+\addproject{IMBH Glitch Detection Bachelors Thesis}{pub}
 {University of Portsmouth}{2021-05}
-{Bachelors: `Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}
+{Bachelors: \`Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}
 
-\addproject{Lloyd-Walters J. 2017}{pub}
+\addproject{Extrasolar Habitation EPQ}{pub}
 {Peter Symonds College}{2017-12}
-{Extended Project: `Is There A Possibility of Extrasolar Habitation?'}{https://sk1y101.github.io/assets/pdf/EPQ.pdf}
+{Extended Project: \`Is There A Possibility of Extrasolar Habitation?'}{https://sk1y101.github.io/assets/pdf/EPQ.pdf}
 
 % hobbies and interests
 \addhobby{Space \& Spaceflight}{Natural or artificial, if it's found outside of earth's atmosphere, I probably like it. Exoplanets and space-probes are my favourite though.}

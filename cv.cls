@@ -8,11 +8,10 @@
 \LoadClass{article}
 
 
-\newcommand{\titleheight}{1.75cm}
+\newcommand{\titleheight}{2.8cm}
 \newcommand{\titlepad}{0.1cm}
 
 % Required packages
-\usepackage{changepage}
 \usepackage[yyyymmdd]{datetime}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
@@ -21,6 +20,7 @@
 \usepackage[headheight=12pt,footskip=10.25pt,left=0.01\paperwidth,top=\titleheight,right=0.01\paperwidth,bottom=0.016\paperheight]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=darkblue, urlcolor=darkblue, citecolor=darkblue}
 \usepackage{lmodern}
 \usepackage{paracol}
 \usepackage{pgffor}
@@ -35,18 +35,15 @@
 \usepackage{xcolor}
 \usepackage{xifthen}
 \usepackage{xparse}
+\usepackage{xstring}
 
 % Sidebar background on every page
-\usepackage[pages=all]{background}
-\backgroundsetup{
-    contents={%
-        \begin{tikzpicture}[overlay,remember picture]
-            \fill[sidebarcolour] (current page.north west) rectangle ([xshift=0.2\paperwidth]current page.south west);
-        \end{tikzpicture}%
-    },
-    opacity=1,
-    scale=1,
-}
+\usepackage{atbegshi}
+\AtBeginShipout{\AtBeginShipoutUpperLeft{%
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[sidebarcolour] (current page.north west) rectangle ([xshift=0.2\paperwidth]current page.south west);
+    \end{tikzpicture}%
+}}
 
 % Package settings
 
@@ -55,10 +52,13 @@
 \renewcommand{\footrulewidth}{0pt}
 \graphicspath{{./logos/}}
 \setlength{\parindent}{0pt}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
 % \renewcommand{\baselinestretch}{0.9}
 
 % Classes to print everything
 \newcommand{\firstname}{First name}
+\newcommand{\middlename}{}
 \newcommand{\lastname}{Last name}
 \newcommand{\postnomial}{}
 \newcommand{\pronoun}{}
@@ -99,8 +99,9 @@
 \definecolor{lilac}{HTML}{C8A2C8}
 \definecolor{purple}{HTML}{9358FE}
 \definecolor{aquamarine}{HTML}{36AF90}
+\definecolor{darkblue}{HTML}{4A90D9}
 
-\definecolor{date}{HTML}{A4A4A4}
+\definecolor{date}{HTML}{4A90D9}
 
 \ifdefined\@cv@print
   \colorlet{blue}{gray}
@@ -127,19 +128,40 @@
 \fancyfootoffset{0cm}
 \rfoot{\footnotesize\noindent Curriculum Vitae typeset from a \TeX/\LaTeX\ file. Last updated \today}
 
-\newcommand{\header}[4]{%
+\newcommand{\profilephoto}{}
+\colorlet{entrycolour}{darkgrey}
+\newcommand{\saveentrycolour}{%
+    \ifcase\value{colorCounter}%
+        \colorlet{entrycolour}{red}%
+    \or \colorlet{entrycolour}{orange}%
+    \or \colorlet{entrycolour}{green}%
+    \or \colorlet{entrycolour}{aquamarine}%
+    \or \colorlet{entrycolour}{blue}%
+    \or \colorlet{entrycolour}{lilac}%
+    \or \colorlet{entrycolour}{purple}%
+    \else \colorlet{entrycolour}{lightgrey}%
+    \fi
+}
+\newcommand{\header}[5]{%
   \begin{tikzpicture}[remember picture,overlay]
     \node [rectangle, fill=titlecolour, anchor=north, minimum width=\paperwidth, minimum height=\titleheight] (box) at (current page.north){};
-    \node [anchor=center] (name) at ([yshift=2mm] box) {%
-      \fontsize{40pt}{65pt}\color{header}%
-      {\thinfont #1}\space{\bodyfont  #2}
+    \ifx\profilephoto\empty\else
+      \node [anchor=center, circle, minimum size=2.2cm, path picture={%
+          \node at (path picture bounding box.center) {%
+              \includegraphics[width=2.4cm,height=2.4cm]{\profilephoto}%
+          };
+      }] (profile) at ([xshift=0.08\paperwidth] box.west) {};
+    \fi
+    \node [anchor=center, align=center] (name) at (box) {%
+      {\fontsize{28pt}{34pt}\color{header}%
+       \bodyfont\color{highlightcolour}#1\space\thinfont\color{header}#5}\\[1mm]
+      {\fontsize{18pt}{22pt}\color{header}\bodyfont #2}
     };
-    \node [anchor=center] (postnomial) at ([yshift=-1mm] name.south) {%
-      \fontsize{14pt}{24pt}\color{header}%
-      {\bodyfont #3}
+    \node [anchor=center] (postnomial) at ([yshift=-1.5mm] name.south) {%
+      \fontsize{12pt}{16pt}\color{header}\bodyfont #3
     };
-    \node [anchor=west] (pronoun) at ([yshift=-2.5mm, xshift=20mm] name.east) {%
-      \fontsize{14pt}{24pt}\color{header}%
+    \node [anchor=east] (pronoun) at ([yshift=-0.5mm, xshift=-0.02\paperwidth] box.east) {%
+      \fontsize{12pt}{18pt}\color{header}%
       {\bodyfont #4}
     };
   \end{tikzpicture}
@@ -248,9 +270,8 @@
     \ifthenelse{\getlength{#1} > 0}{
         \sidebarsection{#2}
         \foreach \n in {1,3,...,\getlength{#1}} {
-            {\small\getdata[\n]{#1}}%
-            \hspace{1mm}---\hspace{1mm}%
-            {\footnotesize\color{lightgrey}%
+            \makebox[0.4\linewidth][r]{\small\getdata[\n]{#1}}\hspace{0.1\linewidth}%
+            \makebox[0.35\linewidth][l]{\footnotesize\color{lightgrey}%
             \begin{switch}{\getdata[\n+1]{#1}}%
                 \case{-1}{Native}%
                 \case{5}{Fluent}%
@@ -363,8 +384,9 @@
     % \ifequals{#4}{1}{Hi}
     \ifequals{#2}{-1}{\color{highlightcolour}\faIcon{heart}\space}%
     \small\ifequals{#2}{5}{\color{highlightcolour}\faIcon{heart}\space}%
-    \textbf{#1}\space
-    \foreach \x in {1,...,5}{
+    \textbf{#1}\nobreakspace
+    \foreach \x in {1,...,5}{%
+        \ifnum\x>1\relax\nobreak\fi
         \hspace{-1mm}\ifthenelse{#2=-1}{\color{skillcolour}}{\ifnumgreater{\x}{#2}{\color{lightgray}}{\color{skillcolour}}}\ratingmarker
     }
     \par\vspace{-1.5mm}
@@ -430,41 +452,60 @@
 \newcommand{\widedatewidth}{0.16\linewidth}
 \newcommand{\widesectionwidth}{0.795\linewidth}
 
-\newcommand{\oneproject}[2]{
-    % entry number, entry name
-    \begin{tabularx}{\linewidth}{p{\slimdatewidth}p{\slimiconwidth}p{\slimsectionwidth}}
-        \defaultexists{\getdata[#1+2]{#2}}{Ongoing} & \getdata[#1+5]{#2} & {\vspace{-3mm}\color{darkgrey}\ifexistselse{\getdata[#1+4]{#2}}{\href{\getdata[#1+4]{#2}}{\getdata[#1]{#2}}}{\getdata[#1]{#2}}}\ifexists{\getdata[#1+1]{#2}}{\textit{\hfill\small\getdata[#1+1]{#2}}}%
-        \par%
-        \ifexists{\getdata[#1+3]{#2}}{%
+\newcommand{\parsedate}[1]{{
+    \IfSubStr{#1}{--}{
+        \StrBehind{#1}{--}[\CV@enddate]
+        \StrBefore{#1}{--}[\CV@startdate]
+        \defaultexists{\CV@enddate}{Present}\newline\CV@startdate
+    }{
+        \defaultexists{#1}{Ongoing}
+    }
+}}
+\newcommand{\entrytabular}[4]{{
+    \ifbool{\slimdates}{%
+        \def\localdatewidth{\slimdatewidth}%
+        \def\localsectionwidth{\slimsectionwidth}%
+    }{%
+        \def\localdatewidth{\widedatewidth}%
+        \def\localsectionwidth{\widesectionwidth}%
+    }%
+    \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{\localdatewidth}p{\localsectionwidth}}
+        \vspace{-0.7em}#1
+        & {\vspace{-0.7em}\color{entrycolour}#2}\ifexists{#3}{\textit{\hfill\small#3}}
+        \par
+        \ifexists{#4}{
             \vspace{-0.2em}
-            \begin{addmargin}[\marginwidth]{0mm}%
-                \setstretch{0.9}\footnotesize\getdata[#1+3]{#2}%
-            \end{addmargin}%
-        }%
-    \end{tabularx}%
-    \ifexistselse{\getdata[#1+3]{#2}}{\vspace{-1.5em}\par}{\vspace{-1.4em}\par}%
+            \begin{addmargin}[0mm]{0mm}
+                \setstretch{0.9}\small#4
+            \end{addmargin}
+        }
+    \end{tabularx}
+}}
+\newcommand{\oneproject}[2]{
+    \entrytabular
+        {\parsedate{\getdata[#1+2]{#2}}}
+        {\ifexistselse{\getdata[#1+5]{#2}}
+            {\getdata[#1+5]{#2}\space\ifexistselse{\getdata[#1+4]{#2}}{\href{\getdata[#1+4]{#2}}{\getdata[#1]{#2}}}{\getdata[#1]{#2}}}
+            {\ifexistselse{\getdata[#1+4]{#2}}{\href{\getdata[#1+4]{#2}}{\getdata[#1]{#2}}}{\getdata[#1]{#2}}}}
+        {\getdata[#1+1]{#2}}
+        {\getdata[#1+3]{#2}}
+    \ifexistselse{\getdata[#1+3]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
 }
 \newcommand{\oneitem}[2]{
-    % entry number, entry name
-    \ifbool{\slimdates}{%
-        \begin{tabularx}{\linewidth}{p{\slimdatewidth}p{\slimsectionwidth}}%
-            \defaultexists{\getdata[#1+4]{#2}}{Present}\vspace{-.5mm}\newline\getdata[#1+3]{#2}%
-            & {\vspace{-0.7em}\color{darkgrey}\getdata[#1+1]{#2}}\ifexists{\getdata[#1+2]{#2}}{\textit{\hfill\small\getdata[#1+2]{#2}}}%
-            \par%
-            \ifexists{\getdata[#1+5]{#2}}{%
-                \vspace{-0.2em}%
-                \begin{addmargin}[0mm]{0mm}%
-                    \setstretch{0.9}\small\getdata[#1+5]{#2}%
-                \end{addmargin}%
-            }%
-        \end{tabularx}%
+    \ifbool{\slimdates}{
+        \entrytabular
+            {\defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}}
+            {\getdata[#1+1]{#2}}
+            {\getdata[#1+2]{#2}}
+            {\getdata[#1+5]{#2}}
         \vspace{0.5em}
-    }{%
+        \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.2em}\par}{\vspace{0.5em}\par}
+    }{
         \begin{tabularx}{\linewidth}{p{3.4em}p{0em}p{2.1em}p{\widesectionwidth}}%
             \getdata[#1+3]{#2}&%
             \hspace{-1em}\color{lightgrey}\scriptsize\faIcon{arrow-right}&%
             \hspace{-1.3em}\defaultexists{\getdata[#1+4]{#2}}{Present}&%
-            {\vspace{-3mm}\color{darkgrey}\getdata[#1+1]{#2}}\ifexists{\getdata[#1+2]{#2}}{\textit{\hfill\small\getdata[#1+2]{#2}}}%
+            {\vspace{-3mm}\color{entrycolour}\getdata[#1+1]{#2}}\ifexists{\getdata[#1+2]{#2}}{\textit{\hfill\small\getdata[#1+2]{#2}}}%
             \par%
             \ifexists{\getdata[#1+5]{#2}}{%
                 \vspace{-0.2em}%
@@ -473,8 +514,8 @@
                 \end{addmargin}%
             }%
         \end{tabularx}%
-    }%
-    \ifexistselse{\getdata[#1+5]{#2}}{\vspace{-2em}\par}{\vspace{-1.4em}\par}%
+        \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.2em}\par}{\vspace{0.5em}\par}%
+    }
 }
 \newcommand{\oneinstance}[3]{
     % instance number, instance name, entry name
@@ -501,8 +542,9 @@
 \newcommand{\showcategory}[4]{
     % icon, title, instance name, entry name
     \ifthenelse{\getlength{#3} > 0}{%
+        \saveentrycolour
         \iconsection{\faIcon{#1}}{#2}%
-        \vspace{-0.8em}%
+        \vspace{0.3em}%
         \ifthenelse{\getlength{#3} < 3}{%
             \oneinstance{1}{#3}{#4}%
         }{%
@@ -520,6 +562,7 @@
 \newcommand{\showproject}[3]{
     % entry name
     \ifthenelse{\getlength{#3} > 0}{%
+        \saveentrycolour
         \iconsection{\faIcon{#1}}{#2}%
         % \vspace{-0.8em}%
         \ifthenelse{\getlength{#3} < 7}{%
@@ -532,6 +575,21 @@
         \vspace{0.3em+0.5em}% add a little bit of extra spacing
     }{}%
 }
+\newcommand{\showmainmemberships}[1]{
+    \ifthenelse{\getlength{membershiptitle} > 0}{
+        \saveentrycolour
+        \iconsection{\faIcon{#1}}{Professional Memberships}
+        \foreach \c in {1,8,...,\getlength{membershiptitle}} {
+            \entrytabular
+                {\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}}
+                {\ifexistselse{\getdata[\c+6]{membershiptitle}}{\href{\getdata[\c+6]{membershiptitle}}{\getdata[\c]{membershiptitle}}}{\getdata[\c]{membershiptitle}}}
+                {\getdata[\c+1]{membershiptitle}}
+                {\getdata[\c+2]{membershiptitle}}
+            \vspace{0.2em}\par
+        }
+    }{}
+}
+
 \newcommand{\onehobby}[1]{
     \textbf{\getdata[#1]{hobbies}}\par
     {\color{gray}\footnotesize\getdata[#1+1]{hobbies}}\par
@@ -567,9 +625,9 @@
 \newcommand{\addmembership}[2]{
     \appenddata{membership}{{#1}{#2}}
 }
-\newcommand{\addmembershiptitle}[6]{
-    % \addmembershiptitle{Location}{Title}{onelinedetauks}{Start}{end}{details}
-    \appenddata{membershiptitle}{{#1}{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\addmembershiptitle}[7]{
+    % \addmembershiptitle{Location}{Title}{onelinedetauks}{Start}{end}{details}{link}
+    \appenddata{membershiptitle}{{#1}{#2}{#3}{#4}{#5}{#6}{#7}}
 }
 
 \newcommand{\addaward}[4]{
@@ -579,11 +637,10 @@
 
 \newcommand{\projicon}[1]{
     % proj: hardware, pub: paper, code: software, talk: talk
-    \ifexistselse{#1}{}{\faIcon{paste}}
-    \ifequals{#1}{proj}{\faIcon{microchip}}
-    \ifequals{#1}{pub}{\faIcon{newspaper}}
-    \ifequals{#1}{code}{\faIcon{keyboard}}
-    \ifequals{#1}{talk}{\faIcon{microphone}}
+    \ifequals{#1}{proj}{\color{highlightcolour}\faIcon{microchip}}%
+    \ifequals{#1}{pub}{\color{highlightcolour}\faIcon{newspaper}}%
+    \ifequals{#1}{code}{\color{highlightcolour}\faIcon{keyboard}}%
+    \ifequals{#1}{talk}{\color{highlightcolour}\faIcon{microphone}}%
 }
 \newcommand{\addproject}[6]{
     % \addproject{project name}{proj/pub}{affiliated}{completion date}{details}{link}

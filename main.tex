@@ -15,7 +15,7 @@
 \include{details}
 
 % header (spans full width)
-\rhead{\header{\firstname}{\lastname}{\postnomial}{\pronoun}}
+\rhead{\header{\firstname}{\lastname}{\postnomial}{\pronoun}{\middlename}}
 
 % paracol for sidebar + main content flow
 \setcolumnwidth{0.18\paperwidth, 0.78\paperwidth}
@@ -23,7 +23,6 @@
 \begin{paracol}{2}
 
 % Left column -- Sidebar (ancillary & personality info)
-\columncolor{lightergrey}
 \thinfont\color{grey}
 \raggedleft
 
@@ -37,21 +36,23 @@
 \iconlink{\githubusername}{https://github.com/}{github}
 \iconlink{\orcidid}{https://orcid.org/}{orcid}
 
-\showsimplelanguages{languages}{Languages}
-\showsidebarskills{planguage}{Skills}
-\showsidebarmemberships{}
+\sidebarsection{Publications}
+{\small\faIcon{newspaper}\hspace{1mm}\href{https://arxiv.org/abs/2511.14407}{ExoClock DR IV (2025)}}\par
+{\small\faIcon{graduation-cap}\hspace{1mm}2 Academic Theses}\par
+{\small\faIcon{file-alt}\hspace{1mm}Extended Project (2017)}\par
 
-\sidebarsection{Education}
-{\small
-    \textbf{MPhys Physics, Astronomy, \& Cosmology}\par
-    University of Portsmouth, 2018--2022\par
-    First Class Honours\par
-    \vspace{1mm}
-    \textbf{A-Levels}\par
-    Peter Symonds College, 2016--2018\par
-    Physics (A), EPQ (A), Maths (B)\par
-}
+\sidebarsection{Talks \& Conferences}
+{\small\faIcon{comments}\hspace{1mm}\href{https://britastro.org/event/exoplanet-2023sep}{BAA Exoplanet Webinar (2023)}}\par
+{\small\faIcon{chalkboard-teacher}\hspace{1mm}\textit{Computational Modelling of TTVs}}\par
+
+\sidebarsection{Open Source}
+{\small\faIcon{building}\hspace{1mm}\href{https://github.com/canonical/maas}{@canonical -- MAAS}}\par
+{\small\faIcon{code-branch}\hspace{1mm}\href{https://github.com/Skiylia-Lang}{@Skiylia-Lang -- Founder}}\par
+{\small\faIcon{code}\hspace{1mm}\href{https://github.com/SK1Y101}{52 GitHub Repositories}}\par
+
+\showsimplelanguages{languages}{Languages}
 \showsidebarhobbies{}
+\newpage\showsidebarskills{planguage}{Skills}
 
 \switchcolumn
 
@@ -60,6 +61,7 @@
     \showcategory{briefcase}{Experience}{jobcompanies}{jobpositions}
     \showcategory{user-graduate}{Education}{educationschools}{educationcourses}
     \showproject{book-open}{Projects and Publications}{projects}
+    \showmainmemberships{id-card}
     \showproject{trophy}{Awards}{awards}
 }
 
