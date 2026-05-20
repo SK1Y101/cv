@@ -58,6 +58,7 @@
 \newcommand{\lastname}{Last name}
 \newcommand{\postnomial}{}
 \newcommand{\pronoun}{}
+\newcommand{\tagline}{}
 \newcommand{\email}{}
 \newcommand{\phone}{}
 \newcommand{\address}{}
@@ -140,17 +141,17 @@
           };
       }] (profile) at ([xshift=0.08\paperwidth] box.west) {};
     \fi
-    \node [anchor=center, align=center] (name) at (box) {%
+    \node [anchor=center, align=center, yshift=0.3cm] (name) at (box) {%
       {\fontsize{28pt}{34pt}\color{header}%
        \bodyfont\color{highlightcolour}#1\space{\fontsize{22pt}{28pt}\thinfont\color{header}#5}}\\[1mm]
       {\fontsize{18pt}{22pt}\color{header}\bodyfont #2}
     };
-    \node [anchor=center] (postnomial) at ([yshift=-1.5mm] name.south) {%
+    \node [anchor=center] (postnomial) at ([yshift=-6mm] name.south) {%
       \fontsize{12pt}{16pt}\color{header}\bodyfont #3
     };
-    \node [anchor=east] (pronoun) at ([yshift=-0.5mm, xshift=-0.02\paperwidth] box.east) {%
-      \fontsize{12pt}{18pt}\color{header}%
-      {\bodyfont #4}
+    \node [anchor=east, align=right] (pronoun) at ([xshift=-0.02\paperwidth] box.center -| box.east) {%
+      \fontsize{12pt}{18pt}\color{header}\bodyfont #4\\[2pt]%
+      {\fontsize{9pt}{11pt}\color{header}\tagline}
     };
   \end{tikzpicture}
 }
@@ -432,8 +433,8 @@
 
 \newcommand{\marginwidth}{2mm}
 \newcommand{\slimdates}{true}
-\newcommand{\slimdatewidth}{0.07\linewidth}
-\newcommand{\widedatewidth}{0.16\linewidth}
+\newcommand{\slimdatewidth}{0.06\linewidth}
+\newcommand{\widedatewidth}{0.14\linewidth}
 
 \newcommand{\parsedate}[1]{{
     \IfSubStr{#1}{--}{
@@ -441,7 +442,11 @@
         \StrBefore{#1}{--}[\CV@startdate]
         \StrLeft{\CV@startdate}{7}[\CV@start]
         \StrLeft{\CV@enddate}{7}[\CV@end]
-        \defaultexists{\CV@end}{Present}\newline\CV@start
+        \ifthenelse{\equal{\slimdates}{true}}{%
+            \defaultexists{\CV@end}{Present}\newline\CV@start
+        }{%
+            \CV@start\space-\space\defaultexists{\CV@end}{Present}%
+        }
     }{
         \StrLeft{#1}{7}[\CV@date]
         \defaultexists{\CV@date}{Ongoing}
@@ -453,9 +458,9 @@
     }{%
         \def\localdatewidth{\widedatewidth}%
     }%
-    \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{\localdatewidth}>{\raggedright\arraybackslash}X}
-        \vspace{-0.7em}#1
-        & {\vspace{-0.7em}\color{entrycolour}#2}\ifexists{#3}{\textit{\hfill\small#3}}
+    \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash\footnotesize}p{\localdatewidth}>{\raggedright\arraybackslash}X}
+        \vspace{-7.5pt}#1
+        & {\vspace{-7.5pt}\color{entrycolour}#2}\ifexists{#3}{\textit{\hfill\small#3}}
         \par
         \ifexists{#4}{
             \vspace{-0.2em}
@@ -477,7 +482,11 @@
 }
 \newcommand{\oneitem}[2]{
     \entrytabular
-        {\defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}}
+        {\ifthenelse{\equal{\slimdates}{true}}{%
+            \defaultexists{\getdata[#1+4]{#2}}{Present}\newline\getdata[#1+3]{#2}%
+        }{%
+            \getdata[#1+3]{#2}\space--\space\defaultexists{\getdata[#1+4]{#2}}{Present}%
+        }}
         {\getdata[#1+1]{#2}}
         {\getdata[#1+2]{#2}}
         {\getdata[#1+5]{#2}}
@@ -547,7 +556,11 @@
         \iconsection{\faIcon{#1}}{Professional Memberships}
         \foreach \c in {1,8,...,\getlength{membershiptitle}} {
             \entrytabular
-                {\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}}
+                {\ifthenelse{\equal{\slimdates}{true}}{%
+                    \defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}%
+                }{%
+                    \getdata[\c+3]{membershiptitle}\space--\space\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}%
+                }}
                 {\ifexistselse{\getdata[\c+6]{membershiptitle}}{\href{\getdata[\c+6]{membershiptitle}}{\getdata[\c]{membershiptitle}}}{\getdata[\c]{membershiptitle}}}
                 {\getdata[\c+1]{membershiptitle}}
                 {\getdata[\c+2]{membershiptitle}}
