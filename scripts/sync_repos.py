@@ -11,7 +11,7 @@ Usage:
 Environment:
     GITHUB_TOKEN      - GitHub API token (required for API calls)
     LLM_API_KEY       - LLM API key (defaults to GITHUB_TOKEN for GitHub Models)
-    LLM_MODEL         - Model name (default: deepseek/deepseek-v4)
+    LLM_MODEL         - Model name (default: deepseek/deepseek-v4-flash:free)
     LLM_ENDPOINT      - API endpoint (default: https://openrouter.ai/api/v1)
 """
 
@@ -302,10 +302,7 @@ def _api_request(
                 with urllib.request.urlopen(req, timeout=30) as resp:
                     _update_rate_limit(resp.headers, gh=False)
                     result = json.loads(resp.read())
-                    content = result["choices"][0]["message"].get("content")
-                    if content is None:
-                        raise ValueError("LLM returned empty content")
-                    return content.strip()
+                    return result["choices"][0]["message"]["content"].strip()
 
             except urllib.error.HTTPError as e:
                 body = e.read().decode() if hasattr(e, "read") else ""
@@ -1375,7 +1372,7 @@ def main():
 
     gh_token = os.environ.get("GITHUB_TOKEN") or ""
     llm_key = os.environ.get("LLM_API_KEY") or gh_token
-    llm_model = os.environ.get("LLM_MODEL", "deepseek/deepseek-v4")
+    llm_model = os.environ.get("LLM_MODEL", "deepseek/deepseek-v4-flash:free")
     llm_endpoint = os.environ.get("LLM_ENDPOINT", "https://openrouter.ai/api/v1")
 
     if not llm_key:
