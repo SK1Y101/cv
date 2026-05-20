@@ -95,7 +95,7 @@
 
 \definecolor{date}{HTML}{4A90D9}
 
-% Pastel sidebar versions of the rainbow — mixed with darkgrey for readability
+% Pastel sidebar versions of the rainbow; mixed with darkgrey for readability
 \colorlet{pastelred}{red!70!darkgrey}
 \colorlet{pastelorange}{orange!75!darkgrey}
 \colorlet{pastelgreen}{green!75!darkgrey}

@@ -101,7 +101,7 @@ def strip_latex(text: str) -> str:
     text = re.sub(r'\\LaTeX', 'LaTeX', text)
     # Remove remaining known commands
     text = re.sub(r'\\textbullet\s*', '', text)
-    # --- → — (em dash)
+    # --- →; (em dash)
     text = text.replace('---', '\u2014')
     # -- → – (en dash)
     text = text.replace('--', '\u2013')
@@ -148,7 +148,7 @@ def parse_details_tex(filepath: str) -> dict:
 
     resume = {}
 
-    # ── Basics ──────────────────────────────────────────────
+    #  Basics
     first = extract_renewcommand(content, 'firstname') or ''
     middle = extract_renewcommand(content, 'middlename') or ''
     last = extract_renewcommand(content, 'lastname') or ''
@@ -212,7 +212,7 @@ def parse_details_tex(filepath: str) -> dict:
     basics['profiles'] = profiles
     resume['basics'] = basics
 
-    # ── Work ────────────────────────────────────────────────
+    #  Work
     # Collect companies: {name: icon}
     companies = {}
     for args in collect_commands(content, 'addcompany', 2):
@@ -247,7 +247,7 @@ def parse_details_tex(filepath: str) -> dict:
         work.append(entry)
     resume['work'] = work
 
-    # ── Education ───────────────────────────────────────────
+    #  Education
     schools = {}
     for args in collect_commands(content, 'addeducation', 2):
         schools[args[0]] = args[1]
@@ -280,7 +280,7 @@ def parse_details_tex(filepath: str) -> dict:
         education.append(entry)
     resume['education'] = education
 
-    # ── Awards ──────────────────────────────────────────────
+    #  Awards
     awards = []
     for args in collect_commands(content, 'addaward', 4):
         entry = {
@@ -292,7 +292,7 @@ def parse_details_tex(filepath: str) -> dict:
         awards.append(entry)
     resume['awards'] = awards
 
-    # ── Memberships ─────────────────────────────────────────
+    #  Memberships
     member_icons = {}
     for args in collect_commands(content, 'addmembership', 2):
         member_icons[args[0]] = args[1]
@@ -325,7 +325,7 @@ def parse_details_tex(filepath: str) -> dict:
         memberships.append(entry)
     resume['memberships'] = memberships
 
-    # ── Skills ──────────────────────────────────────────────
+    #  Skills
     from collections import OrderedDict
     categories = OrderedDict()
     for args in collect_commands(content, 'skill', 3):
@@ -335,21 +335,28 @@ def parse_details_tex(filepath: str) -> dict:
             categories[cat] = []
         categories[cat].append(name)
 
-    category_meta = {
-        'Physics':  {'level': 'Master',          'icon': 'fa-solid fa-satellite'},
-        'Software': {'level': 'Software Engineer','icon': 'fa-solid fa-microchip'},
-    }
+    # Sort keywords alphabetically within each category
+    for cat in categories:
+        categories[cat].sort(key=str.lower)
+
+    category_meta = OrderedDict([
+        ('Physics',         {'level': 'Master',          'icon': 'fa-solid fa-satellite'}),
+        ('Languages',       {'level': 'Advanced',        'icon': 'fa-solid fa-code'}),
+        ('DevOps & Cloud',  {'level': 'Software Engineer','icon': 'fa-solid fa-cloud'}),
+        ('Web & Data',      {'level': 'Intermediate',    'icon': 'fa-solid fa-chart-bar'}),
+    ])
 
     skills = []
-    for cat, keywords in categories.items():
-        meta = category_meta.get(cat, {'level': cat, 'icon': ''})
-        entry = {'name': cat, 'level': meta['level'], 'keywords': keywords}
-        if meta['icon']:
-            entry['icon'] = meta['icon']
-        skills.append(entry)
+    for cat in category_meta:
+        if cat in categories:
+            meta = category_meta[cat]
+            entry = {'name': cat, 'level': meta['level'], 'keywords': categories[cat]}
+            if meta['icon']:
+                entry['icon'] = meta['icon']
+            skills.append(entry)
     resume['skills'] = skills
 
-    # ── Languages ───────────────────────────────────────────
+    #  Languages
     languages = []
     for args in collect_commands(content, 'languageskill', 2):
         lang = args[0]
@@ -357,7 +364,7 @@ def parse_details_tex(filepath: str) -> dict:
         languages.append({'language': lang, 'fluency': fluency})
     resume['languages'] = languages
 
-    # ── Interests (hobbies) ─────────────────────────────────
+    #  Interests (hobbies)
     interests = []
     for args in collect_commands(content, 'addhobby', 2):
         name = strip_latex(args[0])
@@ -365,7 +372,7 @@ def parse_details_tex(filepath: str) -> dict:
         interests.append({'name': name, 'keywords': [keywords]})
     resume['interests'] = interests
 
-    # ── Publications & Projects ─────────────────────────────
+    #  Publications & Projects
     publications = []
     projects = []
     for args in collect_commands(content, 'addproject', 6):
@@ -402,7 +409,7 @@ def parse_details_tex(filepath: str) -> dict:
     resume['publications'] = publications
     resume['projects'] = projects
 
-    # ── Schema ──────────────────────────────────────────────
+    #  Schema
     resume['$schema'] = 'https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json'
 
     return resume
