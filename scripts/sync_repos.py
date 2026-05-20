@@ -1017,6 +1017,23 @@ def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
     return text
 
 
+def _escape_latex(text: str) -> str:
+    """Escape LaTeX special chars and strip newlines."""
+    text = text.replace("\\", "\\textbackslash{}")
+    text = text.replace("{", "\\{")
+    text = text.replace("}", "\\}")
+    text = text.replace("$", "\\$")
+    text = text.replace("&", "\\&")
+    text = text.replace("%", "\\%")
+    text = text.replace("_", "\\_")
+    text = text.replace("#", "\\#")
+    text = text.replace("^", "\\textasciicircum{}")
+    text = text.replace("~", "\\textasciitilde{}")
+    text = text.replace("\n", " ").replace("\r", " ")
+    text = " ".join(text.split())
+    return text
+
+
 def generate_addproject(repo: dict, gh_token: str = "", llm_key: str = "", model: str = "", endpoint: str = "") -> str:
     """Generate a full \addproject entry for a repo."""
     name = repo.get("name", "")
@@ -1035,11 +1052,8 @@ def generate_addproject(repo: dict, gh_token: str = "", llm_key: str = "", model
     else:
         desc = generate_description_template(repo)
 
-    # Escape LaTeX special characters in description
-    desc = desc.replace("&", "\\&")
-    desc = desc.replace("%", "\\%")
-    desc = desc.replace("_", "\\_")
-    desc = desc.replace("#", "\\#")
+    # Escape LaTeX special characters and strip newlines from description
+    desc = _escape_latex(desc)
 
     icon_str = "{" + icon + "}" if icon else "{}"
     affiliation_str = "{" + affiliation + "}"
@@ -1419,12 +1433,8 @@ def main():
             print(f"    Would add: {wp['name']} ({wp['url']})")
             continue
 
-        # Escape LaTeX special chars in description
-        desc = wp["details"]
-        desc = desc.replace("&", "\\&")
-        desc = desc.replace("%", "\\%")
-        desc = desc.replace("_", "\\_")
-        desc = desc.replace("#", "\\#")
+        # Escape LaTeX special chars and strip newlines from description
+        desc = _escape_latex(wp["details"])
 
         today = date.today().isoformat()[:10]
         icon = "{}"
