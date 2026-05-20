@@ -1,0 +1,42 @@
+name: Sync Repos to CV
+
+on:
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run repo sync script
+        run: python3 scripts/sync_repos.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: deepseek/deepseek-v4
+          LLM_ENDPOINT: https://openrouter.ai/api/v1
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push if changed
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config user.name "CV Sync Bot"
+          git config user.email "skye+bot@casolw.space"
+          git add -A
+          git commit -m "chore: auto-sync new GitHub repos to CV [skip ci]"
+          git push
