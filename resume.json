@@ -129,16 +129,16 @@
   ],
   "awards": [
     {
-      "title": "Graham Bryant Prize for Best Observatory Project",
-      "awarder": "University of Portsmouth",
-      "date": "2022-05",
-      "summary": "First recipient of the award to honour the late Graham Bryant for my Masters thesis"
-    },
-    {
       "title": "Certified in the practical application of AI and Data Engineering",
       "awarder": "AiCore",
       "date": "2022-06",
       "summary": "Awarded for the successful completion of the course. Completed to the highest standard awarded in less than half the expected time."
+    },
+    {
+      "title": "Graham Bryant Prize for Best Observatory Project",
+      "awarder": "University of Portsmouth",
+      "date": "2022-05",
+      "summary": "First recipient of the award to honour the late Graham Bryant for my Masters thesis"
     }
   ],
   "memberships": [
@@ -186,6 +186,21 @@
   ],
   "skills": [
     {
+      "name": "Physics",
+      "level": "Master",
+      "keywords": [
+        "Exoplanetary Physics",
+        "Transit Timing Analysis",
+        "Computational Modelling",
+        "Signal Processing",
+        "Observational Astronomy",
+        "Relativity & Relativistic Mechanics",
+        "Cosmology",
+        "Space & Spacecraft"
+      ],
+      "icon": "fa-solid fa-satellite"
+    },
+    {
       "name": "Software",
       "level": "Software Engineer",
       "keywords": [
@@ -214,13 +229,14 @@
         "YAML",
         "Networking",
         "REST APIs"
-      ]
+      ],
+      "icon": "fa-solid fa-microchip"
     }
   ],
   "languages": [
     {
       "language": "English",
-      "fluency": "Native speaker"
+      "fluency": "Native"
     },
     {
       "language": "Japanese",
@@ -237,13 +253,13 @@
     {
       "name": "Reading",
       "keywords": [
-        "When I'm not staring at a terminal, I'm staring at a page. Current favourites are Project Hail Mary and The Hydrogen Sonata; I have a soft spot for first-contact and post-scarcity sci-fi that explores how we might grow as a species."
+        "I love a good book, but really wish I took the time to read more. My current favourites are Project Hail Mary and The Hydrogen Sonata; I have a soft spot for first-contact and post-scarcity sci-fi that explores how we might grow as a species."
       ]
     },
     {
       "name": "Gaming",
       "keywords": [
-        "I Love Factorio, Stellaris, Transport Fever, modded Minecraft, and Kerbal Space Program — the latter three feature heavily in my YouTube content creation. There's something satisfying about optimising a factory or rescuing a stranded Duna lander."
+        "I Love Factorio, Stellaris, Transport Fever, modded Minecraft, and Kerbal Space Program; the latter three feature heavily in my YouTube content creation. There's something satisfying about optimising a factory or planning and executing a multi-planetary slingshot."
       ]
     },
     {
@@ -255,31 +271,31 @@
     {
       "name": "Language Learning",
       "keywords": [
-        "I'm learning Japanese. Currently at a beginner level and making slow but steady progress — it's a beautiful language and a welcome challenge after a day of writing Python."
+        "I'm learning Japanese. Currently at a beginner level and making slow but steady progress; it's a beautifully efficient language."
       ]
     },
     {
       "name": "Amateur Astronomy",
       "keywords": [
-        "Exoplanet transit timing and observation through the British Astronomical Association. There's something magical about catching a tiny dip in a star's brightness from my back garden, knowing I'm watching another world pass by."
+        "Exoplanet transit timing and observation through the ExoClock collaboration. There's something magical about catching a tiny dip in a star's brightness from my back garden, knowing I'm watching another world pass by."
       ]
     },
     {
       "name": "Tea",
       "keywords": [
-        "Proper loose-leaf, brewed in a pot, left for exactly the right amount of time. I'm a firm believer that a good cup of tea solves most problems — or at least makes them easier to think about."
+        "Earl Grey is my favourite; no sugar, no milk. I do love a nice loose leaf brew from Whittards though, especially something fruity, and always stewed for just the perfect amount of time."
       ]
     },
     {
       "name": "Writing",
       "keywords": [
-        "Academic papers, documentation, and the occasional blog post. I find that explaining something clearly is the best way to make sure I understand it myself."
+        "Be it Documentation or the occasional blog post. I find that explaining something clearly is the best way to make sure I understand it myself. But it's hobbyist writing too, I enjoy partaking in short novella and building out the world that lives within my mind."
       ]
     },
     {
       "name": "Board Games",
       "keywords": [
-        "I love a good engine-building or co-op game, and I'm currently working on designing one of my own. It turns out that balancing a game is a lot like balancing a build pipeline — just with more dice."
+        "My current top three are Hex Effects, Pandemic, and Mage Noir. I'm not great at strategy or deck-building, but I love playing them nonetheless. If it's a Co-op boardgame, I'll always have a blast."
       ]
     }
   ],
@@ -307,20 +323,20 @@
       "url": "https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf",
       "affiliation": "University of Portsmouth",
       "releaseDate": "2021-05"
-    },
-    {
-      "name": "Extrasolar Habitation EPQ",
-      "description": "Extended Project: Is There A Possibility of Extrasolar Habitation?'",
-      "startDate": "2017-12",
-      "url": "https://sk1y101.github.io/assets/pdf/EPQ.pdf",
-      "affiliation": "Peter Symonds College",
-      "releaseDate": "2017-12"
     }
   ],
   "projects": [
     {
+      "name": "Curriculum Vitae — LaTeX",
+      "description": "A fully custom LaTeX CV class with pastel fairycore aesthetic, rainbow section headers, sidebar with grey panel background, circular profile photo, and a Python-based JSON Resume export pipeline. Built with automated PDF releases on every push to main.",
+      "startDate": "2026-05-18",
+      "url": "https://github.com/SK1Y101/cv",
+      "affiliation": "Personal",
+      "type": "software"
+    },
+    {
       "name": "Terraform MAAS bootstrap",
-      "description": "Three-stage Terraform module to bootstrap Juju on LXD, deploy charmed MAAS, and configure the deployed MAAS instance — enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster.",
+      "description": "Three-stage Terraform module bootstrapping Juju on LXD, deploying charmed MAAS, and configuring the deployed instance – enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster, adopted as the standard provisioning path by Canonical field engineers.",
       "startDate": "2025-09",
       "url": "https://github.com/canonical/maas-terraform-modules",
       "affiliation": "Canonical",
@@ -328,23 +344,23 @@
     },
     {
       "name": "MAAS Terraform provider",
-      "description": "Terraform provider published on the official Terraform Registry enabling CRUD management of MAAS resources including networking, users, machines, VM hosts, and DNS.",
-      "startDate": "2025-04",
+      "description": "Published on the official Terraform Registry; enables CRUD management of MAAS resources including networking, machines, VM hosts, and DNS. Primary maintainer driving feature development and community engagement.",
+      "startDate": "2023-08",
       "url": "https://github.com/canonical/terraform-provider-maas",
       "affiliation": "Canonical",
       "type": "software"
     },
     {
       "name": "MAAS Charms",
-      "description": "Charmed operators that automate the operational procedures of running MAAS — handling deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers.",
-      "startDate": "2024-07",
+      "description": "Charmed operators automating deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers in production environments. Drives operational consistency across Canonical's MAAS customer deployments.",
+      "startDate": "2025-07",
       "url": "https://github.com/canonical/maas-charms",
       "affiliation": "Canonical",
       "type": "software"
     },
     {
       "name": "MAAS Anvil",
-      "description": "Snap-based charmed operator for deploying and managing MAAS as a Juju topology, orchestrated through Terraform-driven configuration workflows.",
+      "description": "Snap-based charmed operator deploying and managing MAAS through Terraform-orchestrated Juju topologies. Used as the primary deployment method for production MAAS installations.",
       "startDate": "2024-07",
       "url": "https://github.com/canonical/maas-anvil",
       "affiliation": "Canonical",
@@ -352,7 +368,7 @@
     },
     {
       "name": "Go MAAS Client",
-      "description": "Go client library providing a typed wrapper around the full MAAS REST API, used internally by the Terraform provider and other Go-based MAAS tooling.",
+      "description": "Go client library wrapping the full MAAS REST API; adopted by the Terraform provider, maas-cli, and internal Canonical tooling as the standard Go interface for MAAS.",
       "startDate": "2024-06",
       "url": "https://github.com/canonical/gomaasclient",
       "affiliation": "Canonical",
@@ -360,7 +376,7 @@
     },
     {
       "name": "MAAS Internal CI",
-      "description": "Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure, managing automated build, test, and release pipelines across multiple MAAS product repositories.",
+      "description": "Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure. Designed and manage automated build, test, and release pipelines across multiple MAAS product repositories, ensuring reliable delivery of MAAS releases.",
       "startDate": "2024-06",
       "url": "https://maas.io",
       "affiliation": "Canonical",
@@ -368,15 +384,15 @@
     },
     {
       "name": "Packer-MAAS",
-      "description": "Packer templates, scripts, and configuration for building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration.",
-      "startDate": "2024-03",
+      "description": "Packer templates and scripts building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration. Used internally at Canonical for production MAAS image pipelines.",
+      "startDate": "2023-10",
       "url": "https://github.com/canonical/packer-maas",
       "affiliation": "Canonical",
       "type": "software"
     },
     {
       "name": "Metal As A Service",
-      "description": "MAAS transforms physical servers into cloud-like resources, automating provisioning, monitoring, and management of bare metal. Enables remote OS deployment, DHCP, DNS, IPAM, and full lifecycle management of data center hardware.",
+      "description": "Core engineering team member building and maintaining the platform that transforms physical servers into cloud-like resources – automating bare-metal provisioning, DHCP, DNS, IPAM, and full lifecycle management of data centre hardware.",
       "startDate": "2024-03",
       "url": "https://maas.io",
       "affiliation": "Canonical",
@@ -384,7 +400,7 @@
     },
     {
       "name": "YT-Automation",
-      "description": "Python-based automation suite for YouTube channel management. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Uses the YouTube Data API via python-youtube and Google Calendar API with OAuth authentication.",
+      "description": "Python automation suite managing YouTube channel operations. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.",
       "startDate": "2025-02",
       "endDate": "2026-01",
       "url": "https://github.com/SkiylianSoftware/YT-automation",
@@ -399,7 +415,8 @@
     {
       "name": "VisualNovel Template",
       "description": "A lightweight web-based Visual Novel engine template, supporting branching storylines, dynamic effects, and variations to ensure every playthrough feels unique. Stories are written in a simple markup format and compiled using a Python-based generator with built-in validation.",
-      "startDate": "2025-11",
+      "startDate": "2025-10",
+      "endDate": "2026-01",
       "url": "https://github.com/SK1Y101/vn-template"
     },
     {
@@ -412,7 +429,7 @@
     },
     {
       "name": "Terraform Charmed MAAS Training",
-      "description": "Hands-on training material created and delivered for the Canonical Berlin Commercial Sprint 2025. Inducts field engineers in deploying and managing MAAS through the new Anvil approach using Terraform, Juju, and charmed operators, with step-by-step exercises for each deployment stage.",
+      "description": "Hands-on training material created and delivered at the Canonical Berlin Commercial Sprint 2025. Inducted field engineers in deploying and managing MAAS through the Anvil approach using Terraform, Juju, and charmed operators, enabling them to stand up production MAAS environments for customers.",
       "startDate": "2025-05",
       "url": "https://github.com/SK1Y101/tf-charmed-maas-training",
       "affiliation": "Canonical",
@@ -422,7 +439,7 @@
       "name": "Skiylia Programming Language",
       "description": "A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.",
       "startDate": "2022-12",
-      "endDate": "2024",
+      "endDate": "2026-04",
       "url": "https://github.com/SK1Y101/Skiylia",
       "type": "hardware"
     },
@@ -430,14 +447,14 @@
       "name": "KOS Flight Computer",
       "description": "Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Provides a multi-size BootUI system for connection-loss displays, real-time telemetry (MET, power, orbit status, disk capacity), and a modular menu interface for controlling spacecraft functions. Written entirely in KerboScript with ~400B of code.",
       "startDate": "2022-01",
-      "endDate": "2024-12",
+      "endDate": "2022-02",
       "url": "https://github.com/SK1Y101/KOSFlightController"
     },
     {
       "name": "Season Clock",
       "description": "Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.",
       "startDate": "2022-09",
-      "endDate": "2024-03",
+      "endDate": "2023-04",
       "url": "https://github.com/SK1Y101/SeasonsClock"
     },
     {
@@ -458,14 +475,14 @@
     {
       "name": "Improved TTV Pipeline",
       "description": "Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.",
-      "startDate": "2023-07",
+      "startDate": "2023-03",
       "url": "https://github.com/SK1Y101/Improved-TTV-Pipeline"
     },
     {
       "name": "MAAS Ansible Playbooks",
       "description": "An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.",
       "startDate": "2022-09",
-      "endDate": "2023-03",
+      "endDate": "2025-08",
       "url": "https://github.com/maas/MAAS-ansible-playbook",
       "affiliation": "Canonical",
       "type": "software"
@@ -480,7 +497,8 @@
     {
       "name": "Data Collection Pipeline",
       "description": "Full-stack cloud-based web scraper targeting the NASA Exoplanet Catalogue. Built with Selenium 4 for dynamic page interaction, UUID v4/JSON for data storage, and Boto3 for AWS S3 upload. Containerised with Docker and deployed on EC2 with Selenium Grid for distributed scraping. Monitored via Prometheus and Grafana dashboards with automated CI/CD and cron-based daily restarts. Scrapes all 4940+ known exoplanets.",
-      "startDate": "2022-03",
+      "startDate": "2022-02",
+      "endDate": "2022-04",
       "url": "https://github.com/SK1Y101/Data_Collection_Pipeline",
       "affiliation": "AiCore"
     },
@@ -488,7 +506,7 @@
       "name": "Fitbit Pokétch",
       "description": "Fitbit clock face replicating the Pok\\'etch from Pok\\'emon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).",
       "startDate": "2021-08",
-      "endDate": "2022-02",
+      "endDate": "2026-04",
       "url": "https://github.com/SK1Y101/PoketchFitbit"
     },
     {

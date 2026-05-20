@@ -257,13 +257,13 @@
 }
 
 % Skills display (technical skills with proficiency ratings)
-\newcommand{\showsidebarskills}[2]{
-    \ifthenelse{\getlength{#1} > 0}{
-        \sidebarsection{#2}
+\newcommand{\showsidebarskills}[1]{
+    \ifthenelse{\getlength{skills} > 0}{
+        \sidebarsection{#1}
         \foreach \i in {-1,5,4,3,2,1} {
-            \foreach \n in {1,3,...,\getlength{#1}} {
-                \ifnum\getdata[\n+1]{#1}=\i\relax
-                    \cvskill{\getdata[\n]{#1}}{\i}{}{S}
+            \foreach \n in {1,4,7,...,\getlength{skills}} {
+                \ifnum\getdata[\n+2]{skills}=\i\relax
+                    \cvskill{\getdata[\n+1]{skills}}{\i}{}{S}
                 \fi
             }
         }
@@ -366,18 +366,11 @@
 
 \newcommand{\ratingmarker}{\faCircle}
 \newcommand{\cvskill}[4]{
-    % Skill name, profficiency, icon, language
-    % #1~#2~#3\par
-    % \ifequals{#4}{1}{Hi}
+    \small%
     \ifequals{#2}{-1}{\color{highlightcolour}\faIcon{heart}\space}%
-    \small\ifequals{#2}{5}{\color{highlightcolour}\faIcon{heart}\space}%
-    \textbf{#1}\nobreakspace
-    \foreach \x in {1,...,5}{%
-        \ifnum\x>1\relax\nobreak\fi
-        \hspace{-1mm}\ifthenelse{#2=-1}{\color{skillcolour}}{\ifnumgreater{\x}{#2}{\color{lightgray}}{\color{skillcolour}}}\ratingmarker
-    }
-    \par\vspace{-1.5mm}
-    {\footnotesize%
+    \ifequals{#2}{5}{\color{highlightcolour}\faIcon{heart}\space}%
+    \textbf{#1}\par\vspace{-0.3mm}
+    {\normalfont\footnotesize\color{lightgrey}%
     \begin{switch}{#2}%
         \case{1}{Beginner}%
         \case{2}{Mediocre}%
@@ -385,15 +378,20 @@
         \case{4}{Advanced}%
         \case{5}{\ifthenelse{\equal{#4}{L}}{Fluent}{Expert}}%
         \case{-1}{Native}%
-    \end{switch}}
-    \par\vspace{0.5mm}
+    \end{switch}}\nobreakspace
+    \foreach \x in {1,...,5}{%
+        \ifnum\x>1\relax\hspace{-0.5mm}\nobreak\fi
+        \ifthenelse{#2=-1}{\color{skillcolour}}{\ifnumgreater{\x}{#2}{\color{lightgray}}{\color{skillcolour}}}\ratingmarker
+    }%
+    \par\vspace{0.3mm}
 }
 
 \newcommand{\languageskill}[2]{
     \appenddata{languages}{{#1}{#2}}
 }
-\newcommand{\programmingskill}[2]{
-    \appenddata{planguage}{{#1}{#2}}
+
+\newcommand{\skill}[3]{
+    \appenddata{skills}{{#1}{#2}{#3}}
 }
 
 \newcommand{\icowidth}{2.2mm}

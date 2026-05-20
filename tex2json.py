@@ -8,8 +8,6 @@ from pathlib import Path
 LATEX_CMD = re.compile(r'\\(?P<name>[a-zA-Z]+)')
 COMMENT_LINE = re.compile(r'^\s*%')
 FLUENCY_MAP = {'-1': 'Native speaker', '5': 'Fluent', '4': 'Advanced',
-               '3': 'Intermediate', '2': 'Mediocre', '1': 'Beginner'}
-SKILL_LEVEL_MAP = {'5': 'Expert', '4': 'Advanced', '3': 'Intermediate',
                    '2': 'Novice', '1': 'Beginner', '-1': 'Native'}
 ICON_TYPE = {'proj': 'hardware', 'pub': 'paper', 'code': 'software', 'talk': 'talk'}
 COUNTRY_MAP = {
@@ -328,29 +326,27 @@ def parse_details_tex(filepath: str) -> dict:
     resume['memberships'] = memberships
 
     # ── Skills ──────────────────────────────────────────────
-    skills_map = {}
-    for args in collect_commands(content, 'programmingskill', 2):
-        name = strip_latex(args[0])
-        level = int(args[1])
-        level_str = SKILL_LEVEL_MAP.get(args[1], 'Intermediate')
-        # Group by level categories
-        category = 'Software' if level >= 3 else 'Software'
-        if name not in skills_map:
-            skills_map[name] = {'name': name, 'level': level_str, 'keywords': []}
+    from collections import OrderedDict
+    categories = OrderedDict()
+    for args in collect_commands(content, 'skill', 3):
+        cat = strip_latex(args[0])
+        name = strip_latex(args[1])
+        if cat not in categories:
+            categories[cat] = []
+        categories[cat].append(name)
 
-    # Build two main skill groups: Physics and Software
-    physics_keywords = []
-    software_keywords = []
-    for args in collect_commands(content, 'programmingskill', 2):
-        name = strip_latex(args[0])
-        level = int(args[1])
-        level_str = SKILL_LEVEL_MAP.get(args[1], 'Intermediate')
-        software_keywords.append(name)
+    category_meta = {
+        'Physics':  {'level': 'Master',          'icon': 'fa-solid fa-satellite'},
+        'Software': {'level': 'Software Engineer','icon': 'fa-solid fa-microchip'},
+    }
 
-    skills = [
-        {'name': 'Software', 'level': 'Software Engineer',
-         'keywords': software_keywords},
-    ]
+    skills = []
+    for cat, keywords in categories.items():
+        meta = category_meta.get(cat, {'level': cat, 'icon': ''})
+        entry = {'name': cat, 'level': meta['level'], 'keywords': keywords}
+        if meta['icon']:
+            entry['icon'] = meta['icon']
+        skills.append(entry)
     resume['skills'] = skills
 
     # ── Languages ───────────────────────────────────────────

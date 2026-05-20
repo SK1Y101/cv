@@ -39,34 +39,44 @@
 \languageskill{Japanese}{1}
 % \languageskill{German}{1}
 
-% Highlighted skill
-% \programmingskill{Name}{mastery}
+% Skills — unified command {category}{name}{level}
+% Category used for grouping in resume.json; all skills shown together in sidebar
+% Mastery: 5=Expert/Senior, 4=Advanced, 3=Intermediate, 2=Mediocre, 1=Beginner
 
-\programmingskill{Python}{5}
-\programmingskill{\LaTeX}{4}
-\programmingskill{Markdown}{4}
-\programmingskill{Groovy}{4}
-\programmingskill{HTML/CSS}{3}
-\programmingskill{Javascript}{3}
-\programmingskill{Kerboscript}{3}
-\programmingskill{SQL}{3}
-\programmingskill{Bash}{3}
-\programmingskill{Go}{3}
-\programmingskill{Terraform HCL}{3}
-\programmingskill{Jenkins / CI}{4}
-\programmingskill{Docker}{3}
-\programmingskill{Ansible}{3}
-\programmingskill{AWS}{1}
-\programmingskill{C++}{1}
-\programmingskill{Jupyter}{2}
-\programmingskill{OpenCV}{2}
-\programmingskill{TensorFlow / Keras}{2}
-\programmingskill{Selenium}{2}
-\programmingskill{Git}{4}
-\programmingskill{Linux}{4}
-\programmingskill{YAML}{3}
-\programmingskill{Networking}{3}
-\programmingskill{REST APIs}{3}
+\skill{Physics}{Exoplanetary Physics}{5}
+\skill{Physics}{Transit Timing Analysis}{5}
+\skill{Physics}{Computational Modelling}{4}
+\skill{Physics}{Signal Processing}{4}
+\skill{Physics}{Observational Astronomy}{4}
+\skill{Physics}{Relativity \& Relativistic Mechanics}{3}
+\skill{Physics}{Cosmology}{3}
+\skill{Physics}{Space \& Spacecraft}{3}
+
+\skill{Software}{Python}{5}
+\skill{Software}{\LaTeX}{4}
+\skill{Software}{Markdown}{4}
+\skill{Software}{Groovy}{4}
+\skill{Software}{HTML/CSS}{3}
+\skill{Software}{Javascript}{3}
+\skill{Software}{Kerboscript}{3}
+\skill{Software}{SQL}{3}
+\skill{Software}{Bash}{3}
+\skill{Software}{Go}{3}
+\skill{Software}{Terraform HCL}{3}
+\skill{Software}{Jenkins / CI}{4}
+\skill{Software}{Docker}{3}
+\skill{Software}{Ansible}{3}
+\skill{Software}{AWS}{1}
+\skill{Software}{C++}{1}
+\skill{Software}{Jupyter}{2}
+\skill{Software}{OpenCV}{2}
+\skill{Software}{TensorFlow / Keras}{2}
+\skill{Software}{Selenium}{2}
+\skill{Software}{Git}{4}
+\skill{Software}{Linux}{4}
+\skill{Software}{YAML}{3}
+\skill{Software}{Networking}{3}
+\skill{Software}{REST APIs}{3}
 
 % Jobs
 % \addcompany{Company name}{logo path}
@@ -119,8 +129,8 @@
 {%
 \begin{itemize}[leftmargin=*, labelsep=-0.1em, noitemsep]
     \item First year mean grade of 76.7\%, Final year mean grade of 79.2\%
-    \item \href{https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf}{Masters thesis} combining computational modelling, first hand observation, and supplemental data to measure exoplanet transits. Developed analytical models of transit timing variation to investigate the orbital properties of non-transiting planets. Results were summarised with a 6000 word dissertation, 10 minute presentation/discussion, and scientific poster.
-    \item \href{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}{Bachelors thesis} utilising computational modelling and signal processing to identify and model glitch events within the LIGO data set. Results were summarised with a 5000 word dissertation, 10 minute presentation/discussion, and LaTeX Compatible result list.
+    \item \href{https://sk1y101.github.io/assets/pdf/TransitDissertation.pdf}{Masters thesis} combining computational modelling, first hand observation, and supplemental data to measure exoplanet transits. Developed analytical models of transit timing variation to investigate the orbital properties of non-transiting planets. Results were summarised with a 6000 word dissertation, 10 minute presentation/discussion, and scientific poster.
+    \item \href{https://sk1y101.github.io/assets/pdf/GWProjectFinalReport.pdf}{Bachelors thesis} utilising computational modelling and signal processing to identify and model glitch events within the LIGO data set. Results were summarised with a 5000 word dissertation, 10 minute presentation/discussion, and LaTeX Compatible result list.
 \end{itemize}
 }
 
@@ -212,40 +222,40 @@
 
 \addproject{Terraform MAAS bootstrap}{code}
 {Canonical}{2025-09--Present}
-{Three-stage Terraform module to bootstrap Juju on LXD, deploy charmed MAAS, and configure the deployed MAAS instance; enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster.}{https://github.com/canonical/maas-terraform-modules}
+{Three-stage Terraform module bootstrapping Juju on LXD, deploying charmed MAAS, and configuring the deployed instance -- enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster, adopted as the standard provisioning path by Canonical field engineers.}{https://github.com/canonical/maas-terraform-modules}
 
 \addproject{MAAS Terraform provider}{code}
 {Canonical}{2023-08--Present}
-{Terraform provider published on the official Terraform Registry enabling CRUD management of MAAS resources including networking, users, machines, VM hosts, and DNS.}{https://github.com/canonical/terraform-provider-maas}
+{Published on the official Terraform Registry; enables CRUD management of MAAS resources including networking, machines, VM hosts, and DNS. Primary maintainer driving feature development and community engagement.}{https://github.com/canonical/terraform-provider-maas}
 
 \addproject{MAAS Charms}{code}
 {Canonical}{2025-07--Present}
-{Charmed operators that automate the operational procedures of running MAAS; handling deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers.}{https://github.com/canonical/maas-charms}
+{Charmed operators automating deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers in production environments. Drives operational consistency across Canonical's MAAS customer deployments.}{https://github.com/canonical/maas-charms}
 
 \addproject{MAAS Anvil}{code}
 {Canonical}{2024-07--Present}
-{Snap-based charmed operator for deploying and managing MAAS as a Juju topology, orchestrated through Terraform-driven configuration workflows.}{https://github.com/canonical/maas-anvil}
+{Snap-based charmed operator deploying and managing MAAS through Terraform-orchestrated Juju topologies. Used as the primary deployment method for production MAAS installations.}{https://github.com/canonical/maas-anvil}
 
 \addproject{Go MAAS Client}{code}
 {Canonical}{2024-06--Present}
-{Go client library providing a typed wrapper around the full MAAS REST API, used internally by the Terraform provider and other Go-based MAAS tooling.}{https://github.com/canonical/gomaasclient}
+{Go client library wrapping the full MAAS REST API; adopted by the Terraform provider, maas-cli, and internal Canonical tooling as the standard Go interface for MAAS.}{https://github.com/canonical/gomaasclient}
 
 \addproject{MAAS Internal CI}{code}
 {Canonical}{2024-06--Present}
-{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure, managing automated build, test, and release pipelines across multiple MAAS product repositories.}{https://maas.io}
+{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure. Designed and manage automated build, test, and release pipelines across multiple MAAS product repositories, ensuring reliable delivery of MAAS releases.}{https://maas.io}
 
 \addproject{Packer-MAAS}{code}
 {Canonical}{2023-10--Present}
-{Packer templates, scripts, and configuration for building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration.}{https://github.com/canonical/packer-maas}
+{Packer templates and scripts building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration. Used internally at Canonical for production MAAS image pipelines.}{https://github.com/canonical/packer-maas}
 
 \addproject{Metal As A Service}{code}
 {Canonical}{2024-03--Present}
-{MAAS transforms physical servers into cloud-like resources, automating provisioning, monitoring, and management of bare metal. Enables remote OS deployment, DHCP, DNS, IPAM, and full lifecycle management of data center hardware.}{https://maas.io}
+{Core engineering team member building and maintaining the platform that transforms physical servers into cloud-like resources -- automating bare-metal provisioning, DHCP, DNS, IPAM, and full lifecycle management of data centre hardware.}{https://maas.io}
 
 % Completed, sorted by end date descending
 \addproject{YT-Automation}{}
 {SkiylianSoftware}{2025-02--2026-01}
-{Python-based automation suite for YouTube channel management. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Uses the YouTube Data API via python-youtube and Google Calendar API with OAuth authentication.}{https://github.com/SkiylianSoftware/YT-automation}
+{Python automation suite managing YouTube channel operations. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.}{https://github.com/SkiylianSoftware/YT-automation}
 
 \addproject{Ambistream}{}
 {}{2026-01}
@@ -265,7 +275,7 @@
 
 \addproject{Terraform Charmed MAAS Training}{code}
 {Canonical}{2025-05}
-{Hands-on training material created and delivered for the Canonical Berlin Commercial Sprint 2025. Inducts field engineers in deploying and managing MAAS through the new Anvil approach using Terraform, Juju, and charmed operators, with step-by-step exercises for each deployment stage.}{https://github.com/SK1Y101/tf-charmed-maas-training}
+{Hands-on training material created and delivered at the Canonical Berlin Commercial Sprint 2025. Inducted field engineers in deploying and managing MAAS through the Anvil approach using Terraform, Juju, and charmed operators, enabling them to stand up production MAAS environments for customers.}{https://github.com/SK1Y101/tf-charmed-maas-training}
 
 \addproject{Skiylia Programming Language}{proj}
 {}{2022-12--2026-04}
@@ -318,10 +328,6 @@
 \addproject{IMBH Glitch Detection Bachelors Thesis}{pub}
 {University of Portsmouth}{2021-05}
 {Bachelors: \`Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf}
-
-\addproject{Extrasolar Habitation EPQ}{pub}
-{Peter Symonds College}{2017-12}
-{Extended Project: \`Is There A Possibility of Extrasolar Habitation?'}{https://sk1y101.github.io/assets/pdf/EPQ.pdf}
 
 % hobbies and interests
 \addhobby{Space \& Spaceflight}{Natural or artificial, if it's found outside of Earth's atmosphere, I probably like it. Exoplanets and deep space probes are my favourite. I keep an eye on every mission that leaves Earth.}
