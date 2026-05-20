@@ -95,6 +95,15 @@
 
 \definecolor{date}{HTML}{4A90D9}
 
+% Pastel sidebar versions of the rainbow — mixed with darkgrey for readability
+\colorlet{pastelred}{red!70!darkgrey}
+\colorlet{pastelorange}{orange!75!darkgrey}
+\colorlet{pastelgreen}{green!75!darkgrey}
+\colorlet{pastelaqua}{aquamarine!75!darkgrey}
+\colorlet{pastelblue}{blue!75!darkgrey}
+\colorlet{pastellilac}{lilac!80!darkgrey}
+\colorlet{pastelpurple}{purple!75!darkgrey}
+
 \colorlet{fillheader}{gray}
 \colorlet{header}{white}
 \colorlet{textcolor}{gray}
@@ -133,7 +142,7 @@
     \fi
     \node [anchor=center, align=center] (name) at (box) {%
       {\fontsize{28pt}{34pt}\color{header}%
-       \bodyfont\color{highlightcolour}#1\space\thinfont\color{header}#5}\\[1mm]
+       \bodyfont\color{highlightcolour}#1\space{\fontsize{22pt}{28pt}\thinfont\color{header}#5}}\\[1mm]
       {\fontsize{18pt}{22pt}\color{header}\bodyfont #2}
     };
     \node [anchor=center] (postnomial) at ([yshift=-1.5mm] name.south) {%
@@ -221,7 +230,7 @@
 % Sidebar section heading (compact, for the left column)
 \newcommand{\sidebarsection}[1]{
     \par\vspace{2mm}
-    {\small\headingfont\color{grey}#1}
+    {\small\headingfont\@sidebarsectioncolor{#1}}
     \par\vspace{1mm}
 }
 
@@ -232,8 +241,8 @@
     \ifthenelse{\getlength{#1} > 0}{
         \sidebarsection{#2}
         \foreach \n in {1,3,...,\getlength{#1}} {
-            \makebox[0.35\linewidth][r]{\small\getdata[\n]{#1}}\hspace{1mm}%
-            \makebox[\langflagwidth][c]{\languageflag{\getdata[\n]{#1}}}\hspace{1mm}%
+            \makebox[0.35\linewidth][r]{\small\getdata[\n]{#1}}\hspace{2mm}%
+            \makebox[\langflagwidth][c]{\languageflag{\getdata[\n]{#1}}}\hspace{2mm}%
             \makebox[0.35\linewidth][l]{\footnotesize\color{lightgrey}%
             \begin{switch}{\getdata[\n+1]{#1}}%
                 \case{-1}{Native}%
@@ -290,6 +299,22 @@
 %  define heading styles
 
 % \RequirePackage{parskip}
+
+\newcounter{sidebarColorCounter}
+\def\@sidebarsectioncolor#1{%
+    {\color{%
+        \ifcase\value{sidebarColorCounter}%
+            pastelred\or%
+            pastelorange\or%
+            pastelgreen\or%
+            pastelaqua\or%
+            pastelblue\or%
+            pastellilac\or%
+            pastelpurple\else%
+            grey\fi%
+    }#1}%
+    \stepcounter{sidebarColorCounter}%
+}
 
 \newcounter{colorCounter}
 \def\@sectioncolor#1#2#3{%
@@ -416,9 +441,12 @@
     \IfSubStr{#1}{--}{
         \StrBehind{#1}{--}[\CV@enddate]
         \StrBefore{#1}{--}[\CV@startdate]
-        \defaultexists{\CV@enddate}{Present}\newline\CV@startdate
+        \StrLeft{\CV@startdate}{7}[\CV@start]
+        \StrLeft{\CV@enddate}{7}[\CV@end]
+        \defaultexists{\CV@end}{Present}\newline\CV@start
     }{
-        \defaultexists{#1}{Ongoing}
+        \StrLeft{#1}{7}[\CV@date]
+        \defaultexists{\CV@date}{Ongoing}
     }
 }}
 \newcommand{\entrytabular}[4]{{

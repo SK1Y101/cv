@@ -157,9 +157,20 @@ def parse_details_tex(filepath: str) -> dict:
     postnom = extract_renewcommand(content, 'postnomial') or ''
     name_parts = [first, middle, last]
     full_name = ' '.join(p for p in name_parts if p)
+
+    # Formatted name with newline before postnomial (matches header layout)
     if postnom:
-        full_name += f' {postnom}'
-    basics = {'name': full_name}
+        display_name = f'{full_name}\n{postnom}'
+    else:
+        display_name = full_name
+
+    basics = {
+        'name': display_name,
+        'x_firstname': first,
+        'x_middlename': middle,
+        'x_lastname': last,
+        'x_postnomial': postnom,
+    }
 
     photo = extract_renewcommand(content, 'profilephoto') or ''
     if photo:

@@ -1,6 +1,10 @@
 {
   "basics": {
-    "name": "Skye Cassiopeia-Jacqueline Owen-Lloyd-Walters MPhys MInstP FRAS",
+    "name": "Skye Cassiopeia-Jacqueline Owen-Lloyd-Walters\nMPhys MInstP FRAS",
+    "x_firstname": "Skye",
+    "x_middlename": "Cassiopeia-Jacqueline",
+    "x_lastname": "Owen-Lloyd-Walters",
+    "x_postnomial": "MPhys MInstP FRAS",
     "image": "/img/profile.jpg",
     "email": "skyecasolw@gmail.com",
     "phone": "",
@@ -129,6 +133,12 @@
       "awarder": "University of Portsmouth",
       "date": "2022-05",
       "summary": "First recipient of the award to honour the late Graham Bryant for my Masters thesis"
+    },
+    {
+      "title": "Certified in the practical application of AI and Data Engineering",
+      "awarder": "AiCore",
+      "date": "2022-06",
+      "summary": "Awarded for the successful completion of the course. Completed to the highest standard awarded in less than half the expected time."
     }
   ],
   "memberships": [
@@ -221,19 +231,55 @@
     {
       "name": "Space & Spaceflight",
       "keywords": [
-        "Natural or artificial, if it's found outside of earth's atmosphere, I probably like it. Exoplanets and space-probes are my favourite though."
+        "Natural or artificial, if it's found outside of Earth's atmosphere, I probably like it. Exoplanets and deep space probes are my favourite. I keep an eye on every mission that leaves Earth."
+      ]
+    },
+    {
+      "name": "Reading",
+      "keywords": [
+        "When I'm not staring at a terminal, I'm staring at a page. Current favourites are Project Hail Mary and The Hydrogen Sonata; I have a soft spot for first-contact and post-scarcity sci-fi that explores how we might grow as a species."
       ]
     },
     {
       "name": "Gaming",
       "keywords": [
-        "I Love Factorio, Stellaris, modded Minecraft, and Kerbal Space Program — the latter of which features heavily in my YouTube content creation."
+        "I Love Factorio, Stellaris, Transport Fever, modded Minecraft, and Kerbal Space Program — the latter three feature heavily in my YouTube content creation. There's something satisfying about optimising a factory or rescuing a stranded Duna lander."
       ]
     },
     {
       "name": "Programming",
       "keywords": [
-        "I build watch faces for my FitBit Versa, design programming languages, write flight computers for Kerbal Space Program, and experiment with esoteric hardware designs like balanced ternary logic."
+        "I build watch faces for my FitBit Versa, design programming languages, write flight computers for Kerbal Space Program, and experiment with esoteric hardware designs like balanced ternary logic. The thing I'm most proud of is the shotcut automation pipeline that backs my YouTube workflow."
+      ]
+    },
+    {
+      "name": "Language Learning",
+      "keywords": [
+        "I'm learning Japanese. Currently at a beginner level and making slow but steady progress — it's a beautiful language and a welcome challenge after a day of writing Python."
+      ]
+    },
+    {
+      "name": "Amateur Astronomy",
+      "keywords": [
+        "Exoplanet transit timing and observation through the British Astronomical Association. There's something magical about catching a tiny dip in a star's brightness from my back garden, knowing I'm watching another world pass by."
+      ]
+    },
+    {
+      "name": "Tea",
+      "keywords": [
+        "Proper loose-leaf, brewed in a pot, left for exactly the right amount of time. I'm a firm believer that a good cup of tea solves most problems — or at least makes them easier to think about."
+      ]
+    },
+    {
+      "name": "Writing",
+      "keywords": [
+        "Academic papers, documentation, and the occasional blog post. I find that explaining something clearly is the best way to make sure I understand it myself."
+      ]
+    },
+    {
+      "name": "Board Games",
+      "keywords": [
+        "I love a good engine-building or co-op game, and I'm currently working on designing one of my own. It turns out that balancing a game is a lot like balancing a build pipeline — just with more dice."
       ]
     }
   ],
