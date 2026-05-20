@@ -162,11 +162,11 @@ def parse_details_tex(filepath: str) -> dict:
         display_name = full_name
 
     basics = {
-        'name': display_name,
-        'x_firstname': first,
-        'x_middlename': middle,
-        'x_lastname': last,
-        'x_postnomial': postnom,
+        # 'name': display_name,
+        'firstname': first,
+        'middlename': middle,
+        'lastname': last,
+        'postnomials': postnom,
     }
 
     photo = extract_renewcommand(content, 'profilephoto') or ''
