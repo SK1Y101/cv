@@ -1,4 +1,4 @@
-name: Sync Repos to CV
+name: Synchronise Repos to CV
 
 on:
   schedule:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run repo sync script
+      - name: Run repo synchronisation script
         run: python3 scripts/sync_repos.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,11 +32,36 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and push if changed
+      - name: Commit changes
         if: steps.git-check.outputs.changed == 'true'
         run: |
-          git config user.name "CV Sync Bot"
+          git config user.name "CV Synchronisation Bot"
           git config user.email "skye+bot@casolw.space"
           git add -A
-          git commit -m "chore: auto-sync new GitHub repos to CV [skip ci]"
-          git push
+          git commit -m "chore: auto-synchronise new GitHub repos to CV"
+
+      - name: Compile LaTeX document
+        if: steps.git-check.outputs.changed == 'true'
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          latexmk_use_xelatex: false
+
+      - name: Generate resume.json
+        if: steps.git-check.outputs.changed == 'true'
+        run: python3 scripts/tex2json.py
+
+      - name: Push
+        if: steps.git-check.outputs.changed == 'true'
+        run: git push
+
+      - name: Create/Update Release
+        if: steps.git-check.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          files: |
+            main.pdf
+            resume.json
+          make_latest: true
+          generate_release_notes: false

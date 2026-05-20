@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Daily sync script: fetches public repos from configured GitHub owners and
+Daily synchronisation script: fetches public repos from configured GitHub owners and
 parses sk1y101.github.io/projects/ for new entries, detects ones not yet in
 details.tex, generates descriptions via LLM, and inserts new \addproject
 entries. Also marks stale projects (6+ months without commits) as completed.
@@ -9,17 +9,21 @@ Usage:
     python3 scripts/sync_repos.py [--dry-run]
 
 Environment:
-    GITHUB_TOKEN       — GitHub API token (required for API calls)
-    LLM_API_KEY        — LLM API key (defaults to GITHUB_TOKEN for GitHub Models)
-    LLM_MODEL          — Model name (default: deepseek/deepseek-v4)
-    LLM_ENDPOINT       — API endpoint (default: https://openrouter.ai/api/v1)
+    GITHUB_TOKEN      - GitHub API token (required for API calls)
+    LLM_API_KEY       - LLM API key (defaults to GITHUB_TOKEN for GitHub Models)
+    LLM_MODEL         - Model name (default: deepseek/deepseek-v4)
+    LLM_ENDPOINT      - API endpoint (default: https://openrouter.ai/api/v1)
 """
 
+import time
+import random
 import os
 import sys
+import re
 import json
 import subprocess
 import urllib.request
+import urllib.error
 import urllib.parse
 import html.parser
 from datetime import date
@@ -28,15 +32,45 @@ from typing import Optional
 
 REPO_DIR = Path(__file__).resolve().parent.parent
 DETAILS_TEX = REPO_DIR / "details.tex"
-TEX2JSON = REPO_DIR / "tex2json.py"
+TEX2JSON = REPO_DIR / "scripts/tex2json.py"
 
 STALENESS_DAYS = 180  # 6 months
 WEBSITE_URL = "https://sk1y101.github.io/projects/"
+
+# Minimum start dates per organisation (GitHub owner).
+# When a repo's `created_at` falls after this date, the organisation date is
+# used instead — handles projects that migrated to GitHub long after they
+# began (e.g. MAAS repos that lived on Launchpad for 15+ years).
+# The value is the user's employment start at that organisation.
+ORG_START_DATES = {
+    "canonical": "2022-06-14",
+    "maas": "2022-06-14",
+}
 
 # GitHub owners to scan for new repos
 OWNERS = [
     "SK1Y101",
     "SkiylianSoftware",
+]
+
+# Orgs to scan for repos the user has personally committed to
+CONTRIBUTION_ORGS = ["canonical"]
+
+# The user's GitHub username, used to filter contribution orgs and to find
+# their first/last commit dates in a repo.
+GITHUB_USERNAME = "SK1Y101"
+
+# Fallback models for OpenRouter – tried in order when the primary is
+# rate-limited upstream.  All must be free-tier variants (queried from
+# ``/api/v1/models`` on 2026-05-20).
+FALLBACK_MODELS = [
+    "deepseek/deepseek-v4-flash:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "qwen/qwen3-coder:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "minimax/minimax-m2.5:free",
+    "openai/gpt-oss-20b:free",
 ]
 
 # Icon mapping by repo topics / language
@@ -116,18 +150,262 @@ def log(msg: str):
     print(f"[sync] {msg}", flush=True)
 
 
+# ---------------------------------------------------------------------------
+# Rate-limit state tracking for LLM (OpenRouter) and GitHub API
+# ---------------------------------------------------------------------------
+_RATE_LIMIT = {
+    "remaining": None,  # X-RateLimit-Remaining
+    "reset_at": None,   # X-RateLimit-Reset (unix timestamp)
+}
+
+_GH_RATE_LIMIT = {
+    "remaining": None,
+    "reset_at": None,
+}
+
+
+def _update_rate_limit(headers: dict, *, gh: bool = False) -> None:
+    """Track rate-limit state from response headers returned on every request."""
+    state = _GH_RATE_LIMIT if gh else _RATE_LIMIT
+    remaining = headers.get("X-RateLimit-Remaining")
+    reset = headers.get("X-RateLimit-Reset")
+    if remaining is not None:
+        try:
+            state["remaining"] = int(remaining)
+        except (ValueError, TypeError):
+            pass
+    if reset is not None:
+        try:
+            state["reset_at"] = int(reset)
+        except (ValueError, TypeError):
+            pass
+
+
+def _proactive_delay(gh: bool = False) -> None:
+    """If fewer than 2 requests remain, wait until the reset window."""
+    state = _GH_RATE_LIMIT if gh else _RATE_LIMIT
+    remaining = state["remaining"]
+    reset_at = state["reset_at"]
+    if remaining is not None and reset_at is not None and remaining < 2:
+        wait = max(0, reset_at - time.time())
+        if wait > 0:
+            tag = "GitHub" if gh else "LLM"
+            log(f"{tag} rate limit low ({remaining} remaining), pausing {wait:.0f}s until reset")
+            time.sleep(wait + 1)
+
+
+def _retry_after_from_response(e: urllib.error.HTTPError, body: str) -> float | None:
+    """Extract exact retry-after seconds from a 429/503 response.
+
+    Priority:
+    1. ``Retry-After`` HTTP response header (standard).
+    2. ``X-RateLimit-Reset`` HTTP header (Unix timestamp — compute ``reset - now``).
+    3. ``error.metadata.retry_after_seconds`` in the JSON body (OpenRouter).
+    4. ``error.metadata.headers.Retry-After`` in the JSON body (deep fallback).
+    5. Parse a number from ``error.metadata.raw`` string (OpenRouter upstream).
+
+    Returns ``None`` when the wait would exceed 1 hour — retrying then is
+    pointless (it signals a daily-limit exhaustion rather than an RPM blip).
+    """
+    now = time.time()
+
+    # 1. HTTP Retry-After header (seconds or HTTP-date)
+    http_retry = e.headers.get("Retry-After")
+    if http_retry is not None:
+        try:
+            seconds = float(http_retry)
+            return None if seconds > 3600 else seconds
+        except (ValueError, TypeError):
+            pass
+
+    # 2. X-RateLimit-Reset header (Unix timestamp)
+    reset_ts = e.headers.get("X-RateLimit-Reset")
+    if reset_ts is not None:
+        try:
+            seconds = float(reset_ts) - now
+            return None if seconds > 3600 else max(seconds, 1)
+        except (ValueError, TypeError):
+            pass
+
+    # 3 / 4 / 5. JSON body
+    if body:
+        try:
+            parsed = json.loads(body)
+            meta = parsed.get("error", {}).get("metadata", {})
+
+            raw_seconds = meta.get("retry_after_seconds") or meta.get("retry_after_seconds_raw")
+            if raw_seconds is not None:
+                seconds = float(raw_seconds)
+                return None if seconds > 3600 else seconds
+
+            body_retry = meta.get("headers", {}).get("Retry-After")
+            if body_retry is not None:
+                seconds = float(body_retry)
+                return None if seconds > 3600 else seconds
+
+            # OpenRouter upstream rate limits put a human-readable string in
+            # ``raw``; try to extract any numeric seconds value from it.
+            raw_text = meta.get("raw", "")
+            m = re.search(r"(\d+)\s*(?:second|sec|s)", raw_text, re.I)
+            if m:
+                seconds = float(m.group(1))
+                return None if seconds > 3600 else seconds
+        except (json.JSONDecodeError, ValueError, TypeError):
+            pass
+
+    return None
+
+
+def _api_request(
+    payload: dict,
+    llm_key: str,
+    models: list[str],
+    endpoint: str,
+    *,
+    max_retries: int = 3,
+    title: str = "CV-Sync",
+) -> str | None:
+    """POST *payload* to the LLM endpoint with rate-limit-aware retry and
+    model fallback.
+
+    * Tries each model in *models* in order.
+    * On 429/503: reads ``Retry-After`` / ``X-RateLimit-Reset`` headers for
+      the exact wait time.  If the wait would exceed 1 hour (daily limit)
+      retries are skipped entirely for that model.
+    * Tracks ``X-RateLimit-*`` headers from every response so we can delay
+      proactively before the window is exhausted.
+    * Falls back to exponential backoff (5, 10, 20 s) if no retry timing
+      information is available.
+
+    Returns the response content text, or ``None`` if all models and all
+    retries were exhausted.
+    """
+    for model in models:
+        _proactive_delay(gh=False)
+        log(f"  LLM call: {model}")
+
+        for attempt in range(max_retries + 1):
+            try:
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {llm_key}",
+                    "User-Agent": "cv-sync/1.0",
+                }
+                if "openrouter" in endpoint:
+                    headers["HTTP-Referer"] = "https://github.com/SK1Y101/cv"
+                    headers["X-Title"] = title
+                req = urllib.request.Request(
+                    f"{endpoint}/chat/completions",
+                    data=json.dumps({**payload, "model": model}).encode(),
+                    headers=headers,
+                )
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    _update_rate_limit(resp.headers, gh=False)
+                    result = json.loads(resp.read())
+                    content = result["choices"][0]["message"].get("content")
+                    if content is None:
+                        raise ValueError("LLM returned empty content")
+                    return content.strip()
+
+            except urllib.error.HTTPError as e:
+                body = e.read().decode() if hasattr(e, "read") else ""
+
+                if e.code in (429, 503) and attempt < max_retries:
+                    retry_after = _retry_after_from_response(e, body)
+                    if retry_after is None:
+                        retry_after = 5 * (2**attempt)
+
+                    jitter = random.uniform(0.9, 1.1)
+                    sleep_time = retry_after * jitter
+                    log(
+                        f"    Rate limited ({e.code}), retrying in "
+                        f"{sleep_time:.0f}s (attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(sleep_time)
+                    continue
+
+                log(f"    {model} failed: HTTP {e.code}- {body[:200]}")
+
+                # Non-retryable status or retries exhausted — try next model
+                break
+
+            except Exception as e:
+                log(f"    {model} failed: {e}")
+                break
+
+    return None
+
+
 def gh_api(path: str, token: str) -> dict | list:
-    url = f"https://api.github.com{path}"
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", f"Bearer {token}")
-    req.add_header("Accept", "application/vnd.github.v3+json")
-    req.add_header("User-Agent", "cv-sync/1.0")
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        log(f"GitHub API error {e.code} for {path}: {e.read().decode()[:200]}")
-        return []
+    """Make a GitHub API GET request with rate-limit-aware retry.
+
+    * Reads ``X-RateLimit-Remaining`` / ``X-RateLimit-Reset`` from every
+      response and delays proactively when the limit is near exhaustion.
+    * On 403 (rate limit) or 429: reads the ``Retry-After`` header or falls
+      back to exponential backoff (5, 10, 20 s).
+    * Returns the parsed JSON body, or ``[]`` if all retries are exhausted.
+    """
+    data, _headers = _gh_api_raw(path, token)
+    return data
+
+
+def _gh_api_raw(path: str, token: str) -> tuple:
+    """Like ``gh_api`` but also returns the HTTP response headers.
+
+    Returns ``(parsed_json, http_headers)``, or ``([], {})`` on failure.
+    """
+    _proactive_delay(gh=True)
+
+    max_retries = 3
+    for attempt in range(max_retries + 1):
+        try:
+            url = f"https://api.github.com{path}"
+            req = urllib.request.Request(url)
+            req.add_header("Authorization", f"Bearer {token}")
+            accept = "application/vnd.github.cloak-preview" if path.startswith("/search/") else "application/vnd.github.v3+json"
+            req.add_header("Accept", accept)
+            req.add_header("User-Agent", "cv-sync/1.0")
+            with urllib.request.urlopen(req) as resp:
+                _update_rate_limit(resp.headers, gh=True)
+                return json.loads(resp.read()), resp.headers
+
+        except urllib.error.HTTPError as e:
+            body = e.read().decode() if hasattr(e, "read") else ""
+
+            if e.code in (403, 429) and attempt < max_retries:
+                retry_after = _retry_after_from_response(e, body)
+                if retry_after is None:
+                    retry_after = 5 * (2**attempt)
+
+                jitter = random.uniform(0.9, 1.1)
+                sleep_time = retry_after * jitter
+                log(
+                    f"GitHub rate limited ({e.code}) for {path}, "
+                    f"retrying in {sleep_time:.0f}s "
+                    f"(attempt {attempt + 1}/{max_retries})"
+                )
+                time.sleep(sleep_time)
+                continue
+
+            log(f"GitHub API error {e.code} for {path}: {body[:200]}")
+            return [], {}
+
+    return [], {}
+
+
+def _last_page_from_link(headers: dict) -> int | None:
+    """Extract the last page number from a ``Link`` response header.
+
+    The GitHub API includes a ``Link`` header on paginated responses:
+      ``<...?page=2>; rel="next", <...?page=5>; rel="last"``
+    """
+    link = headers.get("Link", "")
+    if not link:
+        return None
+    m = re.search(r'page=(\d+)>;\s*rel="last"', link)
+    if m:
+        return int(m.group(1))
+    return None
 
 
 def fetch_all_repos(owner: str, token: str) -> list[dict]:
@@ -145,48 +423,119 @@ def fetch_all_repos(owner: str, token: str) -> list[dict]:
     return repos
 
 
-def fetch_first_commit(repo_full: str, token: str) -> Optional[str]:
-    """Get the date of the very first commit in a repo."""
-    # First try: get the first commit via the list API
-    data = gh_api(f"/repos/{repo_full}/commits?per_page=1&sha=", token)
-    if data and isinstance(data, list) and len(data) > 0:
-        # GitHub API returns commits from the default branch
-        # Get first commit by walking to the root - use the SHA ordering
-        # Actually, the first commit is the LAST one in the full list
-        data = gh_api(f"/repos/{repo_full}/commits?per_page=1&page=1", token)
-        if data and isinstance(data, list) and len(data) > 0:
-            # Get the last page by checking Link header
-            pass
+def fetch_user_contributed_repos(org: str, username: str, token: str) -> list[dict]:
+    """Fetch repos in *org* that *username* has committed to.
 
-    # Simple approach: get commits sorted by date, take the oldest
-    # But this doesn't work well. Let's get the repo creation date instead.
-    repo_data = gh_api(f"/repos/{repo_full}", token)
-    if repo_data and isinstance(repo_data, dict):
-        created = repo_data.get("created_at", "")
-        if created:
-            return created[:10]  # YYYY-MM-DD
+    Uses the commit search API to find every org repo the user has touched,
+    then fetches full repo metadata for each.  This avoids pulling hundreds
+    of unrelated repos.
+    """
+    seen = set()
+    repos = []
+    page = 1
 
-    return None
+    while True:
+        data = gh_api(
+            f"/search/commits?q=author:{username}+org:{org}&per_page=100&page={page}",
+            token,
+        )
+        if not data or not isinstance(data, dict):
+            break
+
+        for item in data.get("items", []):
+            full_name = item.get("repository", {}).get("full_name", "")
+            if full_name and full_name not in seen:
+                seen.add(full_name)
+                repo_data = gh_api(f"/repos/{full_name}", token)
+                if repo_data and isinstance(repo_data, dict):
+                    repos.append(repo_data)
+
+        if len(data.get("items", [])) < 100:
+            break
+        page += 1
+
+    log(f"  Found {len(repos)} repos with contributions by {username}")
+    return repos
 
 
-def fetch_commit_dates(repo_full: str, token: str) -> tuple[Optional[str], Optional[str]]:
-    """Get first and latest commit dates for a repo (by SK1Y101 if canonical org)."""
+def fetch_commit_dates(
+    repo_full: str,
+    token: str,
+    *,
+    only_user: bool = True,
+) -> tuple[Optional[str], Optional[str]]:
+    """Get the user's first and latest commit dates in *repo_full*.
+
+    Looks up commits authored by ``GITHUB_USERNAME`` on the default branch.
+    Paginates via the ``Link`` header to find the user's earliest commit,
+    even in repos with 500+ of their commits.
+
+    For organisations in ``ORG_START_DATES`` the first date is clamped to
+    that day (handles projects that migrated to GitHub from Launchpad).
+
+    Falls back to the ``created_at`` date from the repo metadata when no
+    user commits are found.
+
+    When *only_user* is ``False`` the latest-commit lookup uses any author
+    (needed by ``check_staleness``, where we care about project-wide
+    activity rather than just the user's).
+    """
+    username = GITHUB_USERNAME
     first_date = None
     last_date = None
 
-    # Get repo creation date as fallback for first commit
-    repo_data = gh_api(f"/repos/{repo_full}", token)
-    if repo_data and isinstance(repo_data, dict):
-        created = repo_data.get("created_at", "")
-        if created:
-            first_date = created[:10]
+    # ── Latest commit by the user (page 1, first item) ──────────────
+    commits, headers = _gh_api_raw(
+        f"/repos/{repo_full}/commits?author={username}&per_page=100", token
+    )
+    if commits and isinstance(commits, list) and commits:
+        cd = commits[0].get("commit", {}).get("committer", {}).get("date", "")
+        if cd:
+            last_date = cd[:10]
 
-    # Get latest commit on default branch
-    commits = gh_api(f"/repos/{repo_full}/commits?per_page=1", token)
-    if commits and isinstance(commits, list) and len(commits) > 0:
-        commit_date = commits[0].get("commit", {}).get("committer", {}).get("date", "")
-        if commit_date:
-            last_date = commit_date[:10]
+    # ── Earliest commit by the user ─────────────────────────────────
+    # If fewer than 100 items came back, the last item on page 1 is the
+    # earliest.  Otherwise jump to the last page.
+    earliest_commits = commits
+    if commits and isinstance(commits, list) and len(commits) >= 100:
+        last_page = _last_page_from_link(headers)
+        if last_page and last_page > 1:
+            last_commits, _ = _gh_api_raw(
+                f"/repos/{repo_full}/commits?author={username}&per_page=100&page={last_page}",
+                token,
+            )
+            if last_commits and isinstance(last_commits, list) and last_commits:
+                earliest_commits = last_commits
+
+    if earliest_commits and isinstance(earliest_commits, list) and earliest_commits:
+        cd = earliest_commits[-1].get("commit", {}).get("committer", {}).get("date", "")
+        if cd:
+            first_date = cd[:10]
+
+    # Fallback: repo creation date
+    if not first_date:
+        repo_data, _ = _gh_api_raw(f"/repos/{repo_full}", token)
+        if repo_data and isinstance(repo_data, dict):
+            created = repo_data.get("created_at", "")
+            if created:
+                first_date = created[:10]
+
+    # Clamp first_date to the organisation start date for migrated repos
+    owner = repo_full.split("/")[0] if "/" in repo_full else ""
+    org_min = ORG_START_DATES.get(owner.lower())
+    if org_min and first_date and first_date < org_min:
+        first_date = org_min
+
+    # For staleness checks: overwrite last_date with the latest commit by
+    # anyone, so we can detect if the project as a whole is inactive.
+    if not only_user:
+        any_commits, _ = _gh_api_raw(
+            f"/repos/{repo_full}/commits?per_page=1", token
+        )
+        if any_commits and isinstance(any_commits, list) and any_commits:
+            cd = any_commits[0].get("commit", {}).get("committer", {}).get("date", "")
+            if cd:
+                last_date = cd[:10]
 
     return first_date, last_date
 
@@ -229,11 +578,10 @@ def determine_icon(repo: dict) -> str:
 def determine_affiliation(repo: dict) -> str:
     """Determine the affiliation for a repo."""
     owner = repo.get("owner", {}).get("login", "")
-    if owner.lower() == "canonical":
-        return "Canonical"
-    if owner == "SkiylianSoftware":
-        return "SkiylianSoftware"
-    return "Personal"
+    # Personal repos — use the owner name verbatim for orgs
+    if owner.lower() in ("sk1y101", "skyecasolw"):
+        return "Personal"
+    return owner
 
 
 def format_date_range(first: Optional[str], last: Optional[str]) -> str:
@@ -265,24 +613,24 @@ def format_date_range(first: Optional[str], last: Optional[str]) -> str:
 
 def _collect_addproject_args(text: str, start_idx: int) -> tuple[list[str], int]:
     """Collect 6 brace-delimited arguments from \addproject at start_idx.
-    
+
     Returns (args, end_idx) where end_idx is position after closing brace of arg 6.
     Returns ([], start_idx) if parsing fails.
     """
     idx = start_idx + len("\\addproject{")  # consume opening { of arg 1
     args = []
-    
+
     for arg_i in range(6):
         # Skip whitespace
         while idx < len(text) and text[idx] in " \n\r\t":
             idx += 1
-        
+
         # For args 2-6, consume the opening {
         if arg_i > 0:
             if idx >= len(text) or text[idx] != "{":
                 return [], start_idx
             idx += 1
-        
+
         # Balance braces to find closing }
         depth = 0
         start = idx
@@ -298,7 +646,7 @@ def _collect_addproject_args(text: str, start_idx: int) -> tuple[list[str], int]
             idx += 1
         else:
             return [], start_idx  # ran out of text
-    
+
     return args, idx
 
 
@@ -357,44 +705,28 @@ Rules:
 - Do NOT use first person ("I", "my")
 - Keep it to 1-3 sentences
 - Be specific about technologies and architecture where relevant
-- Do not wrap in quotes"""
+- Do not wrap in quotes
+- Do not use em-dashes"""
 
-    # Try LLM API via OpenRouter-compatible endpoint
-    try:
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-            "User-Agent": "cv-sync/1.0",
-        }
-        # OpenRouter-specific headers
-        if "openrouter" in endpoint:
-            headers["HTTP-Referer"] = "https://github.com/SK1Y101/cv"
-            headers["X-Title"] = "CV-Sync"
-        req = urllib.request.Request(
-            f"{endpoint}/chat/completions",
-            data=json.dumps({
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": "You are a technical writer for CVs. Write concise, informative project descriptions."},
-                    {"role": "user", "content": prompt},
-                ],
-                "max_tokens": 200,
-                "temperature": 0.7,
-            }).encode(),
-            headers=headers,
-        )
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read())
-            text = result["choices"][0]["message"]["content"].strip()
-            # Remove quotes if LLM wrapped it
-            text = text.strip('"').strip("'")
-            return text
-    except Exception as e:
-        log(f"LLM call failed: {e}")
-        # Fallback: use the GitHub description directly
-        if desc:
-            return f"{name}: {desc}"
-        return f"{name}. Written in {language}." if language else f"{name}."
+    payload = {
+        "messages": [
+            {"role": "system", "content": "You are a technical writer for CVs. Write concise, informative project descriptions."},
+            {"role": "user", "content": prompt},
+        ],
+        "max_tokens": 200,
+        "temperature": 0.7,
+    }
+
+    models = [model] + [m for m in FALLBACK_MODELS if m.lower() != model.lower()]
+    text = _api_request(payload, token, models, endpoint)
+    if text is not None:
+        text = text.strip('"').strip("'")
+        return text
+
+    # Fallback: use the GitHub description directly
+    if desc:
+        return f"{name}: {desc}"
+    return f"{name}. Written in {language}." if language else f"{name}."
 
 
 def generate_description_template(repo: dict) -> str:
@@ -417,6 +749,275 @@ def generate_description_template(repo: dict) -> str:
     if parts:
         return ". ".join(parts) + "."
     return f"{''.join(w.capitalize() for w in name.replace('-', ' ').split())} project."
+
+
+# Mapping from GitHub languages/topics to CV skill (category, name)
+GITHUB_SKILL_MAP = {
+    # Languages
+    "python": ("Languages", "Python"),
+    "go": ("Languages", "Go"),
+    "rust": ("Languages", "C++"),  # close enough; C++ maps broadly
+    "c++": ("Languages", "C++"),
+    "c": ("Languages", "C++"),
+    "typescript": ("Languages", "Javascript"),
+    "javascript": ("Languages", "Javascript"),
+    "java": ("Languages", "Groovy"),
+    "groovy": ("Languages", "Groovy"),
+    "shell": ("Languages", "Bash"),
+    "bash": ("Languages", "Bash"),
+    "html": ("Languages", "HTML/CSS"),
+    "css": ("Languages", "HTML/CSS"),
+    "dockerfile": ("Languages", "Bash"),
+    "makefile": ("Languages", "Bash"),
+    "kerboscript": ("Languages", "Kerboscript"),
+    "latex": ("Languages", r"\LaTeX"),
+    "markdown": ("Languages", "Markdown"),
+    "sql": ("Languages", "SQL"),
+    # DevOps & Cloud
+    "terraform": ("DevOps & Cloud", "Terraform HCL"),
+    "hcl": ("DevOps & Cloud", "Terraform HCL"),
+    "packer": ("DevOps & Cloud", "Packer"),
+    "ansible": ("DevOps & Cloud", "Ansible"),
+    "maas": ("DevOps & Cloud", "MAAS"),
+    "docker": ("DevOps & Cloud", "Docker"),
+    "kubernetes": ("DevOps & Cloud", "Docker"),
+    "k8s": ("DevOps & Cloud", "Docker"),
+    "jenkins": ("DevOps & Cloud", "Jenkins / CI"),
+    "ci/cd": ("DevOps & Cloud", "Jenkins / CI"),
+    "ci": ("DevOps & Cloud", "Jenkins / CI"),
+    "cd": ("DevOps & Cloud", "Jenkins / CI"),
+    "github actions": ("DevOps & Cloud", "Jenkins / CI"),
+    "api": ("DevOps & Cloud", "REST APIs"),
+    "rest": ("DevOps & Cloud", "REST APIs"),
+    "rest api": ("DevOps & Cloud", "REST APIs"),
+    "cli": ("DevOps & Cloud", "CLI Development"),
+    "aws": ("DevOps & Cloud", "AWS"),
+    "amazon web services": ("DevOps & Cloud", "AWS"),
+    "linux": ("DevOps & Cloud", "Linux"),
+    "networking": ("DevOps & Cloud", "Networking"),
+    "git": ("DevOps & Cloud", "Git"),
+    "yaml": ("DevOps & Cloud", "YAML"),
+    "yml": ("DevOps & Cloud", "YAML"),
+    # Web & Data
+    "machine learning": ("Web & Data", "TensorFlow / Keras"),
+    "deep learning": ("Web & Data", "TensorFlow / Keras"),
+    "tensorflow": ("Web & Data", "TensorFlow / Keras"),
+    "keras": ("Web & Data", "TensorFlow / Keras"),
+    "data science": ("Web & Data", "NumPy / SciPy"),
+    "data": ("Web & Data", "NumPy / SciPy"),
+    "numpy": ("Web & Data", "NumPy / SciPy"),
+    "scipy": ("Web & Data", "NumPy / SciPy"),
+    "pandas": ("Web & Data", "NumPy / SciPy"),
+    "jupyter": ("Web & Data", "Jupyter"),
+    "jupyter notebook": ("Web & Data", "Jupyter"),
+    "opencv": ("Web & Data", "OpenCV"),
+    "computer-vision": ("Web & Data", "OpenCV"),
+    "cv": ("Web & Data", "OpenCV"),
+    "selenium": ("Web & Data", "Selenium"),
+    "web": ("Web & Data", "Web Development"),
+    "react": ("Web & Data", "Web Development"),
+    "vue": ("Web & Data", "Web Development"),
+    "flask": ("Web & Data", "Web Development"),
+    "django": ("Web & Data", "Web Development"),
+    "fastapi": ("Web & Data", "Web Development"),
+    "database": ("Web & Data", "Databases"),
+    "postgresql": ("Web & Data", "Databases"),
+    "mongodb": ("Web & Data", "Databases"),
+    # Physics
+    "physics": ("Physics", "Computational Modelling"),
+    "astronomy": ("Physics", "Observational Astronomy"),
+    "exoplanet": ("Physics", "Exoplanetary Physics"),
+    "exoplanets": ("Physics", "Exoplanetary Physics"),
+    "transit timing variation": ("Physics", "Transit Timing Analysis"),
+    "ttv": ("Physics", "Transit Timing Analysis"),
+    "gravitational wave": ("Physics", "Gravitational Wave Physics"),
+    "ligo": ("Physics", "Gravitational Wave Physics"),
+    "space": ("Physics", "Space & Spacecraft"),
+    "rocket": ("Physics", "Space & Spacecraft"),
+    "ksp": ("Physics", "Space & Spacecraft"),
+    "kerbal": ("Physics", "Space & Spacecraft"),
+    "cosmology": ("Physics", "Cosmology"),
+    "signal processing": ("Physics", "Signal Processing"),
+    "statistics": ("Physics", "Statistical Analysis"),
+    "statistical analysis": ("Physics", "Statistical Analysis"),
+    "modelling": ("Physics", "Computational Modelling"),
+    "simulation": ("Physics", "Computational Modelling"),
+}
+
+
+def parse_skills(text: str) -> list[dict]:
+    """Extract all \\skill{category}{name}{level} entries via brace balancing."""
+    skills = []
+    idx = 0
+    while True:
+        idx = text.find("\\skill{", idx)
+        if idx == -1:
+            break
+        line_start = text.rfind("\n", 0, idx) + 1
+        if text[line_start:idx].strip().startswith("%"):
+            idx += 1
+            continue
+        args, end = _collect_addproject_args(text.replace("\\skill{", "\\addproject{", 1), idx)
+        # _collect_addproject_args expects \addproject prefix; adapt
+        idx2 = idx + len("\\skill{")
+        args = []
+        for arg_i in range(3):
+            while idx2 < len(text) and text[idx2] in " \n\r\t":
+                idx2 += 1
+            if arg_i > 0:
+                if idx2 >= len(text) or text[idx2] != "{":
+                    break
+                idx2 += 1
+            depth = 0
+            start = idx2
+            while idx2 < len(text):
+                if text[idx2] == "{":
+                    depth += 1
+                elif text[idx2] == "}":
+                    if depth == 0:
+                        args.append(text[start:idx2])
+                        idx2 += 1
+                        break
+                    depth -= 1
+                idx2 += 1
+        if len(args) >= 3:
+            full = text[idx:idx2]
+            skills.append({"full": full, "category": args[0], "name": args[1], "level": args[2]})
+        idx = idx2
+    return skills
+
+
+def extract_repo_skills(repo: dict) -> list[tuple[str, str]]:
+    """Map a repo's language and topics to CV skill (category, name) pairs."""
+    matched = []
+    language = (repo.get("language") or "").lower()
+    if language and language in GITHUB_SKILL_MAP:
+        matched.append(GITHUB_SKILL_MAP[language])
+    for topic in (t.lower() for t in repo.get("topics", [])):
+        if topic in GITHUB_SKILL_MAP:
+            matched.append(GITHUB_SKILL_MAP[topic])
+    return matched
+
+
+def evaluate_skills(new_repos_info: list[dict], current_skills: list[dict], llm_key: str, model: str, endpoint: str):
+    """Ask the LLM to suggest skill adjustments AND new skills based on new repos.
+
+    Returns (adjustments, new_skills):
+      - adjustments: dict mapping skill name (lowercase) to new level (str)
+      - new_skills: list of (category, name, level) tuples for entirely new skills
+    """
+    if not llm_key or not new_repos_info:
+        return {}, []
+
+    repos_text = "\n".join(
+        f"- {r['name']}: {r.get('language') or 'N/A'} — {(', '.join(r.get('topics') or []))}\n  {(r.get('description') or 'No description')[:200]}"
+        for r in new_repos_info
+    )
+    current_text = "\n".join(
+        f"  {s['name']:<30} {s['category']:<18} Level {s['level']}"
+        for s in current_skills
+    )
+
+    prompt = f"""You are evaluating skill levels for a LaTeX CV. Skill levels are 1 (Beginner) to 5 (Master).
+
+New repositories have been added to the CV. Based on their languages, topics, and descriptions, do two things:
+
+1. Suggest level ADJUSTMENTS for existing skills that are reflected in the new work.
+2. Suggest entirely NEW skills that should be added (for languages/tools/domains the
+   new repos demonstrate but are not yet listed).
+
+Current skills (all of them):
+{current_text}
+
+New repositories added:
+{repos_text}
+
+Respond in this exact format. One line per change, no extra text:
+
+For existing skill adjustments:
+skill_name|new_level
+
+For new skills to add:
++category|skill_name|new_level
+
+Examples:
+Python|5
+Docker|4
++DevOps & Cloud|Kubernetes|2
++Languages|Rust|1
+
+Only list changes. Return nothing if no adjustments or new skills needed."""
+
+    payload = {
+        "messages": [
+            {"role": "system", "content": "You are a skill evaluator for CVs. Output only the requested format."},
+            {"role": "user", "content": prompt},
+        ],
+        "max_tokens": 400,
+        "temperature": 0.3,
+    }
+
+    models = [model] + [m for m in FALLBACK_MODELS if m.lower() != model.lower()]
+    text = _api_request(payload, llm_key, models, endpoint, title="CV-Skill-Eval")
+    if text is None:
+        return {}, []
+
+    adjustments = {}
+    new_skills = []
+    for line in text.strip().split("\n"):
+        line = line.strip()
+        if not line or "|" not in line:
+            continue
+        parts = line.split("|")
+        if line.startswith("+"):
+            # New skill: +category|name|level
+            if len(parts) == 4:
+                _, cat, name, level = parts
+            elif len(parts) == 3:
+                _, name, level = parts
+                cat = "Languages"
+            else:
+                continue
+            if level.isdigit() and 1 <= int(level) <= 5:
+                new_skills.append((cat.strip(), name.strip(), level.strip()))
+        else:
+            # Adjustment: name|level
+            if len(parts) >= 2:
+                name, level = parts[0].strip(), parts[1].strip()
+                if level.isdigit() and 1 <= int(level) <= 5:
+                    adjustments[name.lower()] = level
+
+    if adjustments or new_skills:
+        log(f"Skill adjustments: {adjustments}  new skills: {(s[1] for s in new_skills)}")
+    return adjustments, new_skills
+
+
+def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
+    """Apply skill level adjustments and add new skills in the text."""
+    # Apply adjustments to existing skills
+    if adjustments:
+        skills = parse_skills(text)
+        for s in skills:
+            key = s["name"].strip().lower()
+            if key in adjustments and adjustments[key] != s["level"]:
+                old = s["full"]
+                new = old.replace("{" + s["level"] + "}", "{" + adjustments[key] + "}", 1)
+                text = text.replace(old, new, 1)
+                log(f"  Skill: {s['name']} level {s['level']} → {adjustments[key]}")
+
+    # Insert new skills before "% Hobbies and Interests"
+    if new_skills:
+        new_lines = []
+        for cat, name, level in new_skills:
+            new_lines.append(f"\\skill{{{cat}}}{{{name}}}{{{level}}}")
+            log(f"  New skill: {cat} / {name} (level {level})")
+        insert = "\n" + "\n".join(new_lines) + "\n"
+        hobby_marker = "% hobbies and interests"
+        pos = text.find(hobby_marker)
+        if pos != -1:
+            text = text[:pos] + insert + text[pos:]
+
+    return text
 
 
 def generate_addproject(repo: dict, gh_token: str = "", llm_key: str = "", model: str = "", endpoint: str = "") -> str:
@@ -568,9 +1169,10 @@ def check_staleness(text: str, token: str) -> str:
         # Get last 2 parts: owner/repo
         repo_full = "/".join(parts[-2:])
         # Remove .git suffix if present
-        repo_full = repo_full.rstrip(".git")
+        if repo_full.endswith(".git"):
+            repo_full = repo_full[:-4]
 
-        _, last_date = fetch_commit_dates(repo_full, token)
+        _, last_date = fetch_commit_dates(repo_full, token, only_user=False)
         if not last_date:
             continue
 
@@ -590,7 +1192,7 @@ def check_staleness(text: str, token: str) -> str:
                 new = "{" + new_date + "}"
                 text = text.replace(old, new, 1)
                 changed = True
-                log(f"  Stale: {proj['name']} — set end to {last_date[:10]}")
+                log(f"  Stale: {proj['name']}- set end to {last_date[:10]}")
 
     if changed:
         log("Updated stale project dates")
@@ -645,28 +1247,20 @@ def parse_existing_projects(text: str) -> list[dict]:
 
 def find_insert_position(projects: list[dict], new_entry: dict) -> int:
     """Find where to insert a new project entry to maintain sort order.
-    
+
     Order: ongoing (Present end) by start desc, then completed by end desc.
     """
-
-    def sort_key(p):
-        is_ongoing = p["end"] == "Present" or p["end"] == ""
-        # For sorting: ongoing first (0 < 1), then by end desc, then start desc
-        return (
-            0 if is_ongoing else 1,
-            # For 'Present', use a very large date
-            "9999-99" if is_ongoing else (p["end"] or "0000-00"),
-            p["start"] or "0000-00",
-        )
-
-    # Add the new entry to the list, sort, find its position
-    all_projects = projects + [new_entry]
-    all_projects.sort(key=sort_key, reverse=True)
     # Ongoing sort by start DESC, completed by end DESC
-    ongoing = [p for p in all_projects if p["end"] == "Present" or p["end"] == ""]
-    completed = [p for p in all_projects if p["end"] and p["end"] != "Present"]
-    ongoing.sort(key=lambda p: p["start"] or "0000-00", reverse=True)
-    completed.sort(key=lambda p: p["end"] or "0000-00", reverse=True)
+    ongoing = sorted(
+        [p for p in projects + [new_entry] if p["end"] == "Present" or p["end"] == ""],
+        key=lambda p: p["start"] or "0000-00",
+        reverse=True,
+    )
+    completed = sorted(
+        [p for p in projects + [new_entry] if p["end"] and p["end"] != "Present"],
+        key=lambda p: p["end"] or "0000-00",
+        reverse=True,
+    )
     sorted_projects = ongoing + completed
 
     # Find position of new entry in sorted list
@@ -683,6 +1277,7 @@ def parse_single_addproject(entry_str: str) -> dict | None:
     if len(args) < 6:
         return None
     project = {
+        "full": entry_str,
         "name": args[0],
         "icon": args[1],
         "affiliation": args[2],
@@ -798,7 +1393,7 @@ def main():
                 DETAILS_TEX.write_text(updated_text)
                 log("Updated stale project dates.")
     else:
-        log("No GITHUB_TOKEN — skipping staleness check.")
+        log("No GITHUB_TOKEN- skipping staleness check.")
 
     # Step 2: Scan website for non-GitHub projects
     log("Scanning website for projects...")
@@ -814,6 +1409,7 @@ def main():
 
     # Step 3: Generate entries from website (non-GitHub projects)
     new_entries = []
+    would_add = 0
     for wp in website_projects:
         if wp["url"] in existing_urls:
             continue
@@ -821,6 +1417,7 @@ def main():
         if wp["name"].strip().lower() in existing_names:
             continue
         log(f"  New website project: {wp['name']} ({wp['url']})")
+        would_add += 1
         if dry_run:
             print(f"    Would add: {wp['name']} ({wp['url']})")
             continue
@@ -835,7 +1432,16 @@ def main():
         today = date.today().isoformat()[:10]
         icon = "{}"
         affiliation = "{" + wp["category"] + "}"
-        date_range = f"{today}--Present"
+
+        # Floor work-category projects to the earliest organisation start date
+        # (handles projects like MAAS that predate their GH migration).
+        start = today
+        if wp.get("category", "").lower() in ("work", "employment"):
+            work_floors = [d for d in ORG_START_DATES.values() if d and d < start]
+            if work_floors:
+                start = min(work_floors)
+
+        date_range = f"{start}--Present"
         entry = (
             f"\\addproject{{{wp['name']}}}{icon}\n"
             f"{affiliation}{{{date_range}}}\n"
@@ -845,6 +1451,55 @@ def main():
         log(f"    Generated entry for {wp['name']}")
 
     # Step 4: Scan GitHub repos
+    new_repos_info = []  # for skill evaluation
+    replacements = {}  # old_full_text → new_full_text
+
+    # Step 4a: Scan contribution orgs first.  These are the "source of truth"
+    # for any repo the user has touched — forks of these will be skipped.
+    for org in CONTRIBUTION_ORGS:
+        log(f"Fetching contributed repos for {org}...")
+        repos = fetch_user_contributed_repos(org, GITHUB_USERNAME, gh_token)
+
+        for repo in repos:
+            url = repo.get("html_url", "")
+            if url in existing_urls:
+                continue
+
+            name = repo.get("name", "").strip().lower()
+
+            if name and name in existing_names:
+                # This repo exists under a different URL (likely a fork).
+                # Upgrade the existing entry to use the upstream.
+                log(f"  Upgrading {repo['name']} to upstream ({url})")
+                would_add += 1
+                new_repos_info.append(repo)
+                if dry_run:
+                    print(f"    Would upgrade: {repo['name']} → {url}")
+                    continue
+                entry = generate_addproject(repo, gh_token=gh_token, llm_key=llm_key, model=llm_model, endpoint=llm_endpoint)
+                for p in parse_existing_projects(text):
+                    if p["name"].strip().lower() == name:
+                        replacements[p["full"]] = entry
+                        break
+                continue
+
+            # Skip archived repos
+            if repo.get("archived"):
+                continue
+
+            log(f"  New repo: {repo['name']} ({org})")
+            would_add += 1
+            new_repos_info.append(repo)
+            if dry_run:
+                print(f"    Would add: {repo['name']} ({url})")
+                continue
+
+            entry = generate_addproject(repo, gh_token=gh_token, llm_key=llm_key, model=llm_model, endpoint=llm_endpoint)
+            new_entries.append(entry)
+            log(f"    Generated entry for {repo['name']}")
+
+    # Step 4b: Scan personal repos.  Skip forks of repos already covered by
+    # contribution orgs; keep other forks (they're from external projects).
     for owner in OWNERS:
         log(f"Fetching repos for {owner}...")
         repos = fetch_all_repos(owner, gh_token)
@@ -855,15 +1510,28 @@ def main():
             if url in existing_urls:
                 continue
 
-            # Skip forks unless they have significant changes
-            if repo.get("fork"):
+            name = repo.get("name", "").strip().lower()
+
+            # Skip if a project with this name is already tracked (from a
+            # contribution org or manually added). The upstream is the
+            # source of truth; the fork/personal copy is redundant.
+            if name and name in existing_names:
+                log(f"  Skipped {repo['name']} (already exists in CV)")
                 continue
+
+            # Keep forks of external orgs (not covered by contribution
+            # orgs) — those are unique contributions worth listing.
+            if repo.get("fork"):
+                log(f"  New fork: {repo['name']}")
+            else:
+                log(f"  New repo: {repo['name']}")
 
             # Skip archived repos
             if repo.get("archived"):
                 continue
 
-            log(f"  New repo: {repo['name']}")
+            would_add += 1
+            new_repos_info.append(repo)
             if dry_run:
                 print(f"    Would add: {repo['name']} ({url})")
                 continue
@@ -874,20 +1542,45 @@ def main():
             log(f"    Generated entry for {repo['name']}")
 
     if dry_run:
-        log(f"Dry run complete. Would add {len(new_entries)} new entries.")
+        log(f"Dry run complete. Would add {would_add} new entries.")
         return
 
-    if not new_entries:
+    if not new_entries and not replacements:
         log("No new repos found.")
         return
 
+    # Apply replacements (upgrade fork entries to upstream)
+    if replacements:
+        text = DETAILS_TEX.read_text()
+        for old_full, new_full in replacements.items():
+            if old_full in text:
+                text = text.replace(old_full, new_full, 1)
+                log("  Replaced fork entry with upstream")
+        DETAILS_TEX.write_text(text)
+
     # Update details.tex
-    updated = update_details_tex(new_entries)
+    updated = False
+    if new_entries:
+        updated = update_details_tex(new_entries)
+    if replacements:
+        updated = True
     if updated:
         run_tex2json()
-        log(f"Sync complete. Added {len(new_entries)} new projects.")
+        log(f"Synchronisation complete. Added {len(new_entries)} new entries, "
+            f"upgraded {len(replacements)} forks to upstream.")
+
+    # Step 5: Re-evaluate skill levels based on new repos
+    if new_repos_info and llm_key:
+        log("Evaluating skill levels from new repos...")
+        text = DETAILS_TEX.read_text()
+        current_skills = parse_skills(text)
+        adjustments, new_skills = evaluate_skills(new_repos_info, current_skills, llm_key, llm_model, llm_endpoint)
+        if adjustments or new_skills:
+            text = update_skills(text, adjustments, new_skills)
+            DETAILS_TEX.write_text(text)
+            run_tex2json()
     else:
-        log("No changes made.")
+        log("Skipping skill evaluation (no new repos or no LLM key).")
 
 
 if __name__ == "__main__":

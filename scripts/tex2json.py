@@ -7,8 +7,8 @@ from pathlib import Path
 
 LATEX_CMD = re.compile(r'\\(?P<name>[a-zA-Z]+)')
 COMMENT_LINE = re.compile(r'^\s*%')
-FLUENCY_MAP = {'-1': 'Native speaker', '5': 'Fluent', '4': 'Advanced',
-                   '2': 'Novice', '1': 'Beginner', '-1': 'Native'}
+FLUENCY_MAP = {'5': 'Fluent', '4': 'Advanced',
+               '2': 'Novice', '1': 'Beginner', '-1': 'Native'}
 ICON_TYPE = {'proj': 'hardware', 'pub': 'paper', 'code': 'software', 'talk': 'talk'}
 COUNTRY_MAP = {
     'united kingdom': 'GB', 'uk': 'GB', 'england': 'GB',
@@ -64,7 +64,6 @@ def collect_commands(text: str, cmd_name: str, arg_count: int) -> list[list[str]
     """Find all non-commented occurrences of \\cmd_name and extract arg_count arguments."""
     results = []
     pattern = re.compile(r'\\' + cmd_name + r'(?:\s*\{)')
-    lines = text.split('\n')
     for match in pattern.finditer(text):
         # Find which line this match is on
         line_start = text.rfind('\n', 0, match.start()) + 1
@@ -417,7 +416,7 @@ def parse_details_tex(filepath: str) -> dict:
 
 def main():
     import sys
-    tex_path = Path(__file__).parent / 'details.tex'
+    tex_path = Path(__file__).resolve().parent.parent / 'details.tex'
     if len(sys.argv) > 1:
         tex_path = Path(sys.argv[1])
     if not tex_path.exists():

@@ -18,7 +18,7 @@ jobs:
           latexmk_use_xelatex: false
 
       - name: Generate resume.json
-        run: python3 tex2json.py
+        run: python3 scripts/tex2json.py
 
       - name: Upload PDF and JSON artifacts
         uses: actions/upload-artifact@v4
