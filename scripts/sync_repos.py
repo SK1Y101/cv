@@ -1006,7 +1006,9 @@ def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
     if new_skills:
         new_lines = []
         for cat, name, level in new_skills:
-            new_lines.append(f"\\skill{{{cat}}}{{{name}}}{{{level}}}")
+            esc_name = _LATEX_ARG_PAT.sub(lambda m: _LATEX_ESC[m.group(0)], name)
+            esc_cat = _LATEX_ARG_PAT.sub(lambda m: _LATEX_ESC[m.group(0)], cat)
+            new_lines.append(f"\\skill{{{esc_cat}}}{{{esc_name}}}{{{level}}}")
             log(f"  New skill: {cat} / {name} (level {level})")
         insert = "\n" + "\n".join(new_lines) + "\n"
         hobby_marker = "% hobbies and interests"
@@ -1017,19 +1019,20 @@ def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
     return text
 
 
+_LATEX_ARG_PAT = re.compile(r'[#$&%_^~]')
+_LATEX_ESC_PAT = re.compile(r'[\\{}#$&%_^~\n\r]')
+_LATEX_ESC = {
+    "\\": "\\textbackslash{}", "{": "\\{", "}": "\\}",
+    "$": "\\$", "&": "\\&", "%": "\\%",
+    "_": "\\_", "#": "\\#",
+    "^": "\\textasciicircum{}", "~": "\\textasciitilde{}",
+    "\n": " ", "\r": " ",
+}
+
+
 def _escape_latex(text: str) -> str:
     """Escape LaTeX special chars and strip newlines."""
-    text = text.replace("\\", "\\textbackslash{}")
-    text = text.replace("{", "\\{")
-    text = text.replace("}", "\\}")
-    text = text.replace("$", "\\$")
-    text = text.replace("&", "\\&")
-    text = text.replace("%", "\\%")
-    text = text.replace("_", "\\_")
-    text = text.replace("#", "\\#")
-    text = text.replace("^", "\\textasciicircum{}")
-    text = text.replace("~", "\\textasciitilde{}")
-    text = text.replace("\n", " ").replace("\r", " ")
+    text = _LATEX_ESC_PAT.sub(lambda m: _LATEX_ESC[m.group(0)], text)
     text = " ".join(text.split())
     return text
 

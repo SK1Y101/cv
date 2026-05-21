@@ -152,17 +152,8 @@ def parse_details_tex(filepath: str) -> dict:
     middle = extract_renewcommand(content, 'middlename') or ''
     last = extract_renewcommand(content, 'lastname') or ''
     postnom = extract_renewcommand(content, 'postnomial') or ''
-    name_parts = [first, middle, last]
-    full_name = ' '.join(p for p in name_parts if p)
-
-    # Formatted name with newline before postnomial (matches header layout)
-    if postnom:
-        display_name = f'{full_name}\n{postnom}'
-    else:
-        display_name = full_name
 
     basics = {
-        # 'name': display_name,
         'firstname': first,
         'middlename': middle,
         'lastname': last,
