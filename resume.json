@@ -1,10 +1,9 @@
 {
   "basics": {
-    "name": "Skye Cassiopeia-Jacqueline Owen-Lloyd-Walters\nMPhys MInstP FRAS",
-    "x_firstname": "Skye",
-    "x_middlename": "Cassiopeia-Jacqueline",
-    "x_lastname": "Owen-Lloyd-Walters",
-    "x_postnomial": "MPhys MInstP FRAS",
+    "firstname": "Skye",
+    "middlename": "Cassiopeia-Jacqueline",
+    "lastname": "Owen-Lloyd-Walters",
+    "postnomials": "MPhys MInstP FRAS",
     "image": "/img/profile.jpg",
     "email": "skyecasolw@gmail.com",
     "phone": "",
@@ -189,48 +188,65 @@
       "name": "Physics",
       "level": "Master",
       "keywords": [
-        "Exoplanetary Physics",
-        "Transit Timing Analysis",
         "Computational Modelling",
-        "Signal Processing",
+        "Cosmology",
+        "Exoplanetary Physics",
+        "Gravitational Wave Physics",
         "Observational Astronomy",
         "Relativity & Relativistic Mechanics",
-        "Cosmology",
-        "Space & Spacecraft"
+        "Signal Processing",
+        "Space & Spacecraft",
+        "Statistical Analysis",
+        "Transit Timing Analysis"
       ],
       "icon": "fa-solid fa-satellite"
     },
     {
-      "name": "Software",
-      "level": "Software Engineer",
+      "name": "Languages",
+      "level": "Advanced",
       "keywords": [
-        "Python",
-        "LaTeX",
-        "Markdown",
+        "Bash",
+        "C++",
+        "Go",
         "Groovy",
         "HTML/CSS",
         "Javascript",
         "Kerboscript",
-        "SQL",
-        "Bash",
-        "Go",
-        "Terraform HCL",
-        "Jenkins / CI",
-        "Docker",
+        "LaTeX",
+        "Markdown",
+        "Python",
+        "SQL"
+      ],
+      "icon": "fa-solid fa-code"
+    },
+    {
+      "name": "DevOps & Cloud",
+      "level": "Software Engineer",
+      "keywords": [
         "Ansible",
         "AWS",
-        "C++",
-        "Jupyter",
-        "OpenCV",
-        "TensorFlow / Keras",
-        "Selenium",
+        "Docker",
         "Git",
+        "Jenkins / CI",
         "Linux",
-        "YAML",
         "Networking",
-        "REST APIs"
+        "REST APIs",
+        "Terraform HCL",
+        "YAML"
       ],
-      "icon": "fa-solid fa-microchip"
+      "icon": "fa-solid fa-cloud"
+    },
+    {
+      "name": "Web & Data",
+      "level": "Intermediate",
+      "keywords": [
+        "Jupyter",
+        "NumPy / SciPy",
+        "OpenCV",
+        "Selenium",
+        "TensorFlow / Keras"
+      ],
+      "icon": "fa-solid fa-chart-bar"
     }
   ],
   "languages": [
@@ -312,7 +328,7 @@
       "name": "Exoplanet TTV Masters Thesis",
       "description": "Masters: Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'",
       "startDate": "2022-05",
-      "url": "https://sk1y101.github.io/assets/pdf/TransitProject/TransitDissertation.pdf",
+      "url": "https://sk1y101.github.io/assets/pdf/TransitDissertation.pdf",
       "affiliation": "University of Portsmouth",
       "releaseDate": "2022-05"
     },
@@ -320,14 +336,14 @@
       "name": "IMBH Glitch Detection Bachelors Thesis",
       "description": "Bachelors: Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'",
       "startDate": "2021-05",
-      "url": "https://sk1y101.github.io/assets/pdf/GWProject/GWProjectFinalReport.pdf",
+      "url": "https://sk1y101.github.io/assets/pdf/GWProjectFinalReport.pdf",
       "affiliation": "University of Portsmouth",
       "releaseDate": "2021-05"
     }
   ],
   "projects": [
     {
-      "name": "Curriculum Vitae — LaTeX",
+      "name": "Curriculum Vitae; LaTeX",
       "description": "A fully custom LaTeX CV class with pastel fairycore aesthetic, rainbow section headers, sidebar with grey panel background, circular profile photo, and a Python-based JSON Resume export pipeline. Built with automated PDF releases on every push to main.",
       "startDate": "2026-05-18",
       "url": "https://github.com/SK1Y101/cv",
@@ -436,6 +452,14 @@
       "type": "software"
     },
     {
+      "name": "python-youtube",
+      "description": "Contributed to the Python wrapper for the YouTube Data API by implementing automated token-refresh login examples and refining grammar across library documentation to improve developer onboarding.",
+      "startDate": "2025-02",
+      "url": "https://github.com/SkiylianSoftware/python-youtube",
+      "affiliation": "SkiylianSoftware",
+      "type": "software"
+    },
+    {
       "name": "Skiylia Programming Language",
       "description": "A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.",
       "startDate": "2022-12",
@@ -445,10 +469,12 @@
     },
     {
       "name": "KOS Flight Computer",
-      "description": "Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Provides a multi-size BootUI system for connection-loss displays, real-time telemetry (MET, power, orbit status, disk capacity), and a modular menu interface for controlling spacecraft functions. Written entirely in KerboScript with ~400B of code.",
+      "description": "Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Features a multi-size BootUI system, real-time telemetry diagnostics, and a modular menu interface; expanded with automated sounding rocket guidance and boot scripting on active development branches.",
       "startDate": "2022-01",
-      "endDate": "2022-02",
-      "url": "https://github.com/SK1Y101/KOSFlightController"
+      "endDate": "2024-04",
+      "url": "https://github.com/SkiylianSoftware/KOSFlightComputer",
+      "affiliation": "SkiylianSoftware",
+      "type": "software"
     },
     {
       "name": "Season Clock",
@@ -456,6 +482,14 @@
       "startDate": "2022-09",
       "endDate": "2023-04",
       "url": "https://github.com/SK1Y101/SeasonsClock"
+    },
+    {
+      "name": "Real Solar System (UK Sites)",
+      "description": "Contributed custom United Kingdom space launch sites and corresponding RemoteTech communications network configurations to the RealSolarSystem mod; improving accuracy and realism for UK-based spaceflight campaigns.",
+      "startDate": "2024-04",
+      "url": "https://github.com/SkiylianSoftware/RealSolarSystem",
+      "affiliation": "SkiylianSoftware",
+      "type": "software"
     },
     {
       "name": "Balanced Ternary Computer",
