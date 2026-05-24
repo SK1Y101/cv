@@ -286,7 +286,6 @@ def _api_request(
     """
     for model in models:
         _proactive_delay(gh=False)
-        log(f"  LLM call: {model}")
 
         for attempt in range(max_retries + 1):
             try:
@@ -1092,6 +1091,7 @@ def generate_addproject(
 
     # Get description
     if llm_key:
+        log("    ~ Generating description")
         desc = generate_description_llm(repo, llm_key, model, endpoint)
     else:
         desc = generate_description_template(repo)
@@ -1250,7 +1250,7 @@ def check_staleness(text: str, token: str) -> str:
                 new = "{" + new_date + "}"
                 text = text.replace(old, new, 1)
                 changed = True
-                log(f"  Stale: {proj['name']}- set end to {last_date[:10]}")
+                log(f"  -> {proj['name']} (stale, end: {last_date[:10]})")
 
     if changed:
         log("Updated stale project dates")
@@ -1483,10 +1483,10 @@ def main():
         # Skip if same name exists (e.g., MAAS already in CV via GitHub URL)
         if normalize_name(wp["name"]) in existing_names:
             continue
-        log(f"  New website project: {wp['name']} ({wp['url']})")
+        log(f"  -> {wp['name']} ({wp['url']})")
         would_add += 1
         if dry_run:
-            print(f"    Would add: {wp['name']} ({wp['url']})")
+            print(f"    -> Would add: {wp['name']} ({wp['url']})")
             continue
 
         # Escape LaTeX special chars and strip newlines from description
@@ -1511,7 +1511,7 @@ def main():
             f"{{{desc}}}{{{wp['url']}}}"
         )
         new_entries.append(entry)
-        log(f"    Generated entry for {wp['name']}")
+        log("    ^ Entry generated")
 
     # Step 4: Scan GitHub repos
     new_repos_info = []  # for skill evaluation
@@ -1533,11 +1533,11 @@ def main():
             if name and name in existing_names:
                 # This repo exists under a different URL (likely a fork).
                 # Upgrade the existing entry to use the upstream.
-                log(f"  Upgrading {repo['name']} to upstream ({url})")
+                log(f"  -> {repo['name']} (upgrade)")
                 would_add += 1
                 new_repos_info.append(repo)
                 if dry_run:
-                    print(f"    Would upgrade: {repo['name']} → {url}")
+                    print(f"    -> Would upgrade: {repo['name']} -> {url}")
                     continue
                 entry = generate_addproject(
                     repo,
@@ -1556,11 +1556,11 @@ def main():
             if repo.get("archived"):
                 continue
 
-            log(f"  New repo: {repo['name']} ({org})")
+            log(f"  -> {repo['name']} ({org})")
             would_add += 1
             new_repos_info.append(repo)
             if dry_run:
-                print(f"    Would add: {repo['name']} ({url})")
+                print(f"    -> Would add: {repo['name']} ({url})")
                 continue
 
             entry = generate_addproject(
@@ -1571,7 +1571,7 @@ def main():
                 endpoint=llm_endpoint,
             )
             new_entries.append(entry)
-            log(f"    Generated entry for {repo['name']}")
+            log("    ^ Entry generated")
 
     # Step 4b: Scan personal repos.  Skip forks of repos already covered by
     # contribution orgs; keep other forks (they're from external projects).
@@ -1591,15 +1591,15 @@ def main():
             # contribution org or manually added). The upstream is the
             # source of truth; the fork/personal copy is redundant.
             if name and name in existing_names:
-                log(f"  Skipped {repo['name']} (already exists in CV)")
+                log(f"  -> {repo['name']} (already exists)")
                 continue
 
             # Keep forks of external orgs (not covered by contribution
             # orgs) — those are unique contributions worth listing.
             if repo.get("fork"):
-                log(f"  New fork: {repo['name']}")
+                log(f"  -> {repo['name']} (fork)")
             else:
-                log(f"  New repo: {repo['name']}")
+                log(f"  -> {repo['name']}")
 
             # Skip archived repos
             if repo.get("archived"):
@@ -1608,7 +1608,7 @@ def main():
             would_add += 1
             new_repos_info.append(repo)
             if dry_run:
-                print(f"    Would add: {repo['name']} ({url})")
+                print(f"    -> Would add: {repo['name']} ({url})")
                 continue
 
             # Generate entry
@@ -1620,7 +1620,7 @@ def main():
                 endpoint=llm_endpoint,
             )
             new_entries.append(entry)
-            log(f"    Generated entry for {repo['name']}")
+            log("    ^ Entry generated")
 
     if dry_run:
         log(f"Dry run complete. Would add {would_add} new entries.")
@@ -1636,7 +1636,7 @@ def main():
         for old_full, new_full in replacements.items():
             if old_full in text:
                 text = text.replace(old_full, new_full, 1)
-                log("  Replaced fork entry with upstream")
+                log("  ^ Replaced fork entry with upstream")
         DETAILS_TEX.write_text(text)
 
     # Update details.tex
