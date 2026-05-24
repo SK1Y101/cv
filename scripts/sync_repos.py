@@ -155,7 +155,7 @@ def log(msg: str):
 # ---------------------------------------------------------------------------
 _RATE_LIMIT = {
     "remaining": None,  # X-RateLimit-Remaining
-    "reset_at": None,   # X-RateLimit-Reset (unix timestamp)
+    "reset_at": None,  # X-RateLimit-Reset (unix timestamp)
 }
 
 _GH_RATE_LIMIT = {
@@ -190,7 +190,9 @@ def _proactive_delay(gh: bool = False) -> None:
         wait = max(0, reset_at - time.time())
         if wait > 0:
             tag = "GitHub" if gh else "LLM"
-            log(f"{tag} rate limit low ({remaining} remaining), pausing {wait:.0f}s until reset")
+            log(
+                f"{tag} rate limit low ({remaining} remaining), pausing {wait:.0f}s until reset"
+            )
             time.sleep(wait + 1)
 
 
@@ -233,7 +235,9 @@ def _retry_after_from_response(e: urllib.error.HTTPError, body: str) -> float | 
             parsed = json.loads(body)
             meta = parsed.get("error", {}).get("metadata", {})
 
-            raw_seconds = meta.get("retry_after_seconds") or meta.get("retry_after_seconds_raw")
+            raw_seconds = meta.get("retry_after_seconds") or meta.get(
+                "retry_after_seconds_raw"
+            )
             if raw_seconds is not None:
                 seconds = float(raw_seconds)
                 return None if seconds > 3600 else seconds
@@ -359,7 +363,11 @@ def _gh_api_raw(path: str, token: str) -> tuple:
             url = f"https://api.github.com{path}"
             req = urllib.request.Request(url)
             req.add_header("Authorization", f"Bearer {token}")
-            accept = "application/vnd.github.cloak-preview" if path.startswith("/search/") else "application/vnd.github.v3+json"
+            accept = (
+                "application/vnd.github.cloak-preview"
+                if path.startswith("/search/")
+                else "application/vnd.github.v3+json"
+            )
             req.add_header("Accept", accept)
             req.add_header("User-Agent", "cv-sync/1.0")
             with urllib.request.urlopen(req) as resp:
@@ -410,7 +418,9 @@ def fetch_all_repos(owner: str, token: str) -> list[dict]:
     repos = []
     page = 1
     while True:
-        data = gh_api(f"/users/{owner}/repos?per_page=100&page={page}&type=public", token)
+        data = gh_api(
+            f"/users/{owner}/repos?per_page=100&page={page}&type=public", token
+        )
         if not data:
             break
         repos.extend(data)
@@ -526,9 +536,7 @@ def fetch_commit_dates(
     # For staleness checks: overwrite last_date with the latest commit by
     # anyone, so we can detect if the project as a whole is inactive.
     if not only_user:
-        any_commits, _ = _gh_api_raw(
-            f"/repos/{repo_full}/commits?per_page=1", token
-        )
+        any_commits, _ = _gh_api_raw(f"/repos/{repo_full}/commits?per_page=1", token)
         if any_commits and isinstance(any_commits, list) and any_commits:
             cd = any_commits[0].get("commit", {}).get("committer", {}).get("date", "")
             if cd:
@@ -707,7 +715,10 @@ Rules:
 
     payload = {
         "messages": [
-            {"role": "system", "content": "You are a technical writer for CVs. Write concise, informative project descriptions."},
+            {
+                "role": "system",
+                "content": "You are a technical writer for CVs. Write concise, informative project descriptions.",
+            },
             {"role": "user", "content": prompt},
         ],
         "max_tokens": 200,
@@ -854,7 +865,9 @@ def parse_skills(text: str) -> list[dict]:
         if text[line_start:idx].strip().startswith("%"):
             idx += 1
             continue
-        args, end = _collect_addproject_args(text.replace("\\skill{", "\\addproject{", 1), idx)
+        args, end = _collect_addproject_args(
+            text.replace("\\skill{", "\\addproject{", 1), idx
+        )
         # _collect_addproject_args expects \addproject prefix; adapt
         idx2 = idx + len("\\skill{")
         args = []
@@ -879,7 +892,9 @@ def parse_skills(text: str) -> list[dict]:
                 idx2 += 1
         if len(args) >= 3:
             full = text[idx:idx2]
-            skills.append({"full": full, "category": args[0], "name": args[1], "level": args[2]})
+            skills.append(
+                {"full": full, "category": args[0], "name": args[1], "level": args[2]}
+            )
         idx = idx2
     return skills
 
@@ -896,7 +911,13 @@ def extract_repo_skills(repo: dict) -> list[tuple[str, str]]:
     return matched
 
 
-def evaluate_skills(new_repos_info: list[dict], current_skills: list[dict], llm_key: str, model: str, endpoint: str):
+def evaluate_skills(
+    new_repos_info: list[dict],
+    current_skills: list[dict],
+    llm_key: str,
+    model: str,
+    endpoint: str,
+):
     """Ask the LLM to suggest skill adjustments AND new skills based on new repos.
 
     Returns (adjustments, new_skills):
@@ -947,7 +968,10 @@ Only list changes. Return nothing if no adjustments or new skills needed."""
 
     payload = {
         "messages": [
-            {"role": "system", "content": "You are a skill evaluator for CVs. Output only the requested format."},
+            {
+                "role": "system",
+                "content": "You are a skill evaluator for CVs. Output only the requested format.",
+            },
             {"role": "user", "content": prompt},
         ],
         "max_tokens": 400,
@@ -985,7 +1009,9 @@ Only list changes. Return nothing if no adjustments or new skills needed."""
                     adjustments[name.lower()] = level
 
     if adjustments or new_skills:
-        log(f"Skill adjustments: {adjustments}  new skills: {(s[1] for s in new_skills)}")
+        log(
+            f"Skill adjustments: {adjustments}  new skills: {(s[1] for s in new_skills)}"
+        )
     return adjustments, new_skills
 
 
@@ -998,7 +1024,9 @@ def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
             key = s["name"].strip().lower()
             if key in adjustments and adjustments[key] != s["level"]:
                 old = s["full"]
-                new = old.replace("{" + s["level"] + "}", "{" + adjustments[key] + "}", 1)
+                new = old.replace(
+                    "{" + s["level"] + "}", "{" + adjustments[key] + "}", 1
+                )
                 text = text.replace(old, new, 1)
                 log(f"  Skill: {s['name']} level {s['level']} → {adjustments[key]}")
 
@@ -1019,14 +1047,21 @@ def update_skills(text: str, adjustments: dict, new_skills: list) -> str:
     return text
 
 
-_LATEX_ARG_PAT = re.compile(r'[#$&%_^~]')
-_LATEX_ESC_PAT = re.compile(r'[\\{}#$&%_^~\n\r]')
+_LATEX_ARG_PAT = re.compile(r"[#$&%_^~]")
+_LATEX_ESC_PAT = re.compile(r"[\\{}#$&%_^~\n\r]")
 _LATEX_ESC = {
-    "\\": "\\textbackslash{}", "{": "\\{", "}": "\\}",
-    "$": "\\$", "&": "\\&", "%": "\\%",
-    "_": "\\_", "#": "\\#",
-    "^": "\\textasciicircum{}", "~": "\\textasciitilde{}",
-    "\n": " ", "\r": " ",
+    "\\": "\\textbackslash{}",
+    "{": "\\{",
+    "}": "\\}",
+    "$": "\\$",
+    "&": "\\&",
+    "%": "\\%",
+    "_": "\\_",
+    "#": "\\#",
+    "^": "\\textasciicircum{}",
+    "~": "\\textasciitilde{}",
+    "\n": " ",
+    "\r": " ",
 }
 
 
@@ -1037,12 +1072,18 @@ def _escape_latex(text: str) -> str:
     return text
 
 
-def generate_addproject(repo: dict, gh_token: str = "", llm_key: str = "", model: str = "", endpoint: str = "") -> str:
+def generate_addproject(
+    repo: dict,
+    gh_token: str = "",
+    llm_key: str = "",
+    model: str = "",
+    endpoint: str = "",
+) -> str:
     """Generate a full \addproject entry for a repo."""
-    name = repo.get("name", "")
+    name = _escape_latex(repo.get("name", ""))
     url = repo.get("html_url", "")
     icon = determine_icon(repo)
-    affiliation = determine_affiliation(repo)
+    affiliation = _escape_latex(determine_affiliation(repo))
 
     # Get dates
     repo_full = repo.get("full_name", "")
@@ -1074,6 +1115,7 @@ def scan_website() -> list[dict]:
 
     Returns a list of project dicts with keys: name, details, url, category.
     """
+
     class ProjectParser(html.parser.HTMLParser):
         def __init__(self):
             super().__init__()
@@ -1111,12 +1153,14 @@ def scan_website() -> list[dict]:
             elif tag == "div" and self.in_grid_item:
                 self.in_grid_item = False
                 if self.current_url and self.current_title:
-                    self.projects.append({
-                        "name": self.current_title.strip(),
-                        "details": self.current_text.strip(),
-                        "url": self.current_url.strip(),
-                        "category": self.current_category,
-                    })
+                    self.projects.append(
+                        {
+                            "name": self.current_title.strip(),
+                            "details": self.current_text.strip(),
+                            "url": self.current_url.strip(),
+                            "category": self.current_category,
+                        }
+                    )
             elif tag == "h2":
                 self.in_card_title = False
             elif tag == "p":
@@ -1332,8 +1376,14 @@ def update_details_tex(new_entries: list[str]) -> bool:
         idx, sorted_projects = find_insert_position(existing, new_project)
 
         # Build the new projects section
-        ongoing = [p for p in sorted_projects if p.get("end") == "Present" or p.get("end") == ""]
-        completed = [p for p in sorted_projects if p.get("end") and p.get("end") != "Present"]
+        ongoing = [
+            p
+            for p in sorted_projects
+            if p.get("end") == "Present" or p.get("end") == ""
+        ]
+        completed = [
+            p for p in sorted_projects if p.get("end") and p.get("end") != "Present"
+        ]
 
         new_section = "% Projects and Publications\n\n"
         new_section += "% \\addproject{name}{icon}{affiliation}{date}{details}{link}\n"
@@ -1414,11 +1464,14 @@ def main():
     website_projects = scan_website()
     log(f"Found {len(website_projects)} website-only project candidates")
 
+    def normalize_name(n: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", n.lower())
+
     # Fetch existing entries (both URLs and names for dedup)
     existing_urls = extract_existing_urls(DETAILS_TEX)
     existing_names = set()
     for p in parse_existing_projects(DETAILS_TEX.read_text()):
-        existing_names.add(p["name"].strip().lower())
+        existing_names.add(normalize_name(p["name"]))
     log(f"Found {len(existing_urls)} existing project entries")
 
     # Step 3: Generate entries from website (non-GitHub projects)
@@ -1428,7 +1481,7 @@ def main():
         if wp["url"] in existing_urls:
             continue
         # Skip if same name exists (e.g., MAAS already in CV via GitHub URL)
-        if wp["name"].strip().lower() in existing_names:
+        if normalize_name(wp["name"]) in existing_names:
             continue
         log(f"  New website project: {wp['name']} ({wp['url']})")
         would_add += 1
@@ -1475,7 +1528,7 @@ def main():
             if url in existing_urls:
                 continue
 
-            name = repo.get("name", "").strip().lower()
+            name = normalize_name(repo.get("name", ""))
 
             if name and name in existing_names:
                 # This repo exists under a different URL (likely a fork).
@@ -1486,9 +1539,15 @@ def main():
                 if dry_run:
                     print(f"    Would upgrade: {repo['name']} → {url}")
                     continue
-                entry = generate_addproject(repo, gh_token=gh_token, llm_key=llm_key, model=llm_model, endpoint=llm_endpoint)
+                entry = generate_addproject(
+                    repo,
+                    gh_token=gh_token,
+                    llm_key=llm_key,
+                    model=llm_model,
+                    endpoint=llm_endpoint,
+                )
                 for p in parse_existing_projects(text):
-                    if p["name"].strip().lower() == name:
+                    if normalize_name(p["name"]) == name:
                         replacements[p["full"]] = entry
                         break
                 continue
@@ -1504,7 +1563,13 @@ def main():
                 print(f"    Would add: {repo['name']} ({url})")
                 continue
 
-            entry = generate_addproject(repo, gh_token=gh_token, llm_key=llm_key, model=llm_model, endpoint=llm_endpoint)
+            entry = generate_addproject(
+                repo,
+                gh_token=gh_token,
+                llm_key=llm_key,
+                model=llm_model,
+                endpoint=llm_endpoint,
+            )
             new_entries.append(entry)
             log(f"    Generated entry for {repo['name']}")
 
@@ -1520,7 +1585,7 @@ def main():
             if url in existing_urls:
                 continue
 
-            name = repo.get("name", "").strip().lower()
+            name = normalize_name(repo.get("name", ""))
 
             # Skip if a project with this name is already tracked (from a
             # contribution org or manually added). The upstream is the
@@ -1547,7 +1612,13 @@ def main():
                 continue
 
             # Generate entry
-            entry = generate_addproject(repo, gh_token=gh_token, llm_key=llm_key, model=llm_model, endpoint=llm_endpoint)
+            entry = generate_addproject(
+                repo,
+                gh_token=gh_token,
+                llm_key=llm_key,
+                model=llm_model,
+                endpoint=llm_endpoint,
+            )
             new_entries.append(entry)
             log(f"    Generated entry for {repo['name']}")
 
@@ -1576,15 +1647,19 @@ def main():
         updated = True
     if updated:
         run_tex2json()
-        log(f"Synchronisation complete. Added {len(new_entries)} new entries, "
-            f"upgraded {len(replacements)} forks to upstream.")
+        log(
+            f"Synchronisation complete. Added {len(new_entries)} new entries, "
+            f"upgraded {len(replacements)} forks to upstream."
+        )
 
     # Step 5: Re-evaluate skill levels based on new repos
     if new_repos_info and llm_key:
         log("Evaluating skill levels from new repos...")
         text = DETAILS_TEX.read_text()
         current_skills = parse_skills(text)
-        adjustments, new_skills = evaluate_skills(new_repos_info, current_skills, llm_key, llm_model, llm_endpoint)
+        adjustments, new_skills = evaluate_skills(
+            new_repos_info, current_skills, llm_key, llm_model, llm_endpoint
+        )
         if adjustments or new_skills:
             text = update_skills(text, adjustments, new_skills)
             DETAILS_TEX.write_text(text)
