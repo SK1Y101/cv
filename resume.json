@@ -206,20 +206,15 @@
       "level": "Advanced",
       "keywords": [
         "Bash",
-        "C",
         "C++",
-        "C\\#",
         "Go",
         "Groovy",
         "HTML/CSS",
         "Javascript",
-        "Jinja",
         "Kerboscript",
         "LaTeX",
-        "MAAS",
         "Markdown",
         "Python",
-        "SCSS",
         "SQL"
       ],
       "icon": "fa-solid fa-code"
@@ -790,6 +785,20 @@
       "description": "N-body simulation code in C integrating gravitational dynamics for arbitrary particle systems. Supports multiple integration schemes including symplectic, high-order, and hybrid parallelization with MPI and OpenMP for large-scale astrophysical simulations. Used in research for planetary system dynamics, planetesimal formation, and galactic-scale problems.",
       "startDate": "2023-04-15",
       "url": "https://github.com/SK1Y101/rebound",
+      "affiliation": "Personal"
+    },
+    {
+      "name": "reboundx",
+      "description": "Python library extending the REBOUND N-body integration package to incorporate custom force models. Implements specialized gravitational and non-gravitational accelerations within the integration framework to facilitate high-fidelity astrophysical simulations. Developed and validated using Jupyter Notebooks for interactive prototyping and performance analysis.",
+      "startDate": "2023-04-15",
+      "url": "https://github.com/SK1Y101/reboundx",
+      "affiliation": "Personal"
+    },
+    {
+      "name": "reboundx",
+      "description": "Python library extending the REBOUND N-body integration package to incorporate custom force models. Implements specialized gravitational and non-gravitational accelerations within the integration framework to facilitate high-fidelity astrophysical simulations. Developed and validated using Jupyter Notebooks for interactive prototyping and performance analysis.",
+      "startDate": "2023-04-15",
+      "url": "https://github.com/SK1Y101/reboundx",
       "affiliation": "Personal"
     },
     {
