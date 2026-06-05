@@ -544,6 +544,16 @@ def fetch_commit_dates(
     return first_date, last_date
 
 
+def user_has_commits(repo_full: str, token: str) -> bool:
+    """Quick check: does GITHUB_USERNAME have at least one commit in the repo?."""
+    if not token:
+        return True  # can't verify; include it
+    commits, _ = _gh_api_raw(
+        f"/repos/{repo_full}/commits?author={GITHUB_USERNAME}&per_page=1", token
+    )
+    return bool(commits and isinstance(commits, list) and commits)
+
+
 def determine_icon(repo: dict) -> str:
     """Determine the icon for a repo based on topics and language."""
     topics = [t.lower() for t in repo.get("topics", [])]
@@ -1601,8 +1611,11 @@ def main():
                 continue
 
             # Keep forks of external orgs (not covered by contribution
-            # orgs) — those are unique contributions worth listing.
+            # orgs) — but only if the user has actually committed to them.
             if repo.get("fork"):
+                if not user_has_commits(repo.get("full_name", ""), gh_token):
+                    log(f"  -> {repo['name']} (skipped, no contributions)")
+                    continue
                 log(f"  -> {repo['name']} (fork)")
             else:
                 log(f"  -> {repo['name']}")
