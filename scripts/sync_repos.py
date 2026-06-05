@@ -1511,6 +1511,8 @@ def main():
             f"{{{desc}}}{{{wp['url']}}}"
         )
         new_entries.append(entry)
+        existing_urls.add(wp["url"])
+        existing_names.add(normalize_name(wp["name"]))
         log("    ^ Entry generated")
 
     # Step 4: Scan GitHub repos
@@ -1549,6 +1551,7 @@ def main():
                 for p in parse_existing_projects(text):
                     if normalize_name(p["name"]) == name:
                         replacements[p["full"]] = entry
+                        existing_urls.add(url)
                         break
                 continue
 
@@ -1571,6 +1574,9 @@ def main():
                 endpoint=llm_endpoint,
             )
             new_entries.append(entry)
+            existing_urls.add(url)
+            if name:
+                existing_names.add(name)
             log("    ^ Entry generated")
 
     # Step 4b: Scan personal repos.  Skip forks of repos already covered by
@@ -1620,6 +1626,9 @@ def main():
                 endpoint=llm_endpoint,
             )
             new_entries.append(entry)
+            existing_urls.add(url)
+            if name:
+                existing_names.add(name)
             log("    ^ Entry generated")
 
     if dry_run:
