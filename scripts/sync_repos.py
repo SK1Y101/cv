@@ -364,7 +364,7 @@ def _api_request(
                     data=json.dumps({**payload, "model": model}).encode(),
                     headers=headers,
                 )
-                with urllib.request.urlopen(req, timeout=60) as resp:
+                with urllib.request.urlopen(req, timeout=30) as resp:
                     _update_rate_limit(resp.headers, gh=False)
                     result = json.loads(resp.read())
                     raw = (
