@@ -37,7 +37,7 @@ TEX2JSON = REPO_DIR / "scripts/tex2json.py"
 
 STALENESS_DAYS = 180  # 6 months
 WEBSITE_URL = "https://sk1y101.github.io/projects/"
-BLOG_BASE_URL = "https://sk1y101.github.io/blog/category/"
+BLOG_BASE_URL = "https://sk1y101.github.io/blog/"
 # Blog categories to scan for project summaries (if category page exists)
 BLOG_CATEGORIES = [
     "train-travel",
@@ -1026,6 +1026,64 @@ def extract_existing_urls(tex_path: Path) -> set[str]:
     return urls
 
 
+def _generate_blog_category_summary(
+    category: str,
+    post_titles: list[str],
+    token: str,
+    model: str = "",
+    endpoint: str = "",
+) -> str:
+    """Generate a summary for a blog category based on its post titles.
+
+    Args:
+        category: Category name (e.g., 'train-travel')
+        post_titles: List of post titles in this category
+        token: LLM API key
+        model: Model to use (optional, will use first available if not specified)
+        endpoint: API endpoint (defaults to LLM_ENDPOINT env var)
+
+    Returns:
+        Summary description for the blog category
+    """
+    if not token:
+        return f"Curated collection of {len(post_titles)} blog posts on {category.replace('-', ' ')}"
+
+    post_list = "\n".join([f"- {title}" for title in post_titles])
+    category_display = category.replace('-', ' ').title()
+
+    prompt = f"""You are writing a CV entry for a blog category. Based on these blog post titles, write a 1-2 sentence summary of what this category represents and what topics it covers.
+
+Blog Category: {category_display}
+Number of posts: {len(post_titles)}
+
+Post Titles:
+{post_list}
+
+Write a concise, professional summary suitable for a CV. Focus on the overall theme and value of the blog category."""
+
+    payload = {
+        "model": model or (_ACTIVE_FALLBACKS[0] if _ACTIVE_FALLBACKS else ""),
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": MAX_TOKENS,
+    }
+
+    # Build fallback chain: if model specified, prioritize it; otherwise use _ACTIVE_FALLBACKS
+    if model:
+        models = [model] + [m for m in _ACTIVE_FALLBACKS if m.lower() != model.lower()]
+    else:
+        models = _ACTIVE_FALLBACKS or []
+
+    try:
+        text = _api_request(payload, token, models, endpoint)
+        if text:
+            return _normalize_description(text)
+    except Exception as e:
+        log(f"    ! LLM summary generation failed: {e}")
+
+    return f"Curated collection of {len(post_titles)} blog posts on {category.replace('-', ' ')}"
+
+
 def generate_description_llm(
     repo: dict,
     token: str,
@@ -1081,7 +1139,7 @@ Rules:
 
     # Increase max_tokens for north-mini-code (fast, can handle more) to get richer output
     if model and "north-mini-code" in model.lower():
-        payload["max_tokens"] = int(MAX_TOKENS*1.5)
+        payload["max_tokens"] = int(MAX_TOKENS * 1.5)
 
     models = [model] + [_ for _ in _ACTIVE_FALLBACKS if _.lower() != model.lower()]
     text = _api_request(payload, token, models, endpoint)
@@ -1727,17 +1785,17 @@ def scan_website() -> list[dict]:
         return []
 
 
-def scan_blog_categories() -> list[dict]:
-    """Scan blog categories for project overviews.
+def scan_blog_categories(llm_key: str = "", endpoint: str = "", model: str = "") -> list[dict]:
+    """Scan blog categories and generate summaries via LLM.
 
-    For each configured blog category, fetches the category page and extracts
-    the first/pinned post as a project entry. Returns list of dicts with
-    keys: name, details, url, category="blog".
+    For each configured blog category, fetches all posts from the category page,
+    collects their titles, and generates a summary via LLM. Returns list of dicts
+    with keys: name, details, url, category.
     """
     results = []
 
     for category in BLOG_CATEGORIES:
-        category_url = f"{BLOG_BASE_URL}{category}/"
+        category_url = f"https://sk1y101.github.io/blog/category/{category}/"
         try:
             req = urllib.request.Request(
                 category_url,
@@ -1746,30 +1804,43 @@ def scan_blog_categories() -> list[dict]:
             with urllib.request.urlopen(req, timeout=15) as resp:
                 raw_html = resp.read().decode("utf-8")
 
-            # Simple extraction: find first article title and excerpt
-            title_match = re.search(
-                r'<h2[^>]*class="[^"]*post-title[^"]*"[^>]*>([^<]+)</h2>', raw_html
-            )
-            excerpt_match = re.search(
-                r'<p[^>]*class="[^"]*post-excerpt[^"]*"[^>]*>([^<]+)</p>', raw_html
+            # Category pages use a table structure with post-link class
+            # Format: <td><a class="post-link" href="...">Title</a></td>
+            posts = re.findall(
+                r'<a\s+class="post-link"[^>]*href="([^"]*)"[^>]*>([^<]+)</a>',
+                raw_html
             )
 
-            if title_match:
-                title = title_match.group(1).strip()
-                excerpt = excerpt_match.group(1).strip() if excerpt_match else ""
-                # Clean HTML entities
-                title = re.sub(r"&[a-z]+;", "", title)
-                excerpt = re.sub(r"&[a-z]+;", "", excerpt)
+            if not posts:
+                log(f"  No posts found in category: {category}")
+                continue
 
-                results.append(
-                    {
-                        "name": title,
-                        "details": excerpt,
-                        "url": category_url,
-                        "category": "blog",
-                    }
+            log(f"  Found {len(posts)} posts in {category} category")
+
+            # Build a list of post titles for the summary
+            post_titles = [title.strip() for _, title in posts]
+
+            # Generate summary via LLM if available
+            category_display = category.replace('-', ' ').title()
+            if llm_key:
+                summary = _generate_blog_category_summary(
+                    category, post_titles, llm_key, model, endpoint
                 )
-                log(f"  Found blog category: {category} - {title}")
+            else:
+                # Fallback summary
+                summary = f"Curated collection of {len(posts)} blog posts on {category.replace('-', ' ')}"
+
+            # The category page URL serves as the canonical link
+            category_page_url = category_url.rstrip('/')
+
+            results.append({
+                "name": category_display,
+                "details": summary,
+                "url": category_page_url,
+                "category": "blog",
+            })
+            log(f"  -> Generated summary for: {category_display}")
+
         except Exception as e:
             log(f"  Blog category scan failed for {category}: {e}")
 
@@ -2063,9 +2134,9 @@ def main():
     website_projects = scan_website()
     log(f"Found {len(website_projects)} website-only project candidates")
 
-    # Scan blog categories for project overviews
+     # Scan blog categories for project overviews
     log("Scanning blog categories...")
-    blog_projects = scan_blog_categories()
+    blog_projects = scan_blog_categories(llm_key, llm_endpoint, llm_model)
     website_projects.extend(blog_projects)
     log(f"Found {len(blog_projects)} blog category candidates")
 
