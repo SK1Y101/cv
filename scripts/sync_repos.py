@@ -1690,7 +1690,7 @@ def generate_addproject(
 
 
 def scan_website() -> list[dict]:
-    """Parse sk1y101.github.io/projects/ for projects not linked to GitHub repos.
+    """Parse sk1y101.github.io/projects/ for projects linked to GitHub repos.
 
     Returns a list of project dicts with keys: name, details, url, category.
     """
@@ -1766,16 +1766,17 @@ def scan_website() -> list[dict]:
         parser = ProjectParser()
         parser.feed(raw_html)
 
-        # Filter to only non-GitHub URLs (GitHub repos handled by repo scanner)
+        # Filter to only projects that link to github.com or back to sk1y101.github.io
+        # (skip external sites like arxiv, britastro, maas.io, etc.)
         results = []
         for p in parser.projects:
             url = p["url"]
-            # Skip GitHub repos, absolute PDFs, and section-anchors
-            if "github.com" in url or url.endswith(".pdf") or url.startswith("#"):
-                continue
-            # Resolve relative URLs
+            # Resolve relative URLs first
             if url.startswith("/"):
                 url = "https://sk1y101.github.io" + url
+            # Only keep GitHub repos or personal website projects
+            if "github.com" not in url and "sk1y101.github.io" not in url:
+                continue
             p["url"] = url
             results.append(p)
 
@@ -2091,6 +2092,7 @@ def main():
     llm_key = os.environ.get("LLM_API_KEY") or gh_token
     llm_endpoint = os.environ.get("LLM_ENDPOINT", "https://opencode.ai/zen/v1")
     llm_model_env = os.environ.get("LLM_MODEL", "")
+    llm_model = ""  # Initialize to empty; will be set below
 
     if not llm_key:
         log("No LLM_API_KEY or GITHUB_TOKEN set. Will use template descriptions.")
@@ -2110,8 +2112,12 @@ def main():
                 )
             else:
                 llm_model = STATIC_FALLBACK_MODELS[0]
+                _ACTIVE_FALLBACKS.clear()
+                _ACTIVE_FALLBACKS.extend(STATIC_FALLBACK_MODELS)
         else:
             llm_model = STATIC_FALLBACK_MODELS[0]
+            _ACTIVE_FALLBACKS.clear()
+            _ACTIVE_FALLBACKS.extend(STATIC_FALLBACK_MODELS)
     else:
         llm_model = llm_model_env
 
@@ -2143,8 +2149,12 @@ def main():
     def normalize_name(n: str) -> str:
         return re.sub(r"[^a-z0-9]", "", n.lower())
 
+    def normalize_url(u: str) -> str:
+        """Normalize URLs by removing trailing slashes for consistent dedup."""
+        return u.rstrip('/')
+
     # Fetch existing entries (both URLs and names for dedup)
-    existing_urls = extract_existing_urls(DETAILS_TEX)
+    existing_urls = {normalize_url(u) for u in extract_existing_urls(DETAILS_TEX)}
     existing_names = set()
     for p in parse_existing_projects(DETAILS_TEX.read_text()):
         existing_names.add(normalize_name(p["name"]))
@@ -2154,7 +2164,7 @@ def main():
     new_entries = []
     would_add = 0
     for wp in website_projects:
-        if wp["url"] in existing_urls:
+        if normalize_url(wp["url"]) in existing_urls:
             continue
         # Skip if same name exists (e.g., MAAS already in CV via GitHub URL)
         if normalize_name(wp["name"]) in existing_names:
@@ -2187,7 +2197,7 @@ def main():
             f"{{{desc}}}{{{wp['url']}}}"
         )
         new_entries.append(entry)
-        existing_urls.add(wp["url"])
+        existing_urls.add(normalize_url(wp["url"]))
         existing_names.add(normalize_name(wp["name"]))
         log("    ^ Entry generated")
         log(f"      {entry}")
@@ -2204,7 +2214,7 @@ def main():
 
         for repo in repos:
             url = repo.get("html_url", "")
-            if url in existing_urls:
+            if normalize_url(url) in existing_urls:
                 continue
 
             name = normalize_name(repo.get("name", ""))
@@ -2228,7 +2238,7 @@ def main():
                 for p in parse_existing_projects(text):
                     if normalize_name(p["name"]) == name:
                         replacements[p["full"]] = entry
-                        existing_urls.add(url)
+                        existing_urls.add(normalize_url(url))
                         break
                 continue
 
