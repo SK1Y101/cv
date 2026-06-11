@@ -1766,16 +1766,17 @@ def scan_website() -> list[dict]:
         parser = ProjectParser()
         parser.feed(raw_html)
 
-        # Filter to only projects that link to github.com or back to sk1y101.github.io
-        # (skip external sites like arxiv, britastro, maas.io, etc.)
+        # Filter to only projects that link to personal website (sk1y101.github.io domain)
+        # GitHub repos are scanned separately to avoid duplication
         results = []
         for p in parser.projects:
             url = p["url"]
             # Resolve relative URLs first
             if url.startswith("/"):
                 url = "https://sk1y101.github.io" + url
-            # Only keep GitHub repos or personal website projects
-            if "github.com" not in url and "sk1y101.github.io" not in url:
+            # Only keep personal website projects (urls on sk1y101.github.io domain)
+            # Skip GitHub and other external repos
+            if not url.startswith("https://sk1y101.github.io"):
                 continue
             p["url"] = url
             results.append(p)
@@ -2068,6 +2069,61 @@ def update_details_tex(new_entries: list[str]) -> bool:
         log("Updated details.tex")
 
     return changed
+
+
+def deduplicate_details_tex() -> bool:
+    """Remove duplicate \addproject entries by URL and normalized name.
+
+    Scans details.tex for duplicate entries (same URL or same normalized name)
+    and removes duplicates, keeping only the first occurrence.
+
+    Returns True if any duplicates were removed, False otherwise.
+    """
+    text = DETAILS_TEX.read_text()
+    projects = parse_existing_projects(text)
+
+    def normalize_name(n: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", n.lower())
+
+    def normalize_url(u: str) -> str:
+        return u.rstrip('/')
+
+    seen_urls = set()
+    seen_names = set()
+    to_remove = []
+
+    for proj in projects:
+        url = proj.get("url", "")
+        name = proj.get("name", "")
+        norm_url = normalize_url(url) if url else ""
+        norm_name = normalize_name(name) if name else ""
+
+        # Check for duplicates by URL
+        if norm_url and norm_url in seen_urls:
+            log(f"  Removing duplicate (same URL): {name} ({url})")
+            to_remove.append(proj["full"])
+            continue
+
+        # Check for duplicates by normalized name
+        if norm_name and norm_name in seen_names:
+            log(f"  Removing duplicate (same name): {name}")
+            to_remove.append(proj["full"])
+            continue
+
+        if norm_url:
+            seen_urls.add(norm_url)
+        if norm_name:
+            seen_names.add(norm_name)
+
+    # Remove duplicates from text
+    if to_remove:
+        log(f"Removing {len(to_remove)} duplicate entries...")
+        for entry_full in to_remove:
+            text = text.replace(entry_full, "", 1)
+        DETAILS_TEX.write_text(text)
+        return True
+
+    return False
 
 
 def run_tex2json():
@@ -2365,6 +2421,12 @@ def main():
             f"Synchronisation complete. Added {len(new_entries)} new entries, "
             f"upgraded {len(replacements)} forks to upstream."
         )
+
+    # Step 4b: Remove duplicate entries
+    log("Checking for duplicate entries...")
+    if deduplicate_details_tex():
+        run_tex2json()
+        log("Removed duplicate entries.")
 
     # Step 5: Re-evaluate skill levels based on new repos
     if new_repos_info and llm_key:
