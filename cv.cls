@@ -478,7 +478,7 @@
             {\ifexistselse{\getdata[#1+4]{#2}}{\href{\getdata[#1+4]{#2}}{\getdata[#1]{#2}}}{\getdata[#1]{#2}}}}
         {\getdata[#1+1]{#2}}
         {\getdata[#1+3]{#2}}
-    \ifexistselse{\getdata[#1+3]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
+    \ifexistselse{\getdata[#1+3]{#2}}{\vspace{0.15em}\par}{\vspace{0.3em}\par}%
 }
 \newcommand{\oneitem}[2]{
     \entrytabular
@@ -490,7 +490,7 @@
         {\getdata[#1+1]{#2}}
         {\getdata[#1+2]{#2}}
         {\getdata[#1+5]{#2}}
-    \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.5em}\par}{\vspace{0.7em}\par}%
+    \ifexistselse{\getdata[#1+5]{#2}}{\vspace{0.25em}\par}{\vspace{0.4em}\par}%
 }
 \newcommand{\oneinstance}[3]{
     % instance number, instance name, entry name
@@ -513,6 +513,7 @@
             }%
         }%
     \end{addmargin}%
+    \vspace{-1em}%
 }
 \newcommand{\showcategory}[4]{
     % icon, title, instance name, entry name
@@ -550,35 +551,39 @@
         \vspace{0.3em+0.5em}% add a little bit of extra spacing
     }{}%
 }
+\newcommand{\membershiplogo}[1]{%
+    % Look up the institution logo from the membership store by matching location.
+    % Precomputed into \CV@mlogo so no \foreach runs inside the tabularx cell.
+    \gdef\CV@mlogo{}%
+    \foreach \m in {1,3,...,\getlength{membership}} {%
+        \ifequals{\getdata[#1]{membershiptitle}}{\getdata[\m]{membership}}{%
+            \ifexists{\getdata[\m+1]{membership}}{%
+                \xdef\CV@mlogo{\noexpand\space\noexpand\raisebox{-\iconoffset}{\noexpand\includegraphics[height=3.5mm]{\getdata[\m+1]{membership}}}}%
+            }{}%
+        }%
+    }%
+}
+\newcommand{\onemembership}[1]{
+    % Institution is the main (linked) line, summary underneath, position and logo on the right.
+    \membershiplogo{#1}%
+    \entrytabular
+        {\ifthenelse{\equal{\slimdates}{true}}{%
+            \defaultexists{\getdata[#1+4]{membershiptitle}}{Present}\newline\getdata[#1+3]{membershiptitle}%
+        }{%
+            \getdata[#1+3]{membershiptitle}\space--\space\defaultexists{\getdata[#1+4]{membershiptitle}}{Present}%
+        }}
+        {\ifexistselse{\getdata[#1+6]{membershiptitle}}{\href{\getdata[#1+6]{membershiptitle}}{\getdata[#1]{membershiptitle}}}{\getdata[#1]{membershiptitle}}}
+        {\getdata[#1+1]{membershiptitle}\CV@mlogo}
+        {\getdata[#1+2]{membershiptitle}}
+    \vspace{-0.7em}\par
+}
 \newcommand{\showmainmemberships}[1]{
     \ifthenelse{\getlength{membershiptitle} > 0}{
         \saveentrycolour
         \iconsection{\faIcon{#1}}{Professional Memberships}
         \vspace{0.3em}
-        % Group titles under each institution, showing its logo as a header.
-        \foreach \m in {1,3,...,\getlength{membership}} {
-            \begin{addmargin}[0mm]{0mm}%
-                {\color{grey}\Large\getdata[\m]{membership}%
-                \ifexists{\getdata[\m+1]{membership}}{\hfill%
-                    \raisebox{-\iconoffset}[\iconbox]{\includegraphics[height=\iconheight]{\getdata[\m+1]{membership}}}\vspace{-\iconoffset}%
-                }{}}%
-                \par
-                \foreach \c in {1,8,...,\getlength{membershiptitle}} {
-                    \ifequals{\getdata[\m]{membership}}{\getdata[\c]{membershiptitle}}{%
-                        \entrytabular
-                            {\ifthenelse{\equal{\slimdates}{true}}{%
-                                \defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}%
-                            }{%
-                                \getdata[\c+3]{membershiptitle}\space--\space\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}%
-                            }}
-                            {\ifexistselse{\getdata[\c+6]{membershiptitle}}{\href{\getdata[\c+6]{membershiptitle}}{\getdata[\c+1]{membershiptitle}}}{\getdata[\c+1]{membershiptitle}}}
-                            {\getdata[\c+2]{membershiptitle}}
-                            {\getdata[\c+5]{membershiptitle}}
-                        \vspace{0.2em}\par
-                    }%
-                }
-            \end{addmargin}%
-            \vspace{0.3em}
+        \foreach \c in {1,8,...,\getlength{membershiptitle}} {
+            \onemembership{\c}
         }
     }{}
 }
@@ -634,7 +639,7 @@
     \ifequals{#1}{pub}{\color{highlightcolour}\faIcon{newspaper}}%
     \ifequals{#1}{code}{\color{highlightcolour}\faIcon{keyboard}}%
     \ifequals{#1}{talk}{\color{highlightcolour}\faIcon{microphone}}%
-    \ifequals{#1}{blog}{\color{highlightcolour}\faIcon{blog}}%
+    \ifequals{#1}{blog}{\color{highlightcolour}\faIcon{pen-nib}}%
 }
 \newcommand{\addproject}[6]{
     % \addproject{project name}{proj/pub}{affiliated}{completion date}{details}{link}

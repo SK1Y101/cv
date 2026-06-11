@@ -920,8 +920,8 @@ def determine_icon(repo: dict) -> str:
     if name_words & {"compiler", "language", "interpreter"}:
         return "proj"
 
-    # Default
-    return ""
+    # Default: GitHub entries are code projects, so fall back to the code icon.
+    return "code"
 
 
 def category_icon(category: str) -> str:
