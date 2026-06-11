@@ -952,18 +952,7 @@ Rules:
         if not leaked:
             return _normalize_description(text)
 
-    # Fallback: try another model from the active fallbacks
-    for fb in _ACTIVE_FALLBACKS:
-        if fb.lower() == model.lower():
-            continue
-        text = _api_request(payload, token, [fb], endpoint)
-        if text is not None:
-            text = text.strip('"').strip("'")
-            text = _strip_reasoning(text)
-            if not _is_prompt_leak(text):
-                return _normalize_description(text)
-
-    # Fallback: use the GitHub description directly
+    # Fallback: use the GitHub description directly (skip trying all models for CI speed)
     if desc:
         return f"{name}: {desc}"
     return f"{name}. Written in {language}." if language else f"{name}."
