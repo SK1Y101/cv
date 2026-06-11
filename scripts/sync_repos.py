@@ -37,6 +37,12 @@ TEX2JSON = REPO_DIR / "scripts/tex2json.py"
 
 STALENESS_DAYS = 180  # 6 months
 WEBSITE_URL = "https://sk1y101.github.io/projects/"
+BLOG_BASE_URL = "https://sk1y101.github.io/blog/category/"
+# Blog categories to scan for project summaries (if category page exists)
+BLOG_CATEGORIES = [
+    "train-travel",
+    "ternary-computer",
+]
 
 # Minimum start dates per organisation (GitHub owner).
 # When a repo's `created_at` falls after this date, the organisation date is
@@ -1036,7 +1042,7 @@ def generate_description_llm(
 
 {EXAMPLE_DESCRIPTIONS}
 
-Write a description for this project:
+Write a concise description for this project:
 - Name: {name}
 - GitHub description: {desc}
 - Topics: {topics}
@@ -1047,18 +1053,17 @@ Write a description for this project:
 {commits}
 
 Rules:
-- Write exactly 2-3 sentences
+- Write exactly 2-3 sentences that summarize the project's purpose and impact
 - Write in present tense for ongoing projects, past tense for completed ones
-- Focus on what the project DOES, not just what it IS
+- Focus on WHAT the project DOES and WHY it matters (not implementation details)
+- Explain the key problem it solves or capability it provides
 - Use technical language appropriate for a DevOps/Software Engineering CV
-- Do NOT use first person ("I", "my")
-- Be specific about technologies and architecture
-- Include contributions from the commit history
-- Do not wrap in quotes
-- Do not use em-dashes (use semicolons instead)
+- Do NOT use first person ("I", "my", "we")
+- Mention key technologies if relevant to the CV
+- Do not wrap in quotes; do not use em-dashes (use semicolons instead)
 - Keep descriptions direct, concise, and impactful
-- DO NOT show your work, character counts, or reasoning
-- Just output the final description; nothing else"""
+- Do NOT show your work, character counts, reasoning, or explain implementation
+- Output ONLY the final description; nothing else"""
 
     payload = {
         "messages": [
@@ -1720,6 +1725,55 @@ def scan_website() -> list[dict]:
         return []
 
 
+def scan_blog_categories() -> list[dict]:
+    """Scan blog categories for project overviews.
+
+    For each configured blog category, fetches the category page and extracts
+    the first/pinned post as a project entry. Returns list of dicts with
+    keys: name, details, url, category="blog".
+    """
+    results = []
+
+    for category in BLOG_CATEGORIES:
+        category_url = f"{BLOG_BASE_URL}{category}/"
+        try:
+            req = urllib.request.Request(
+                category_url,
+                headers={"User-Agent": "cv-sync/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw_html = resp.read().decode("utf-8")
+
+            # Simple extraction: find first article title and excerpt
+            title_match = re.search(
+                r'<h2[^>]*class="[^"]*post-title[^"]*"[^>]*>([^<]+)</h2>', raw_html
+            )
+            excerpt_match = re.search(
+                r'<p[^>]*class="[^"]*post-excerpt[^"]*"[^>]*>([^<]+)</p>', raw_html
+            )
+
+            if title_match:
+                title = title_match.group(1).strip()
+                excerpt = excerpt_match.group(1).strip() if excerpt_match else ""
+                # Clean HTML entities
+                title = re.sub(r"&[a-z]+;", "", title)
+                excerpt = re.sub(r"&[a-z]+;", "", excerpt)
+
+                results.append(
+                    {
+                        "name": title,
+                        "details": excerpt,
+                        "url": category_url,
+                        "category": "blog",
+                    }
+                )
+                log(f"  Found blog category: {category} - {title}")
+        except Exception as e:
+            log(f"  Blog category scan failed for {category}: {e}")
+
+    return results
+
+
 def check_staleness(text: str, token: str) -> str:
     """Update existing 'Present' entries that haven't been committed to in
     STALENESS_DAYS to use the last commit date as their end date."""
@@ -2006,6 +2060,12 @@ def main():
     log("Scanning website for projects...")
     website_projects = scan_website()
     log(f"Found {len(website_projects)} website-only project candidates")
+
+    # Scan blog categories for project overviews
+    log("Scanning blog categories...")
+    blog_projects = scan_blog_categories()
+    website_projects.extend(blog_projects)
+    log(f"Found {len(blog_projects)} blog category candidates")
 
     def normalize_name(n: str) -> str:
         return re.sub(r"[^a-z0-9]", "", n.lower())
