@@ -1140,18 +1140,43 @@ def _strip_reasoning(text: str) -> str:
 
     # First pass: strip character counting patterns (Count: "...", "..."=N, space=N)
     # These indicate the model is showing its work on character counting
-    if re.search(r"Count[:\s]*.*?(\d+)\s*=\s*\d+", text):
-        # Try to extract sentences that don't contain counting patterns
+    # Pattern: word (number)=number, quoted words with counts, "Count:" prefix, etc.
+    count_patterns = re.findall(r"\(\d+\)\s*=\s*\d+", text)
+    has_count_prefix = re.search(r"^Count[:\s]", text.strip())
+
+    if (count_patterns and len(count_patterns) >= 2) or (
+        has_count_prefix and count_patterns
+    ):
+        # Character counting detected. Try to extract usable content.
+        # Find the last clean sentence (no counting patterns).
         sentences = re.split(r"(?<=[.!?])\s+", text)
-        clean_sentences = []
-        for sent in sentences:
-            # Skip sentences with character counting patterns
-            if not re.search(r"Count[:\s]*.*?(\d+)\s*=\s*\d+", sent):
-                if not re.search(r'"\w+".*?\(\d+\)\s*=\s*\d+', sent):
-                    clean_sentences.append(sent)
-        if clean_sentences and len("".join(clean_sentences)) > 20:
-            text = " ".join(clean_sentences)
-        # If filtering removed too much, keep original and continue
+        for sent in reversed(sentences):
+            if not re.search(r"\(\d+\)\s*=\s*\d+", sent):
+                if len(sent.strip()) > 20:
+                    text = sent.strip()
+                    break
+        # If no clean sentence found, remove all counting patterns and clean up
+        if count_patterns and len(count_patterns) >= 2:
+            text = re.sub(r"\s*\(\d+\)\s*=\s*\d+", "", text)
+            text = re.sub(r"\s*space\s*=\s*\d+", "", text)
+            text = re.sub(r"^Count[:\s]+", "", text)
+            # Remove leftover patterns: "quoted", +, trailing numbers/symbols
+            text = re.sub(r'"\w+"[\s]*', "", text)
+            text = re.sub(r"\s*\+\s*", " ", text)
+            text = re.sub(r"\b\w+\s*\(\d+\)\s*", "", text)  # word(num) at word boundary
+            text = re.sub(r"\bspace\b", "", text)  # leftover "space" keyword
+            # Clean up extra whitespace
+            text = re.sub(r"\s+", " ", text)
+            text = text.strip()
+    elif re.search(r"Count[:\s].*?(?<=[.!?])", text):
+        # "Count:" prefix with actual sentence after it
+        idx = (
+            re.search(r"(?<=[.!?])\s+", text).start()
+            if re.search(r"(?<=[.!?])\s+", text)
+            else -1
+        )
+        if idx > 0:
+            text = text[idx:].strip()
 
     # Transition markers that separate reasoning from the actual answer.
     # These phrases signal "the answer starts after this line".
