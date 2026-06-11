@@ -1047,8 +1047,7 @@ Write a description for this project:
 {commits}
 
 Rules:
-- Write exactly 2-3 sentences (no more, no less)
-- Keep total length concise and under 450 characters
+- Write exactly 2-3 sentences
 - Write in present tense for ongoing projects, past tense for completed ones
 - Focus on what the project DOES, not just what it IS
 - Use technical language appropriate for a DevOps/Software Engineering CV
@@ -1057,7 +1056,9 @@ Rules:
 - Include contributions from the commit history
 - Do not wrap in quotes
 - Do not use em-dashes (use semicolons instead)
-- Keep descriptions direct and impactful"""
+- Keep descriptions direct, concise, and impactful
+- DO NOT show your work, character counts, or reasoning
+- Just output the final description; nothing else"""
 
     payload = {
         "messages": [
@@ -1129,10 +1130,28 @@ def _strip_reasoning(text: str) -> str:
     prefix their output with first-person reasoning (e.g. "The user wants
     a project description…  Let me analyze…").  This function detects such
     patterns and returns only the final description.
+
+    Also strips character counting breakdowns (e.g. "Count: ... (6)=6 space=7")
+    which leak from models misinterpreting length constraints.
     """
     text = text.strip()
     if not text:
         return text
+
+    # First pass: strip character counting patterns (Count: "...", "..."=N, space=N)
+    # These indicate the model is showing its work on character counting
+    if re.search(r"Count[:\s]*.*?(\d+)\s*=\s*\d+", text):
+        # Try to extract sentences that don't contain counting patterns
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        clean_sentences = []
+        for sent in sentences:
+            # Skip sentences with character counting patterns
+            if not re.search(r"Count[:\s]*.*?(\d+)\s*=\s*\d+", sent):
+                if not re.search(r'"\w+".*?\(\d+\)\s*=\s*\d+', sent):
+                    clean_sentences.append(sent)
+        if clean_sentences and len("".join(clean_sentences)) > 20:
+            text = " ".join(clean_sentences)
+        # If filtering removed too much, keep original and continue
 
     # Transition markers that separate reasoning from the actual answer.
     # These phrases signal "the answer starts after this line".
@@ -1175,7 +1194,6 @@ def _strip_reasoning(text: str) -> str:
     # If no transition found, check whether the text looks like reasoning.
     # The prompt tells the model not to use first person, so first-person
     # pronouns in the output are a strong indicator of CoT leakage.
-    import re
 
     first_line = text.split("\n")[0].strip()
     has_first_person = bool(
