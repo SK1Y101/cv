@@ -1,9 +1,16 @@
-name: Build CV PDF
+name: Build CV
 
 on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -11,6 +18,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ── Sync repos (skip on PR, where we only want to test the build) ──
+      - name: Synchronise repos to CV
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/sync_repos.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: deepseek/deepseek-v4-flash:free
+          LLM_ENDPOINT: https://openrouter.ai/api/v1
+
+      - name: Check for changes
+        id: git-check
+        if: github.event_name != 'pull_request'
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push changes
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config user.name "CV Synchronisation Bot"
+          git config user.email "skye+bot@casolw.space"
+          git add -A
+          git commit -m "chore: auto-synchronise new GitHub repos to CV"
+          git push
+
+      # ── Build ──
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
@@ -20,7 +57,7 @@ jobs:
       - name: Generate resume.json
         run: python3 scripts/tex2json.py
 
-      - name: Upload PDF and JSON artifacts
+      - name: Upload PDF and JSON
         uses: actions/upload-artifact@v4
         with:
           name: CV
@@ -29,13 +66,13 @@ jobs:
             resume.json
 
   release:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && !cancelled()
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download built PDF
+      - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
           name: CV
