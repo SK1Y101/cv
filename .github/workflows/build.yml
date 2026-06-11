@@ -23,8 +23,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: google/gemma-4-31b-it:free
-          LLM_ENDPOINT: https://openrouter.ai/api/v1
 
       # ── Build ──
       - name: Compile LaTeX document

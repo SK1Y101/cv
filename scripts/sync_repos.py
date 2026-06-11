@@ -12,7 +12,7 @@ Environment:
     GITHUB_TOKEN      - GitHub API token (required for API calls)
     LLM_API_KEY       - LLM API key (defaults to GITHUB_TOKEN for GitHub Models)
     LLM_MODEL         - Model name (default: google/gemma-4-31b-it:free)
-    LLM_ENDPOINT      - API endpoint (default: https://openrouter.ai/api/v1)
+    LLM_ENDPOINT      - API endpoint (default: https://opencode.ai/zen/v1)
 """
 
 import time
@@ -61,10 +61,9 @@ CONTRIBUTION_ORGS = ["canonical"]
 # their first/last commit dates in a repo.
 GITHUB_USERNAME = "SK1Y101"
 
-# Fallback models for OpenRouter – tried in order when the primary is
-# rate-limited upstream.  All must be free-tier variants (queried from
-# ``/api/v1/models`` on 2026-06-11).
-FALLBACK_MODELS = [
+# Static fallback models used when dynamic discovery fails (non-Zen providers
+# or network errors during model list fetch).
+STATIC_FALLBACK_MODELS = [
     "google/gemma-4-31b-it:free",
     "google/gemma-4-26b-a4b-it:free",
     "meta-llama/llama-3.3-70b-instruct:free",
@@ -72,6 +71,10 @@ FALLBACK_MODELS = [
     "liquid/lfm-2.5-1.2b-instruct:free",
     "poolside/laguna-xs.2:free",
 ]
+
+# Populated at runtime by ``main()`` via ``discover_models()``; falls back to
+# ``STATIC_FALLBACK_MODELS`` when unavailable.
+_ACTIVE_FALLBACKS: list[str] = list(STATIC_FALLBACK_MODELS)
 
 # Icon mapping by repo topics / language
 ICON_MAP = {
@@ -393,6 +396,53 @@ def _api_request(
                 break
 
     return None
+
+
+def discover_models(endpoint: str, api_key: str) -> list[str]:
+    """Fetch available model IDs from a provider's ``/models`` endpoint.
+
+    For Zen (``opencode.ai/zen``): free models (suffix ``-free``) are listed
+    first, followed by paid models sorted by name.  The first entry is suitable
+    as the primary; the rest as fallbacks.
+
+    For other providers responses without a ``-free`` convention the full list
+    is returned as-is.
+
+    Falls back to ``STATIC_FALLBACK_MODELS`` when the endpoint is unreachable
+    or non-Zen and no models can be parsed.
+    """
+    if not api_key:
+        return list(STATIC_FALLBACK_MODELS)
+
+    try:
+        url = f"{endpoint}/models"
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {api_key}")
+        req.add_header("User-Agent", "cv-sync/1.0")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            body = json.loads(resp.read())
+
+        models = body.get("data") if isinstance(body, dict) else body
+        if not isinstance(models, list):
+            return list(STATIC_FALLBACK_MODELS)
+
+        ids = []
+        for m in models:
+            mid = m.get("id") if isinstance(m, dict) else str(m)
+            if mid:
+                ids.append(mid)
+
+        if not ids:
+            return list(STATIC_FALLBACK_MODELS)
+
+        # Zen conventions: free models first, then sort paid alphabetically
+        free = sorted(m for m in ids if m.endswith("-free"))
+        paid = sorted(m for m in ids if not m.endswith("-free"))
+        return free + paid
+
+    except Exception as e:
+        log(f"Model discovery failed ({endpoint}/models): {e}")
+        return list(STATIC_FALLBACK_MODELS)
 
 
 def gh_api(path: str, token: str) -> dict | list:
@@ -880,7 +930,7 @@ Rules:
         "temperature": 0.7,
     }
 
-    models = [model] + [m for m in FALLBACK_MODELS if m.lower() != model.lower()]
+    models = [model] + [_ for _ in _ACTIVE_FALLBACKS if _.lower() != model.lower()]
     text = _api_request(payload, token, models, endpoint)
     if text is not None:
         text = text.strip('"').strip("'")
@@ -888,6 +938,16 @@ Rules:
         leaked = _is_prompt_leak(text)
         if not leaked:
             return text
+
+    # Fallback: try another model from the active fallbacks
+    for fb in _ACTIVE_FALLBACKS:
+        if fb.lower() == model.lower():
+            continue
+        text = _api_request(payload, token, [fb], endpoint)
+        if text is not None:
+            text = text.strip('"').strip("'")
+            if not _is_prompt_leak(text):
+                return text
 
     # Fallback: use the GitHub description directly
     if desc:
@@ -1156,7 +1216,7 @@ Only list changes. Return nothing if no adjustments or new skills needed."""
         "temperature": 0.3,
     }
 
-    models = [model] + [m for m in FALLBACK_MODELS if m.lower() != model.lower()]
+    models = [model] + [_ for _ in _ACTIVE_FALLBACKS if _.lower() != model.lower()]
     text = _api_request(payload, llm_key, models, endpoint, title="CV-Skill-Eval")
     if text is None:
         return {}, []
@@ -1637,11 +1697,26 @@ def main():
 
     gh_token = os.environ.get("GITHUB_TOKEN") or ""
     llm_key = os.environ.get("LLM_API_KEY") or gh_token
-    llm_model = os.environ.get("LLM_MODEL", "google/gemma-4-31b-it:free")
-    llm_endpoint = os.environ.get("LLM_ENDPOINT", "https://openrouter.ai/api/v1")
+    llm_endpoint = os.environ.get("LLM_ENDPOINT", "https://opencode.ai/zen/v1")
+    llm_model_env = os.environ.get("LLM_MODEL", "")
 
     if not llm_key:
         log("No LLM_API_KEY or GITHUB_TOKEN set. Will use template descriptions.")
+    elif not llm_model_env:
+        # Discover models dynamically from the provider
+        available = discover_models(llm_endpoint, llm_key)
+        if available:
+            llm_model = available[0]
+            _ACTIVE_FALLBACKS.clear()
+            _ACTIVE_FALLBACKS.extend(available)
+            log(
+                f"Discovered {len(available)} models; primary: {llm_model} "
+                f"(set LLM_MODEL to override)"
+            )
+        else:
+            llm_model = STATIC_FALLBACK_MODELS[0]
+    else:
+        llm_model = llm_model_env
 
     # Step 1: Check existing entries for staleness
     if gh_token:
