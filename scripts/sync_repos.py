@@ -76,6 +76,11 @@ STATIC_FALLBACK_MODELS = [
 # ``STATIC_FALLBACK_MODELS`` when unavailable.
 _ACTIVE_FALLBACKS: list[str] = list(STATIC_FALLBACK_MODELS)
 
+# Request throttling for LLM API: tracks last request time to enforce minimum
+# spacing between calls, reducing rate limit collisions. Spacing is per-model.
+_LAST_LLM_REQUEST_TIME: dict[str, float] = {}
+_MIN_REQUEST_SPACING_SECS = 0.5  # Minimum gap between requests to same model
+
 # Icon mapping by repo topics / language
 ICON_MAP = {
     "code": "code",
@@ -322,6 +327,22 @@ def _retry_after_from_response(e: urllib.error.HTTPError, body: str) -> float | 
     return None
 
 
+def _throttle_llm_request(model: str) -> None:
+    """Enforce minimum spacing between LLM requests to the same model.
+
+    Tracks per-model request times and sleeps if necessary to maintain
+    _MIN_REQUEST_SPACING_SECS between calls, reducing rate limit collisions.
+    """
+    now = time.time()
+    last_time = _LAST_LLM_REQUEST_TIME.get(model, 0)
+    elapsed = now - last_time
+    if elapsed < _MIN_REQUEST_SPACING_SECS:
+        sleep_time = _MIN_REQUEST_SPACING_SECS - elapsed
+        log(f"    Throttling {model}: sleeping {sleep_time:.2f}s")
+        time.sleep(sleep_time)
+    _LAST_LLM_REQUEST_TIME[model] = time.time()
+
+
 def _api_request(
     payload: dict,
     llm_key: str,
@@ -348,6 +369,7 @@ def _api_request(
     """
     for model in models:
         _proactive_delay(gh=False)
+        _throttle_llm_request(model)
 
         for attempt in range(max_retries + 1):
             try:
@@ -445,10 +467,25 @@ def discover_models(endpoint: str, api_key: str) -> list[str]:
         if not ids:
             return list(STATIC_FALLBACK_MODELS)
 
-        # Zen conventions: free models first, then sort paid alphabetically
+        # Zen conventions: prioritize most reliable free models first, then paid
+        # Testing shows north-mini-code-free and nemotron-3-ultra-free are 100% reliable
+        # while others fail with 429/401. Order by reliability, then alphabetically.
+        reliable_free = [
+            "north-mini-code-free",
+            "nemotron-3-ultra-free",
+        ]
         free = sorted(m for m in ids if m.endswith("-free"))
         paid = sorted(m for m in ids if not m.endswith("-free"))
-        return free + paid
+
+        # Reorder: put reliable ones first, then other free models, then paid
+        ordered_free = []
+        for model in reliable_free:
+            if model in free:
+                ordered_free.append(model)
+                free.remove(model)
+        ordered_free.extend(free)
+
+        return ordered_free + paid
 
     except Exception as e:
         log(f"Model discovery failed ({endpoint}/models): {e}")
