@@ -191,7 +191,13 @@ def _pretty_project_name(raw: str) -> str:
 
     ``maas-terraform-modules`` → ``MAAS Terraform Modules``
     ``python-youtube`` → ``Python YouTube``
+
+    Names without hyphens or underscores (e.g. ``maas.io``, ``MAAS``,
+    ``Packer-MAAS``) are returned as-is — they're already in their
+    intended form.
     """
+    if "-" not in raw and "_" not in raw:
+        return raw
     parts = re.split(r"[-_\s]", raw)
     words = []
     for p in parts:
@@ -606,6 +612,21 @@ def user_has_commits(repo_full: str, token: str) -> bool:
         f"/repos/{repo_full}/commits?author={GITHUB_USERNAME}&per_page=1", token
     )
     return bool(commits and isinstance(commits, list) and commits)
+
+
+def count_user_commits(repo_full: str, token: str) -> int:
+    """Count total commits by GITHUB_USERNAME in *repo_full* (up to ~1000)."""
+    if not token:
+        return 999  # can't verify; assume meaningful
+    data, headers = _gh_api_raw(
+        f"/repos/{repo_full}/commits?author={GITHUB_USERNAME}&per_page=100", token
+    )
+    if not data or not isinstance(data, list):
+        return 0
+    last_page = _last_page_from_link(headers)
+    if last_page:
+        return (last_page - 1) * 100 + len(data)
+    return len(data)
 
 
 def fetch_readme_or_tree(repo_full: str, token: str) -> str:
@@ -1733,8 +1754,14 @@ def main():
                         break
                 continue
 
-            # Skip archived, disabled, or template repos
+            # Skip archived, disabled, template, or negligible-contribution repos
             if repo.get("archived") or repo.get("disabled") or repo.get("is_template"):
+                continue
+
+            # Skip repos with fewer than 3 user commits (one-off fixes)
+            commit_count = count_user_commits(repo.get("full_name", ""), gh_token)
+            if commit_count < 3:
+                log(f"    {repo['name']} skipped ({commit_count} commits)")
                 continue
 
             log(f"  -> {repo['name']} ({org})")
