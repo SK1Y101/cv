@@ -175,11 +175,11 @@ LANGUAGE_ICON = {
 
 # Example descriptions for LLM style prompting
 EXAMPLE_DESCRIPTIONS = """\
-Python automation suite managing YouTube channel operations. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.
+Python automation suite managing YouTube channel operations; handles playlist population, two-way Google Calendar sync for release scheduling, and automated background music selection. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.
 
-Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), adding an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.
+Locally-hosted web app that streams YouTube audio to Bluetooth devices, curated by weather and time of day. Uses an orchestrator for automatic queuing, OpenWeatherMap for context-aware selection, and ffmpeg for audio processing.
 
-CLI tooling providing automated documentation quality checks for the MAAS team. Wraps aspell, proselint, linkchecker, and style-checking utilities in a unified interface, enabling CI pipeline integration for doc PRs.\
+CLI tooling providing automated documentation quality checks for the MAAS team; wraps aspell, proselint, and linkchecker in a unified interface for CI pipeline integration on doc PRs.\
 """
 
 
@@ -1147,7 +1147,7 @@ Write a concise description for this project:
 {commits}
 
 Rules:
-- Write exactly 2-3 sentences that summarize the project's purpose and impact
+- Write preferably 2, and no more than 3 sentences, that concisely summarizes the project's purpose and impact
 - Write in present tense for ongoing projects, past tense for completed ones
 - Focus on WHAT the project DOES and WHY it matters (not implementation details)
 - Explain the key problem it solves or capability it provides
@@ -1210,6 +1210,7 @@ def _is_prompt_leak(text: str) -> bool:
         "Write a description for",
         "write a description for",
         "Write a 1-3 sentence",
+        "Write exactly 1-2 sentences",
         "Provided details:",
         "We need to produce",
         "we need to produce",
