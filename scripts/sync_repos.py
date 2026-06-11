@@ -21,6 +21,7 @@ import os
 import sys
 import re
 import json
+import base64
 import subprocess
 import urllib.request
 import urllib.error
@@ -554,6 +555,20 @@ def user_has_commits(repo_full: str, token: str) -> bool:
     return bool(commits and isinstance(commits, list) and commits)
 
 
+def fetch_readme(repo_full: str, token: str) -> str:
+    """Fetch the first 2000 chars of a repo's README for LLM context."""
+    if not token:
+        return ""
+    data = gh_api(f"/repos/{repo_full}/readme", token)
+    if isinstance(data, dict) and data.get("content"):
+        try:
+            raw = base64.b64decode(data["content"]).decode("utf-8", errors="replace")
+            return raw[:2000]
+        except Exception:
+            pass
+    return ""
+
+
 def determine_icon(repo: dict) -> str:
     """Determine the icon for a repo based on topics and language."""
     topics = [t.lower() for t in repo.get("topics", [])]
@@ -738,12 +753,35 @@ Rules:
     text = _api_request(payload, token, models, endpoint)
     if text is not None:
         text = text.strip('"').strip("'")
-        return text
+        # Reject descriptions that leaked the prompt
+        leaked = _is_prompt_leak(text)
+        if not leaked:
+            return text
 
     # Fallback: use the GitHub description directly
     if desc:
         return f"{name}: {desc}"
     return f"{name}. Written in {language}." if language else f"{name}."
+
+
+def _is_prompt_leak(text: str) -> bool:
+    """Check if an LLM response contains prompt text instead of a description."""
+    triggers = [
+        "We need to",
+        "we need to",
+        "Write a description for",
+        "write a description for",
+        "Write a 1-3 sentence",
+        "Provided details:",
+        "We need to produce",
+        "we need to produce",
+        "Write a project description",
+        "write a project description",
+    ]
+    for t in triggers:
+        if t in text:
+            return True
+    return False
 
 
 def generate_description_template(repo: dict) -> str:
@@ -1102,6 +1140,9 @@ def generate_addproject(
     # Get description
     if llm_key:
         log("    ~ Generating description")
+        readme = fetch_readme(repo_full, gh_token)
+        if readme:
+            repo["readme"] = readme
         desc = generate_description_llm(repo, llm_key, model, endpoint)
     else:
         desc = generate_description_template(repo)
@@ -1565,8 +1606,8 @@ def main():
                         break
                 continue
 
-            # Skip archived repos
-            if repo.get("archived"):
+            # Skip archived, disabled, or template repos
+            if repo.get("archived") or repo.get("disabled") or repo.get("is_template"):
                 continue
 
             log(f"  -> {repo['name']} ({org})")
@@ -1620,8 +1661,8 @@ def main():
             else:
                 log(f"  -> {repo['name']}")
 
-            # Skip archived repos
-            if repo.get("archived"):
+            # Skip archived, disabled, or template repos
+            if repo.get("archived") or repo.get("disabled") or repo.get("is_template"):
                 continue
 
             would_add += 1
