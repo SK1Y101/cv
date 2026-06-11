@@ -1713,6 +1713,7 @@ def main():
         existing_urls.add(wp["url"])
         existing_names.add(normalize_name(wp["name"]))
         log("    ^ Entry generated")
+        log(f"      {entry}")
 
     # Step 4: Scan GitHub repos
     new_repos_info = []  # for skill evaluation
@@ -1783,6 +1784,7 @@ def main():
             if name:
                 existing_names.add(name)
             log("    ^ Entry generated")
+            log(f"      {entry}")
 
     # Step 4b: Scan personal repos.  Skip forks of repos already covered by
     # contribution orgs; keep other forks (they're from external projects).
@@ -1838,6 +1840,7 @@ def main():
             if name:
                 existing_names.add(name)
             log("    ^ Entry generated")
+            log(f"      {entry}")
 
     if dry_run:
         log(f"Dry run complete. Would add {would_add} new entries.")
