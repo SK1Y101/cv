@@ -630,6 +630,30 @@ def fetch_readme_or_tree(repo_full: str, token: str) -> str:
     return ""
 
 
+def fetch_user_commits(repo_full: str, token: str) -> str:
+    """Fetch up to 30 commit subjects by GITHUB_USERNAME in *repo_full*.
+
+    Returns a human-readable block formatted for LLM context, or empty string.
+    """
+    if not token:
+        return ""
+    commits, _ = _gh_api_raw(
+        f"/repos/{repo_full}/commits?author={GITHUB_USERNAME}&per_page=30",
+        token,
+    )
+    if not commits or not isinstance(commits, list):
+        return ""
+    messages = []
+    for c in commits:
+        msg = c.get("commit", {}).get("message", "")
+        first_line = msg.split("\n")[0].strip()
+        if first_line:
+            messages.append(first_line)
+    if not messages:
+        return ""
+    return "My commits in this repo:\n" + "\n".join("  " + m for m in messages)
+
+
 def determine_icon(repo: dict) -> str:
     """Determine the icon for a repo based on topics and language."""
     topics = [t.lower() for t in repo.get("topics", [])]
@@ -776,7 +800,13 @@ def extract_existing_urls(tex_path: Path) -> set[str]:
     return urls
 
 
-def generate_description_llm(repo: dict, token: str, model: str, endpoint: str) -> str:
+def generate_description_llm(
+    repo: dict,
+    token: str,
+    model: str,
+    endpoint: str,
+    commits: str = "",
+) -> str:
     """Generate a CV-style description using an LLM."""
     name = repo.get("name", "")
     desc = repo.get("description") or ""
@@ -796,6 +826,8 @@ Write a description for this project:
 
 {"- README excerpt: " + readme[:500] if readme else ""}
 
+{commits}
+
 Rules:
 - Write in present tense for ongoing projects, past tense for completed ones
 - Focus on what the project DOES, not just what it IS
@@ -804,7 +836,8 @@ Rules:
 - Keep it to 1-3 sentences
 - Be specific about technologies and architecture where relevant
 - Do not wrap in quotes
-- Do not use em-dashes"""
+- Do not use em-dashes
+- Use the commit history to write a description that reflects what I contributed to the project"""
 
     payload = {
         "messages": [
@@ -1212,7 +1245,14 @@ def generate_addproject(
         readme = fetch_readme_or_tree(repo_full, gh_token)
         if readme:
             repo["readme"] = readme
-        desc = generate_description_llm(repo, llm_key, model, endpoint)
+        user_commits = fetch_user_commits(repo_full, gh_token)
+        desc = generate_description_llm(
+            repo,
+            llm_key,
+            model,
+            endpoint,
+            commits=user_commits,
+        )
     else:
         desc = generate_description_template(repo)
 

@@ -252,7 +252,7 @@
 
 \addproject{MAAS Internal CI}{code}
 {Canonical}{2024-06--Present}
-{Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure. Designed and manage automated build, test, and release pipelines across multiple MAAS product repositories, ensuring reliable delivery of MAAS releases.}{https://maas.io}
+{Designs, builds, and maintains the MAAS team's Jenkins CI infrastructure, managing job definitions across build, test, security, and release pipelines for all MAAS product repositories. Implemented automated CVE scanning and SBOM generation for MAAS debs and snaps; introduced job documentation with automated validation to enforce documentation parity; built testflinger-based hardware test execution and metal testing workflows; automated backport creation from bug-fix merge proposals; and drove reliability improvements through pipeline refactoring, Launchpad-to-GitHub migration, and security integration into the delivery pipeline.}{https://maas.io}
 
 \addproject{Packer-MAAS}{code}
 {Canonical}{2023-10--Present}
@@ -262,33 +262,17 @@
 {Canonical}{2023-08--Present}
 {Published on the official Terraform Registry; enables CRUD management of MAAS resources including networking, machines, VM hosts, and DNS. Primary maintainer driving feature development and community engagement.}{https://github.com/canonical/terraform-provider-maas}
 
-\addproject{maas-site-manager}{}
+\addproject{MAAS Sites Manager}{code}
 {canonical}{2023-04-06--Present}
 {Web-based administrative interface for managing MAAS site configurations, providing tools for bare-metal provisioning, network topology management, and datacenter operations through a React frontend backed by a Python API.}{https://github.com/canonical/maas-site-manager}
 
-\addproject{maas-images}{}
+\addproject{MAAS Images}{}
 {canonical}{2023-03-28--Present}
-{The maas-images project provides a centralized repository for MAAS image development, leveraging Python and mirroring updates from Launchpad. This GitHub mirror enables streamlined collaboration and version control for MAAS image development. It utilizes a Git-based workflow for managing image updates and revisions.}{https://github.com/canonical/maas-images}
+{Provides tooling and configuration for building MAAS ephemeral images from Ubuntu cloud image builds, producing the image streams that MAAS consumes for server commissioning, deployment, and ephemeral environments. Maintains the automated image promotion pipeline that determines which cloud image builds are promoted to production streams across all supported MAAS releases. Mirrored from Launchpad (lp:maas-images), where primary development and image building operations occur.}{https://launchpad.net/maas-images}
 
-\addproject{maas}{code}
-{canonical}{2022-06-28--Present}
-{MAAS (Metal as a Service) is a bare-metal provisioning platform for data center infrastructure management, automating server discovery, commissioning, and deployment. Built with Python, Django, Go, and Twisted, it handles DHCP, PXE boot, IPMI, and integrates with CI/CD pipelines for on-demand hardware orchestration across private clouds.}{https://github.com/canonical/maas}
-
-\addproject{MAAS OpenApi Schema}{}
-{work}{2022-06-14--Present}
-{MAAS API in OpenAPI form}{https://maas.io/docs/api}
-
-\addproject{MAAS}{}
-{work}{2022-06-14--Present}
-{Metal As A Service}{https://maas.io/}
-
-\addproject{sk1y101}{}
-{Personal}{2021-12-05--Present}
-{Personal portfolio and digital identity platform automating content aggregation from GitHub, LinkedIn, and personal APIs. Showcases projects, blog posts, and professional activity with dynamic rendering via a static site generator and serverless functions. Demonstrates API integration, CI/CD pipeline deployment, and responsive frontend architecture.}{https://github.com/SK1Y101/sk1y101}
-
-\addproject{SkiylianSoftware.github.io}{}
-{SkiylianSoftware}{2026-05-21}
-{Python-based static site generator for a personal channel website, deployed on GitHub Pages. Automates content updates through CI/CD pipelines and integrates external API data for dynamic media showcases.}{https://github.com/SkiylianSoftware/SkiylianSoftware.github.io}
+\addproject{MAAS}{code}
+{canonical}{2022-06-14--Present}
+{MAAS (Metal as a Service) is a bare-metal provisioning platform for data center infrastructure management, automating server discovery, commissioning, and deployment. Built with Python, Django, Go, and Twisted, it handles DHCP, PXE boot, IPMI, and integrates with CI/CD pipelines for on-demand hardware orchestration across private clouds.}{https://maas.io/}
 
 \addproject{Skiylia Programming Language}{proj}
 {}{2022-12--2026-04}
@@ -318,49 +302,9 @@
 {Canonical}{2022-09--2025-08}
 {An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
 
-\addproject{Documentation Linting Tools}{code}
-{Canonical}{2025-05}
-{CLI tooling providing automated documentation quality checks for the MAAS team. Wraps aspell, proselint, linkchecker, and style-checking utilities in a unified interface, enabling CI pipeline integration for doc PRs.}{https://github.com/SK1Y101/doc-linting-tools}
-
-\addproject{Terraform Charmed MAAS Training}{code}
-{Canonical}{2025-05}
-{Hands-on training material created and delivered at the Canonical Berlin Commercial Sprint 2025. Inducted field engineers in deploying and managing MAAS through the Anvil approach using Terraform, Juju, and charmed operators, enabling them to stand up production MAAS environments for customers.}{https://github.com/SK1Y101/tf-charmed-maas-training}
-
-\addproject{Sprint Report}{}
-{Personal}{2025-02-13}
-{Python utility generating Markdown reports from Jira sprint data. Fetches issues via the Jira REST API and formats them into structured summaries including status, assignees, and story points. Simplifies sprint retrospectives and stakeholder communication through automated report generation.}{https://github.com/SK1Y101/sprint-report}
-
-\addproject{python-youtube}{code}
-{SkiylianSoftware}{2025-02}
-{Contributed to the Python wrapper for the YouTube Data API by implementing automated token-refresh login examples and refining grammar across library documentation to improve developer onboarding.}{https://github.com/SkiylianSoftware/python-youtube}
-
-\addproject{Skiy Python Template}{}
-{Personal}{2024-09-08}
-{Automated Python project template with pre-configured CI/CD, linting, and testing pipelines. Enforces consistent project structure and code quality standards, streamlining repository setup and maintenance.}{https://github.com/SK1Y101/skiy-python-template}
-
-\addproject{maas-ansible-playbook}{}
-{canonical}{2022-09-06--2024-07-22}
-{Ansible playbook that automates deployment and configuration of MAAS region and rack controllers using Jinja2 templated tasks, idempotently managing networking services and boot image imports across target environments.}{https://github.com/canonical/maas-ansible-playbook}
-
-\addproject{AutoBreezeBeats}{}
-{Personal}{2024-06-19--2024-07-12}
-{Python-based web application designed to stream YouTube audio to Bluetooth-connected devices for automated home radio station functionality. Implements a centralized interface for media playback and device management via a browser-based UI.}{https://github.com/SK1Y101/AutoBreezeBeats}
-
-\addproject{python-libmaas}{code}
-{canonical}{2023-08-17--2024-04-15}
-{Unofficial async Python client library for MAAS, providing programmatic access to the MAAS API with full asyncio support. Enables efficient concurrent management of servers, networks, and resources through modern Python async/await patterns.}{https://github.com/canonical/python-libmaas}
-
 \addproject{MAAS Terraform E2E Tests}{}
 {canonical}{2023-08-19--2024-04-10}
 {Python-based end-to-end test suite for the MAAS Terraform provider. Validates provider resource lifecycle, API interactions, and Terraform state consistency through automated scenarios. Designed for CI/CD pipeline integration to ensure provider stability across releases.}{https://github.com/canonical/maas-terraform-e2e-tests}
-
-\addproject{AutomatedRealismMods}{}
-{SkiylianSoftware}{2024-04-08}
-{Centralized repository and configuration management system for Automated Realism mods within the KOS ecosystem. Facilitates version control and dependency tracking for complex mod lists used in high-fidelity RSS video production. Provides a structured framework for maintaining mod compatibility across diverse simulation environments.}{https://github.com/SkiylianSoftware/AutomatedRealismMods}
-
-\addproject{SkiylianSoftware}{}
-{SkiylianSoftware}{2024-04-07}
-{SkiylianSoftware serves as a central GitHub portfolio aggregating personal projects in automation, web applications, and CLI tooling. It curates a collection of tools demonstrating expertise in Python, API integration, event-driven architecture, and CI/CD pipeline deployment. The portfolio features applications for YouTube channel management, context-aware music streaming, and documentation quality assurance.}{https://github.com/SkiylianSoftware/SkiylianSoftware}
 
 \addproject{KOS Flight Computer}{code}
 {SkiylianSoftware}{2022-01--2024-04}
@@ -370,17 +314,9 @@
 {SkiylianSoftware}{2024-04}
 {Contributed custom United Kingdom space launch sites and corresponding RemoteTech communications network configurations to the RealSolarSystem mod; improving accuracy and realism for UK-based spaceflight campaigns.}{https://github.com/SkiylianSoftware/RealSolarSystem}
 
-\addproject{maas.io}{}
-{canonical}{2023-03-29--2024-03-27}
-{Official website for the MAAS (Metal as a Service) project, serving product documentation, release notes, and community resources. Built with responsive HTML/CSS/JS for cross-device accessibility and integrates with the MAAS API for dynamic content delivery. Supports open-source contributions through Hacktoberfest and adheres to web-and-design best practices.}{https://github.com/canonical/maas.io}
-
 \addproject{Balanced Ternary Computer}{proj}
 {}{2024-02}
 {Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
-
-\addproject{MAAS OpenAPI YAML}{}
-{canonical}{2022-11-21--2023-09-15}
-{Centralised repository for the MAAS OpenAPI YAML specification, serving as the single source of truth for the REST API contract. Enables automated client SDK generation, documentation builds, and contract validation within the CI pipeline. Ensures consistent API versioning and change tracking across all MAAS consumers and internal tooling.}{https://github.com/canonical/maas-openapi-yaml}
 
 \addproject{maas-dev-setup}{}
 {canonical}{2023-09-13}
@@ -398,10 +334,6 @@
 {}{2023-03}
 {Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
 
-\addproject{ansible-collection}{}
-{canonical}{2022-09-29}
-{Ansible Collection providing modules and roles for automating MAAS (Metal as a Service) infrastructure management. Interfaces with the MAAS API to handle machine discovery, commissioning, deployment, and network configuration, enabling infrastructure-as-code workflows for bare-metal environments. Uses Python and Ansible’s dynamic inventory system for scalable provisioning.}{https://github.com/canonical/ansible-collection}
-
 \addproject{TransitProject}{code}
 {Personal}{2022-02-09--2022-05-24}
 {Python analysis framework for detecting exoplanet transit timing variations (TTVs) from photometric light curves. Implements statistical modeling and signal processing pipelines using NumPy, SciPy, and Astropy to identify deviations from periodic transit schedules. Demonstrates scientific computing and data analysis capabilities applied to exoplanet research.}{https://github.com/SK1Y101/TransitProject}
@@ -411,7 +343,7 @@
 {End-to-end data science pipeline predicting football match outcomes, covering: EDA and data cleaning with Pandas; feature engineering for team performance metrics; remote database upload via AWS RDS, PostgreSQL, and SQLAlchemy; model training and selection using sklearn (Logistic Regression, MLP, Naive Bayes, Decision Tree) with feature selection via SelectKBest; and inference on new season data.}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
 
 \addproject{Exoplanet TTV Masters Thesis}{pub}
-{University of Portsmouth}{2022-05}
+{University of Portsmouth}{2022-05-25}
 {Masters: \`Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://sk1y101.github.io/assets/pdf/TransitDissertation.pdf}
 
 \addproject{Data Collection Pipeline}{}
