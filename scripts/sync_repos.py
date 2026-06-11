@@ -11,7 +11,7 @@ Usage:
 Environment:
     GITHUB_TOKEN      - GitHub API token (required for API calls)
     LLM_API_KEY       - LLM API key (defaults to GITHUB_TOKEN for GitHub Models)
-    LLM_MODEL         - Model name (default: deepseek/deepseek-v4-flash:free)
+    LLM_MODEL         - Model name (default: google/gemma-4-31b-it:free)
     LLM_ENDPOINT      - API endpoint (default: https://openrouter.ai/api/v1)
 """
 
@@ -63,15 +63,14 @@ GITHUB_USERNAME = "SK1Y101"
 
 # Fallback models for OpenRouter – tried in order when the primary is
 # rate-limited upstream.  All must be free-tier variants (queried from
-# ``/api/v1/models`` on 2026-05-20).
+# ``/api/v1/models`` on 2026-06-11).
 FALLBACK_MODELS = [
-    "deepseek/deepseek-v4-flash:free",
+    "google/gemma-4-31b-it:free",
     "google/gemma-4-26b-a4b-it:free",
-    "qwen/qwen3-coder:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "minimax/minimax-m2.5:free",
-    "openai/gpt-oss-20b:free",
+    "qwen/qwen3-coder:free",
+    "liquid/lfm-2.5-1.2b-instruct:free",
+    "poolside/laguna-xs.2:free",
 ]
 
 # Icon mapping by repo topics / language
@@ -1638,7 +1637,7 @@ def main():
 
     gh_token = os.environ.get("GITHUB_TOKEN") or ""
     llm_key = os.environ.get("LLM_API_KEY") or gh_token
-    llm_model = os.environ.get("LLM_MODEL", "deepseek/deepseek-v4-flash:free")
+    llm_model = os.environ.get("LLM_MODEL", "google/gemma-4-31b-it:free")
     llm_endpoint = os.environ.get("LLM_ENDPOINT", "https://openrouter.ai/api/v1")
 
     if not llm_key:
