@@ -367,11 +367,11 @@ def _api_request(
                 with urllib.request.urlopen(req, timeout=30) as resp:
                     _update_rate_limit(resp.headers, gh=False)
                     result = json.loads(resp.read())
-                    content = (
-                        result.get("choices", [{}])[0]
-                        .get("message", {})
-                        .get("content", "")
+                    raw = (
+                        result.get("choices", [{}])[0].get("message", {}).get("content")
                     )
+                    # JSON null → None; empty string → ""
+                    content = raw if isinstance(raw, str) else ""
                     stripped = content.strip()
                     if stripped and stripped not in ("None", "null"):
                         return stripped
@@ -441,6 +441,13 @@ def discover_models(endpoint: str, api_key: str) -> list[str]:
             mid = m.get("id") if isinstance(m, dict) else str(m)
             if mid:
                 ids.append(mid)
+
+        if not ids:
+            return list(STATIC_FALLBACK_MODELS)
+
+        # Models known to return empty / 401 at the chat completions endpoint
+        BROKEN = {"deepseek-v4-flash-free", "north-mini-code-free"}
+        ids = [m for m in ids if m not in BROKEN]
 
         if not ids:
             return list(STATIC_FALLBACK_MODELS)
@@ -903,7 +910,7 @@ def generate_description_llm(
     language = repo.get("language") or ""
     readme = repo.get("readme", "")
 
-    prompt = f"""You are writing entries for a LaTeX CV. Write a 1-3 sentence project description matching this style:
+    prompt = f"""You are writing entries for a LaTeX CV. Write a project description matching this style:
 
 {EXAMPLE_DESCRIPTIONS}
 
@@ -918,15 +925,17 @@ Write a description for this project:
 {commits}
 
 Rules:
+- Write exactly 2-3 sentences (no more, no less)
+- Keep total length concise and under 450 characters
 - Write in present tense for ongoing projects, past tense for completed ones
 - Focus on what the project DOES, not just what it IS
 - Use technical language appropriate for a DevOps/Software Engineering CV
 - Do NOT use first person ("I", "my")
-- Keep it to 1-3 sentences
-- Be specific about technologies and architecture where relevant
+- Be specific about technologies and architecture
+- Include contributions from the commit history
 - Do not wrap in quotes
-- Do not use em-dashes
-- Use the commit history to write a description that reflects what I contributed to the project"""
+- Do not use em-dashes (use semicolons instead)
+- Keep descriptions direct and impactful"""
 
     payload = {
         "messages": [
@@ -936,7 +945,7 @@ Rules:
             },
             {"role": "user", "content": prompt},
         ],
-        "max_tokens": 200,
+        "max_tokens": 500,
         "temperature": 0.7,
     }
 
@@ -944,10 +953,11 @@ Rules:
     text = _api_request(payload, token, models, endpoint)
     if text is not None:
         text = text.strip('"').strip("'")
+        text = _strip_reasoning(text)
         # Reject descriptions that leaked the prompt
         leaked = _is_prompt_leak(text)
         if not leaked:
-            return text
+            return _normalize_description(text)
 
     # Fallback: try another model from the active fallbacks
     for fb in _ACTIVE_FALLBACKS:
@@ -956,13 +966,25 @@ Rules:
         text = _api_request(payload, token, [fb], endpoint)
         if text is not None:
             text = text.strip('"').strip("'")
+            text = _strip_reasoning(text)
             if not _is_prompt_leak(text):
-                return text
+                return _normalize_description(text)
 
     # Fallback: use the GitHub description directly
     if desc:
         return f"{name}: {desc}"
     return f"{name}. Written in {language}." if language else f"{name}."
+
+
+def _normalize_description(text: str) -> str:
+    """Post-process a CV description.
+
+    Replaces em-dashes with semicolons to match CV style preferences.
+    """
+    # Replace em-dashes (—, –) with semicolons
+    text = text.replace("—", ";")
+    text = text.replace("–", ";")
+    return text
 
 
 def _is_prompt_leak(text: str) -> bool:
@@ -983,6 +1005,80 @@ def _is_prompt_leak(text: str) -> bool:
         if t in text:
             return True
     return False
+
+
+def _strip_reasoning(text: str) -> str:
+    """Strip chain-of-thought reasoning from an LLM response.
+
+    Some models (notably nemotron-3-ultra-free and north-mini-code-free)
+    prefix their output with first-person reasoning (e.g. "The user wants
+    a project description…  Let me analyze…").  This function detects such
+    patterns and returns only the final description.
+    """
+    text = text.strip()
+    if not text:
+        return text
+
+    # Transition markers that separate reasoning from the actual answer.
+    # These phrases signal "the answer starts after this line".
+    transitions = (
+        "Based on this information",
+        "Based on the provided",
+        "Based on the above",
+        "Here is",
+        "Here's",
+        "Below is",
+        "In summary",
+        "I can provide",
+        "I will provide",
+        "I'll provide",
+        "I can write",
+        "I will write",
+        "I would describe",
+        "A concise description",
+        "A suitable description",
+    )
+
+    for marker in transitions:
+        idx = text.find(marker)
+        if idx >= 0:
+            # Content after this marker (start of the containing line)
+            line_start = text.rfind("\n", 0, idx) + 1
+            rest = text[line_start:].strip()
+            # Strip leading transition text and punctuation
+            while rest:
+                # Remove the marker itself and any leading punctuation/whitespace
+                rest = rest.lstrip("-*# \t")
+                # Check if the rest still starts with the marker or variations
+                if rest.lower().startswith(marker.lower()):
+                    rest = rest[len(marker) :].lstrip(":,; \t")
+                else:
+                    break
+            if len(rest) > 20:
+                return rest
+
+    # If no transition found, check whether the text looks like reasoning.
+    # The prompt tells the model not to use first person, so first-person
+    # pronouns in the output are a strong indicator of CoT leakage.
+    import re
+
+    first_line = text.split("\n")[0].strip()
+    has_first_person = bool(
+        re.search(r"\b(I|my|me|we|our|us)\b", first_line, re.IGNORECASE)
+    )
+
+    if has_first_person and len(text) > 150:
+        # Find the last substantive paragraph without first-person pronouns
+        paragraphs = re.split(r"\n\s*\n", text)
+        candidates = [p.strip() for p in paragraphs if len(p.strip()) > 30]
+        for p in reversed(candidates):
+            if not re.search(r"\b(I|my|me|we|our|us)\b", p):
+                return p
+        # All paragraphs have first person; return the longest one
+        if candidates:
+            return max(candidates, key=len)
+
+    return text
 
 
 def generate_description_template(repo: dict) -> str:
@@ -1230,6 +1326,7 @@ Only list changes. Return nothing if no adjustments or new skills needed."""
     text = _api_request(payload, llm_key, models, endpoint, title="CV-Skill-Eval")
     if text is None:
         return {}, []
+    text = _strip_reasoning(text)
 
     adjustments = {}
     new_skills = []
