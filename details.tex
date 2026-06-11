@@ -234,133 +234,133 @@
 {Personal}{2026-05-18--Present}
 {A fully custom LaTeX CV class with pastel fairycore aesthetic, rainbow section headers, sidebar with grey panel background, circular profile photo, and a Python-based JSON Resume export pipeline. Built with automated PDF releases on every push to main.}{https://github.com/SK1Y101/cv}
 
-\addproject{Terraform MAAS bootstrap}{code}
-{Canonical}{2025-09--Present}
-{Three-stage Terraform module bootstrapping Juju on LXD, deploying charmed MAAS, and configuring the deployed instance -- enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster, adopted as the standard provisioning path by Canonical field engineers.}{https://github.com/canonical/maas-terraform-modules}
+% \addproject{Terraform MAAS bootstrap}{code}
+% {Canonical}{2025-09--Present}
+% {Three-stage Terraform module bootstrapping Juju on LXD, deploying charmed MAAS, and configuring the deployed instance -- enabling full infrastructure-as-code deployment from bare metal to a running MAAS cluster, adopted as the standard provisioning path by Canonical field engineers.}{https://github.com/canonical/maas-terraform-modules}
 
-\addproject{MAAS Charms}{code}
-{Canonical}{2025-07--Present}
-{Charmed operators automating deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers in production environments. Drives operational consistency across Canonical's MAAS customer deployments.}{https://github.com/canonical/maas-charms}
+% \addproject{MAAS Charms}{code}
+% {Canonical}{2025-07--Present}
+% {Charmed operators automating deployment, scaling, upgrades, and Day-2 operations of MAAS region and rack controllers in production environments. Drives operational consistency across Canonical's MAAS customer deployments.}{https://github.com/canonical/maas-charms}
 
-\addproject{MAAS Anvil}{code}
-{Canonical}{2024-07--Present}
-{Snap-based charmed operator deploying and managing MAAS through Terraform-orchestrated Juju topologies. Used as the primary deployment method for production MAAS installations.}{https://github.com/canonical/maas-anvil}
+% \addproject{MAAS Anvil}{code}
+% {Canonical}{2024-07--Present}
+% {Snap-based charmed operator deploying and managing MAAS through Terraform-orchestrated Juju topologies. Used as the primary deployment method for production MAAS installations.}{https://github.com/canonical/maas-anvil}
 
-\addproject{Go MAAS Client}{code}
-{Canonical}{2024-06--Present}
-{Go client library wrapping the full MAAS REST API; adopted by the Terraform provider, maas-cli, and internal Canonical tooling as the standard Go interface for MAAS.}{https://github.com/canonical/gomaasclient}
+% \addproject{Go MAAS Client}{code}
+% {Canonical}{2024-06--Present}
+% {Go client library wrapping the full MAAS REST API; adopted by the Terraform provider, maas-cli, and internal Canonical tooling as the standard Go interface for MAAS.}{https://github.com/canonical/gomaasclient}
 
 \addproject{MAAS Internal CI}{code}
 {Canonical}{2024-06--Present}
 {Designs, builds, and maintains the MAAS team's Jenkins CI infrastructure, managing job definitions across build, test, security, and release pipelines for all MAAS product repositories. Implemented automated CVE scanning and SBOM generation for MAAS debs and snaps; introduced job documentation with automated validation to enforce documentation parity; built testflinger-based hardware test execution and metal testing workflows; automated backport creation from bug-fix merge proposals; and drove reliability improvements through pipeline refactoring, Launchpad-to-GitHub migration, and security integration into the delivery pipeline.}{https://maas.io}
 
-\addproject{Packer-MAAS}{code}
-{Canonical}{2023-10--Present}
-{Packer templates and scripts building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration. Used internally at Canonical for production MAAS image pipelines.}{https://github.com/canonical/packer-maas}
+% \addproject{Packer-MAAS}{code}
+% {Canonical}{2023-10--Present}
+% {Packer templates and scripts building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration. Used internally at Canonical for production MAAS image pipelines.}{https://github.com/canonical/packer-maas}
 
-\addproject{MAAS Terraform provider}{code}
-{Canonical}{2023-08--Present}
-{Published on the official Terraform Registry; enables CRUD management of MAAS resources including networking, machines, VM hosts, and DNS. Primary maintainer driving feature development and community engagement.}{https://github.com/canonical/terraform-provider-maas}
+% \addproject{MAAS Terraform provider}{code}
+% {Canonical}{2023-08--Present}
+% {Published on the official Terraform Registry; enables CRUD management of MAAS resources including networking, machines, VM hosts, and DNS. Primary maintainer driving feature development and community engagement.}{https://github.com/canonical/terraform-provider-maas}
 
-\addproject{MAAS Sites Manager}{code}
-{Canonical}{2023-04-06--Present}
-{Web-based administrative interface for managing MAAS site configurations, providing tools for bare-metal provisioning, network topology management, and datacenter operations through a React frontend backed by a Python API.}{https://github.com/canonical/maas-site-manager}
+% \addproject{MAAS Sites Manager}{code}
+% {Canonical}{2023-04-06--Present}
+% {Web-based administrative interface for managing MAAS site configurations, providing tools for bare-metal provisioning, network topology management, and datacenter operations through a React frontend backed by a Python API.}{https://github.com/canonical/maas-site-manager}
 
-\addproject{MAAS Images}{}
-{Canonical}{2023-03-28--Present}
-{Provides tooling and configuration for building MAAS ephemeral images from Ubuntu cloud image builds, producing the image streams that MAAS consumes for server commissioning, deployment, and ephemeral environments. Maintains the automated image promotion pipeline that determines which cloud image builds are promoted to production streams across all supported MAAS releases. Mirrored from Launchpad (lp:maas-images), where primary development and image building operations occur.}{https://launchpad.net/maas-images}
+% \addproject{MAAS Images}{}
+% {Canonical}{2023-03-28--Present}
+% {Provides tooling and configuration for building MAAS ephemeral images from Ubuntu cloud image builds, producing the image streams that MAAS consumes for server commissioning, deployment, and ephemeral environments. Maintains the automated image promotion pipeline that determines which cloud image builds are promoted to production streams across all supported MAAS releases. Mirrored from Launchpad (lp:maas-images), where primary development and image building operations occur.}{https://launchpad.net/maas-images}
 
-\addproject{MAAS}{code}
-{Canonical}{2022-06-14--Present}
-{MAAS (Metal as a Service) is a bare-metal provisioning platform for data center infrastructure management, automating server discovery, commissioning, and deployment. Built with Python, Django, Go, and Twisted, it handles DHCP, PXE boot, IPMI, and integrates with CI/CD pipelines for on-demand hardware orchestration across private clouds.}{https://maas.io/}
+% \addproject{MAAS}{code}
+% {Canonical}{2022-06-14--Present}
+% {MAAS (Metal as a Service) is a bare-metal provisioning platform for data center infrastructure management, automating server discovery, commissioning, and deployment. Built with Python, Django, Go, and Twisted, it handles DHCP, PXE boot, IPMI, and integrates with CI/CD pipelines for on-demand hardware orchestration across private clouds.}{https://maas.io/}
 
-\addproject{Skiylia Programming Language}{proj}
-{}{2022-12--2026-04}
-{A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.}{https://github.com/SK1Y101/Skiylia}
+% \addproject{Skiylia Programming Language}{proj}
+% {}{2022-12--2026-04}
+% {A dynamically-typed, object-oriented, bytecode-compiled programming language implemented in Python. Features a custom lexer, parser, bytecode compiler, and virtual machine with garbage collection. Includes comprehensive documentation hosted on ReadTheDocs, a standard library, and release management with tagged versions. Open-source with contributions from the community.}{https://github.com/SK1Y101/Skiylia}
 
-\addproject{Fitbit Pokétch}{}
-{}{2021-08--2026-04}
-{Fitbit clock face replicating the Pok\'etch from Pok\'emon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).}{https://github.com/SK1Y101/PoketchFitbit}
+% \addproject{Fitbit Pokétch}{}
+% {}{2021-08--2026-04}
+% {Fitbit clock face replicating the Pok\'etch from Pok\'emon Diamond/Pearl/Platinum, featuring 7 switchable applications: digital/analogue clocks, pedometer, stats view, manual counter, type-effectiveness calculator, calendar, and timer. Supports extensive customisation including button style, face/edge/screen colours, and mascot choice. Published on the Fitbit Gallery for both SDK 4.x (Versa 1/2/Lite) and SDK 6.0 (Versa 3/Sense).}{https://github.com/SK1Y101/PoketchFitbit}
 
-\addproject{YT Automation}{}
-{SkiylianSoftware}{2025-02--2026-01}
-{Python automation suite managing YouTube channel operations. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.}{https://github.com/SkiylianSoftware/YT-automation}
+% \addproject{YT Automation}{}
+% {SkiylianSoftware}{2025-02--2026-01}
+% {Python automation suite managing YouTube channel operations. Handles automatic playlist population from video titles, two-way Google Calendar synchronisation for release scheduling, and automated background music selection for video editing in Shotcut. Demonstrates OAuth, Google APIs, and event-driven pipeline architecture.}{https://github.com/SkiylianSoftware/YT-automation}
 
-\addproject{Ambistream}{}
-{}{2026-01}
-{Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), adding an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
+% \addproject{Ambistream}{}
+% {}{2026-01}
+% {Locally-hosted web application that streams YouTube audio to Bluetooth-connected devices, curated by weather and time of day. Successor to AutoBreezeBeats (2024), adding an orchestrator for automatic queuing from a database, a song metadata UI, and multi-process architecture managed through nox. Uses OpenWeatherMap API for context-aware music selection and ffmpeg for audio processing.}{https://github.com/SK1Y101/ambistream}
 
-\addproject{VisualNovel Template}{}
-{}{2025-10--2026-01}
-{A lightweight web-based Visual Novel engine template, supporting branching storylines, dynamic effects, and variations to ensure every playthrough feels unique. Stories are written in a simple markup format and compiled using a Python-based generator with built-in validation.}{https://github.com/SK1Y101/vn-template}
+% \addproject{VisualNovel Template}{}
+% {}{2025-10--2026-01}
+% {A lightweight web-based Visual Novel engine template, supporting branching storylines, dynamic effects, and variations to ensure every playthrough feels unique. Stories are written in a simple markup format and compiled using a Python-based generator with built-in validation.}{https://github.com/SK1Y101/vn-template}
 
 \addproject{Exoclock Data Release IV}{pub}
 {ExoClock}{2025-11}
 {Peer-reviewed paper in the ExoClock collaboration's Data Release IV, presenting a homogeneous catalogue of 620 updated exoplanet ephemerides. Contributed observational data and transit timing analysis from the TransitProject pipeline. Published on arXiv.}{https://arxiv.org/abs/2511.14407}
 
-\addproject{MAAS Ansible Playbooks}{code}
-{Canonical}{2022-09--2025-08}
-{An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
+% \addproject{MAAS Ansible Playbooks}{code}
+% {Canonical}{2022-09--2025-08}
+% {An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
 
-\addproject{MAAS Terraform E2E Tests}{}
-{Canonical}{2023-08-19--2024-04-10}
-{Python-based end-to-end test suite for the MAAS Terraform provider. Validates provider resource lifecycle, API interactions, and Terraform state consistency through automated scenarios. Designed for CI/CD pipeline integration to ensure provider stability across releases.}{https://github.com/canonical/maas-terraform-e2e-tests}
+% \addproject{MAAS Terraform E2E Tests}{}
+% {Canonical}{2023-08-19--2024-04-10}
+% {Python-based end-to-end test suite for the MAAS Terraform provider. Validates provider resource lifecycle, API interactions, and Terraform state consistency through automated scenarios. Designed for CI/CD pipeline integration to ensure provider stability across releases.}{https://github.com/canonical/maas-terraform-e2e-tests}
 
-\addproject{KOS Flight Computer}{code}
-{SkiylianSoftware}{2022-01--2024-04}
-{Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Features a multi-size BootUI system, real-time telemetry diagnostics, and a modular menu interface; expanded with automated sounding rocket guidance and boot scripting on active development branches.}{https://github.com/SkiylianSoftware/KOSFlightComputer}
+% \addproject{KOS Flight Computer}{code}
+% {SkiylianSoftware}{2022-01--2024-04}
+% {Flight computer system written in KerboScript for the kOS (Kerbal Operating System) mod in Kerbal Space Program, designed for Realism Overhaul saves. Features a multi-size BootUI system, real-time telemetry diagnostics, and a modular menu interface; expanded with automated sounding rocket guidance and boot scripting on active development branches.}{https://github.com/SkiylianSoftware/KOSFlightComputer}
 
-\addproject{Real Solar System (UK Sites)}{code}
-{SkiylianSoftware}{2024-04}
-{Contributed custom United Kingdom space launch sites and corresponding RemoteTech communications network configurations to the RealSolarSystem mod; improving accuracy and realism for UK-based spaceflight campaigns.}{https://github.com/SkiylianSoftware/RealSolarSystem}
+% \addproject{Real Solar System (UK Sites)}{code}
+% {SkiylianSoftware}{2024-04}
+% {Contributed custom United Kingdom space launch sites and corresponding RemoteTech communications network configurations to the RealSolarSystem mod; improving accuracy and realism for UK-based spaceflight campaigns.}{https://github.com/SkiylianSoftware/RealSolarSystem}
 
 \addproject{Balanced Ternary Computer}{proj}
 {}{2024-02}
 {Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
 
-\addproject{MAAS Dev Setup}{}
-{Canonical}{2023-09-13}
-{Automated shell-based provisioning script designed to streamline local development environment setup for the MAAS team. Orchestrates dependency installation and configuration through a single-command interface to ensure environment parity across developer machines.}{https://github.com/canonical/maas-dev-setup}
+% \addproject{MAAS Dev Setup}{}
+% {Canonical}{2023-09-13}
+% {Automated shell-based provisioning script designed to streamline local development environment setup for the MAAS team. Orchestrates dependency installation and configuration through a single-command interface to ensure environment parity across developer machines.}{https://github.com/canonical/maas-dev-setup}
 
 \addproject{`Variations on an Exoplanet Theme' Webinar}{talk}
 {British Astronomical Association}{2023-09}
 {Computational Modelling of Transit Timing Variations}{https://britastro.org/event/exoplanet-2023sep}
 
-\addproject{Season Clock}{}
-{}{2022-09--2023-04}
-{Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.}{https://github.com/SK1Y101/SeasonsClock}
+% \addproject{Season Clock}{}
+% {}{2022-09--2023-04}
+% {Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.}{https://github.com/SK1Y101/SeasonsClock}
 
-\addproject{Improved TTV Pipeline}{}
-{}{2023-03}
-{Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
+% \addproject{Improved TTV Pipeline}{}
+% {}{2023-03}
+% {Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
 
-\addproject{TransitProject}{code}
-{Personal}{2022-02-09--2022-05-24}
-{Python analysis framework for detecting exoplanet transit timing variations (TTVs) from photometric light curves. Implements statistical modeling and signal processing pipelines using NumPy, SciPy, and Astropy to identify deviations from periodic transit schedules. Demonstrates scientific computing and data analysis capabilities applied to exoplanet research.}{https://github.com/SK1Y101/TransitProject}
+% \addproject{TransitProject}{code}
+% {Personal}{2022-02-09--2022-05-24}
+% {Python analysis framework for detecting exoplanet transit timing variations (TTVs) from photometric light curves. Implements statistical modeling and signal processing pipelines using NumPy, SciPy, and Astropy to identify deviations from periodic transit schedules. Demonstrates scientific computing and data analysis capabilities applied to exoplanet research.}{https://github.com/SK1Y101/TransitProject}
 
-\addproject{Data Science Project}{}
-{AiCore}{2022-05}
-{End-to-end data science pipeline predicting football match outcomes, covering: EDA and data cleaning with Pandas; feature engineering for team performance metrics; remote database upload via AWS RDS, PostgreSQL, and SQLAlchemy; model training and selection using sklearn (Logistic Regression, MLP, Naive Bayes, Decision Tree) with feature selection via SelectKBest; and inference on new season data.}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
+% \addproject{Data Science Project}{}
+% {AiCore}{2022-05}
+% {End-to-end data science pipeline predicting football match outcomes, covering: EDA and data cleaning with Pandas; feature engineering for team performance metrics; remote database upload via AWS RDS, PostgreSQL, and SQLAlchemy; model training and selection using sklearn (Logistic Regression, MLP, Naive Bayes, Decision Tree) with feature selection via SelectKBest; and inference on new season data.}{https://github.com/SK1Y101/Football-Match-Outcome-Prediction}
 
 \addproject{Exoplanet TTV Masters Thesis}{pub}
 {University of Portsmouth}{2022-05-25}
 {Masters: \`Determining The Parameters of Exoplanetary Candidates From Transit Timing Variations.'}{https://sk1y101.github.io/assets/pdf/TransitDissertation.pdf}
 
-\addproject{Data Collection Pipeline}{}
-{AiCore}{2022-02--2022-04}
-{Full-stack cloud-based web scraper targeting the NASA Exoplanet Catalogue. Built with Selenium 4 for dynamic page interaction, UUID v4/JSON for data storage, and Boto3 for AWS S3 upload. Containerised with Docker and deployed on EC2 with Selenium Grid for distributed scraping. Monitored via Prometheus and Grafana dashboards with automated CI/CD and cron-based daily restarts. Scrapes all 4940+ known exoplanets.}{https://github.com/SK1Y101/Data_Collection_Pipeline}
+% \addproject{Data Collection Pipeline}{}
+% {AiCore}{2022-02--2022-04}
+% {Full-stack cloud-based web scraper targeting the NASA Exoplanet Catalogue. Built with Selenium 4 for dynamic page interaction, UUID v4/JSON for data storage, and Boto3 for AWS S3 upload. Containerised with Docker and deployed on EC2 with Selenium Grid for distributed scraping. Monitored via Prometheus and Grafana dashboards with automated CI/CD and cron-based daily restarts. Scrapes all 4940+ known exoplanets.}{https://github.com/SK1Y101/Data_Collection_Pipeline}
 
-\addproject{KOSFlightController}{}
-{Personal}{2022-01-02--2022-02-01}
-{KerboScript flight controller for Kerbal Space Program’s Realism Overhaul, handling automated ascent guidance, circularisation, and landing burns with real‑time telemetry feedback. Orchestrates multi‑stage vehicle sequences and abort logic via event‑driven scripts, leveraging KOS’s hardware interface for precise throttle and attitude control. Demonstrates embedded scripting in a modded simulation environment for complex aerospace automation.}{https://github.com/SK1Y101/KOSFlightController}
+% \addproject{KOSFlightController}{}
+% {Personal}{2022-01-02--2022-02-01}
+% {KerboScript flight controller for Kerbal Space Program’s Realism Overhaul, handling automated ascent guidance, circularisation, and landing burns with real‑time telemetry feedback. Orchestrates multi‑stage vehicle sequences and abort logic via event‑driven scripts, leveraging KOS’s hardware interface for precise throttle and attitude control. Demonstrates embedded scripting in a modded simulation environment for complex aerospace automation.}{https://github.com/SK1Y101/KOSFlightController}
 
-\addproject{Computer Vision Rock-Paper-Scissors}{}
-{AiCore}{2022-02}
-{Interactive Rock-Paper-Scissors game using computer vision. A Keras/TensorFlow model trained via Google Teachable-Machine recognises four gestures (rock, paper, scissors, null) in real-time through a webcam feed processed with OpenCV. Includes both a terminal-based fallback and the full CV-enabled game loop.}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
+% \addproject{Computer Vision Rock-Paper-Scissors}{}
+% {AiCore}{2022-02}
+% {Interactive Rock-Paper-Scissors game using computer vision. A Keras/TensorFlow model trained via Google Teachable-Machine recognises four gestures (rock, paper, scissors, null) in real-time through a webcam feed processed with OpenCV. Includes both a terminal-based fallback and the full CV-enabled game loop.}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
 
-\addproject{GWProject}{}
-{Personal}{2021-06-03}
-{Analysis framework for LIGO gravitational wave data, implementing matched filtering and parameter estimation pipelines in Jupyter Notebooks. Leveraged public LIGO Open Science Center datasets and PyCBC library for candidate event detection. Demonstrates signal processing, statistical analysis, and scientific computing workflows.}{https://github.com/SK1Y101/GWProject}
+% \addproject{GWProject}{}
+% {Personal}{2021-06-03}
+% {Analysis framework for LIGO gravitational wave data, implementing matched filtering and parameter estimation pipelines in Jupyter Notebooks. Leveraged public LIGO Open Science Center datasets and PyCBC library for candidate event detection. Demonstrates signal processing, statistical analysis, and scientific computing workflows.}{https://github.com/SK1Y101/GWProject}
 
 \addproject{IMBH Glitch Detection Bachelors Thesis}{pub}
 {University of Portsmouth}{2021-05}
