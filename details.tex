@@ -221,7 +221,7 @@
 % Projects and Publications
 
 % \addproject{name}{icon}{affiliation}{date}{details}{link}
-% Ongoing entries, sorted by start date descending
+
 \addproject{Ternary Computer}{}
 {fun}{2026-05-25--Present}
 {Designing a three value logic computer}{https://sk1y101.github.io/blog/category/ternary-computer/}
@@ -233,10 +233,6 @@
 \addproject{Curriculum Vitae; LaTeX}{code}
 {Personal}{2026-05-18--Present}
 {A fully custom LaTeX CV class with pastel fairycore aesthetic, rainbow section headers, sidebar with grey panel background, circular profile photo, and a Python-based JSON Resume export pipeline. Built with automated PDF releases on every push to main.}{https://github.com/SK1Y101/cv}
-
-\addproject{maas-terraform-modules}{}
-{Personal}{2025-09-10--Present}
-{Terraform module collection enabling deployment of high-availability charmed MAAS clusters. Modules encapsulate provider configuration, resource composition, and lifecycle management for production-grade environments. Integrates with existing Terraform workflows to automate MAAS infrastructure provisioning.}{https://github.com/SK1Y101/maas-terraform-modules}
 
 \addproject{Terraform MAAS bootstrap}{code}
 {Canonical}{2025-09--Present}
@@ -258,10 +254,6 @@
 {Canonical}{2024-06--Present}
 {Owner and primary maintainer of the MAAS team's Jenkins CI infrastructure. Designed and manage automated build, test, and release pipelines across multiple MAAS product repositories, ensuring reliable delivery of MAAS releases.}{https://maas.io}
 
-\addproject{Metal As A Service}{code}
-{Canonical}{2024-03--Present}
-{Core engineering team member building and maintaining the platform that transforms physical servers into cloud-like resources -- automating bare-metal provisioning, DHCP, DNS, IPAM, and full lifecycle management of data centre hardware.}{https://maas.io}
-
 \addproject{Packer-MAAS}{code}
 {Canonical}{2023-10--Present}
 {Packer templates and scripts building custom deployable OS images for MAAS, supporting multiple operating systems and cloud-init integration. Used internally at Canonical for production MAAS image pipelines.}{https://github.com/canonical/packer-maas}
@@ -272,7 +264,7 @@
 
 \addproject{maas-site-manager}{}
 {canonical}{2023-04-06--Present}
-{We need to produce a concise 1-3 sentence description for a project "maas-site-manager". Provided details: Official MAAS Site Manager repository. Bugs tracked on Launchpad. Topics: bare-metal, baremetal, baremetal-provisioning, datacenter, maas, private-cloud, python3, react. Language: Python. We need to describe what it does: MAAS (Metal As A Service) Site Manager likely a UI for managing MAAS sites, maybe a web application with React frontend, Python backend, handling bare-metal provisioning, private cloud datacenter operations. Use technical language, present tense (assuming ongoing). Focus on what it does: manages MAAS sites, provisions bare-metal, integrates with MAAS API, provides UI for datacenter admin, maybe uses React for frontend, Python backend, orchestrates provisioning workflows, integrates with Launchpad for bug tracking. We need to avoid first person, no em-d}{https://github.com/canonical/maas-site-manager}
+{Web-based administrative interface for managing MAAS site configurations, providing tools for bare-metal provisioning, network topology management, and datacenter operations through a React frontend backed by a Python API.}{https://github.com/canonical/maas-site-manager}
 
 \addproject{maas-images}{}
 {canonical}{2023-03-28--Present}
@@ -293,11 +285,6 @@
 \addproject{sk1y101}{}
 {Personal}{2021-12-05--Present}
 {Personal portfolio and digital identity platform automating content aggregation from GitHub, LinkedIn, and personal APIs. Showcases projects, blog posts, and professional activity with dynamic rendering via a static site generator and serverless functions. Demonstrates API integration, CI/CD pipeline deployment, and responsive frontend architecture.}{https://github.com/SK1Y101/sk1y101}
-
-% Completed, sorted by end date descending
-\addproject{SkiylianSoftware.github.io}{}
-{SkiylianSoftware}{2026-05-21}
-{Python-based static site generator for a personal channel website, deployed on GitHub Pages. Automates content updates through CI/CD pipelines and integrates external API data for dynamic media showcases.}{https://github.com/SkiylianSoftware/SkiylianSoftware.github.io}
 
 \addproject{SkiylianSoftware.github.io}{}
 {SkiylianSoftware}{2026-05-21}
@@ -327,10 +314,6 @@
 {ExoClock}{2025-11}
 {Peer-reviewed paper in the ExoClock collaboration's Data Release IV, presenting a homogeneous catalogue of 620 updated exoplanet ephemerides. Contributed observational data and transit timing analysis from the TransitProject pipeline. Published on arXiv.}{https://arxiv.org/abs/2511.14407}
 
-\addproject{maas}{}
-{Personal}{2022-06-28--2025-08-29}
-{Automates bare-metal server discovery, provisioning, and lifecycle management using IPMI, PXE, and DHCP. Integrates with cloud orchestration tools to deliver on-demand physical infrastructure via REST API and CLI. Written in Python with a plugin architecture for custom hardware and networking configurations.}{https://github.com/SK1Y101/maas}
-
 \addproject{MAAS Ansible Playbooks}{code}
 {Canonical}{2022-09--2025-08}
 {An Ansible playbook for full installation and configuration of MAAS, providing automated bootstrapping of the MAAS snap, initial admin user, and networking setup.}{https://github.com/maas/MAAS-ansible-playbook}
@@ -343,11 +326,7 @@
 {Canonical}{2025-05}
 {Hands-on training material created and delivered at the Canonical Berlin Commercial Sprint 2025. Inducted field engineers in deploying and managing MAAS through the Anvil approach using Terraform, Juju, and charmed operators, enabling them to stand up production MAAS environments for customers.}{https://github.com/SK1Y101/tf-charmed-maas-training}
 
-\addproject{terraform-provider-maas}{}
-{Personal}{2023-08-14--2025-04-28}
-{Terraform provider for MAAS enabling infrastructure-as-code management of bare-metal servers, networks, and VM hosts through the MAAS API. Implements the standard Terraform provider pattern in Go, supporting resource create/read/update/delete operations for MAAS machines, subnets, DNS domains, and other core entities. Integrates with Terraform’s plugin framework for declarative provisioning workflows.}{https://github.com/SK1Y101/terraform-provider-maas}
-
-\addproject{sprint-report}{}
+\addproject{Sprint Report}{}
 {Personal}{2025-02-13}
 {Python utility generating Markdown reports from Jira sprint data. Fetches issues via the Jira REST API and formats them into structured summaries including status, assignees, and story points. Simplifies sprint retrospectives and stakeholder communication through automated report generation.}{https://github.com/SK1Y101/sprint-report}
 
@@ -355,17 +334,13 @@
 {SkiylianSoftware}{2025-02}
 {Contributed to the Python wrapper for the YouTube Data API by implementing automated token-refresh login examples and refining grammar across library documentation to improve developer onboarding.}{https://github.com/SkiylianSoftware/python-youtube}
 
-\addproject{operator-libs-linux}{}
-{Personal}{2024-10-03}
-{Python library suite providing core utility functions for the operator framework on Linux systems. Facilitates low-level system interactions and provides standardized interfaces for managing Linux-specific configurations and processes. Enhances framework modularity by decoupling platform-specific logic from high-level operator implementations.}{https://github.com/SK1Y101/operator-libs-linux}
-
-\addproject{skiy-python-template}{}
+\addproject{Skiy Python Template}{}
 {Personal}{2024-09-08}
 {Automated Python project template with pre-configured CI/CD, linting, and testing pipelines. Enforces consistent project structure and code quality standards, streamlining repository setup and maintenance.}{https://github.com/SK1Y101/skiy-python-template}
 
 \addproject{maas-ansible-playbook}{}
 {canonical}{2022-09-06--2024-07-22}
-{We need to produce a description for maas-ansible-playbook: An Ansible playbook for installing and configuring MAAS. Language: Jinja (so templates). Topics not given. Need to write 1-3 sentences, present tense if ongoing. Likely ongoing. Focus on what it does: uses Ansible playbook with Jinja templates to provision and configure MAAS (Metal as a Service). Should mention tasks: deploying MAAS, configuring regions, racks, DHCP, DNS, images, etc. Use technical language. No first person, no em-dashes, no quotes. Provide concise description. Let's craft: "An Ansible playbook that automates the deployment and configuration of MAAS (Metal as a Service) using Jinja2 templated tasks to provision region and rack controllers, set up networking services, and import boot images." That's one sentence. Could add second: "It idempotently manages MAAS services, enabling repeatable}{https://github.com/canonical/maas-ansible-playbook}
+{Ansible playbook that automates deployment and configuration of MAAS region and rack controllers using Jinja2 templated tasks, idempotently managing networking services and boot image imports across target environments.}{https://github.com/canonical/maas-ansible-playbook}
 
 \addproject{AutoBreezeBeats}{}
 {Personal}{2024-06-19--2024-07-12}
@@ -375,7 +350,7 @@
 {canonical}{2023-08-17--2024-04-15}
 {Unofficial async Python client library for MAAS, providing programmatic access to the MAAS API with full asyncio support. Enables efficient concurrent management of servers, networks, and resources through modern Python async/await patterns.}{https://github.com/canonical/python-libmaas}
 
-\addproject{maas-terraform-e2e-tests}{}
+\addproject{MAAS Terraform E2E Tests}{}
 {canonical}{2023-08-19--2024-04-10}
 {Python-based end-to-end test suite for the MAAS Terraform provider. Validates provider resource lifecycle, API interactions, and Terraform state consistency through automated scenarios. Designed for CI/CD pipeline integration to ensure provider stability across releases.}{https://github.com/canonical/maas-terraform-e2e-tests}
 
@@ -383,29 +358,9 @@
 {SkiylianSoftware}{2024-04-08}
 {Centralized repository and configuration management system for Automated Realism mods within the KOS ecosystem. Facilitates version control and dependency tracking for complex mod lists used in high-fidelity RSS video production. Provides a structured framework for maintaining mod compatibility across diverse simulation environments.}{https://github.com/SkiylianSoftware/AutomatedRealismMods}
 
-\addproject{CKAN}{}
-{SkiylianSoftware}{2024-04-08}
-{Centralized data repository and management platform for the Comprehensive Kerbal Archive Network. Orchestrates large-scale dataset indexing, retrieval, and versioning to ensure data integrity across distributed environments. Implements structured metadata schemas and API-driven access patterns to streamline asset management and collaborative research.}{https://github.com/SkiylianSoftware/CKAN}
-
-\addproject{KOS}{}
-{SkiylianSoftware}{2024-04-08}
-{Fully programmable autopilot modification for Kerbal Space Program that enables autonomous flight control and mission execution. Implements complex orbital mechanics logic and real-time decision-making algorithms to automate spacecraft navigation. Provides a highly extensible framework for custom flight scripts and mission-specific automation.}{https://github.com/SkiylianSoftware/KOS}
-
-\addproject{Principia}{}
-{SkiylianSoftware}{2024-04-08}
-{Principia implements real-time n-body and extended-body gravitation for Kerbal Space Program, replacing the stock patched-conic approximation with high-precision numerical integration in C++. Handles perturbed orbital mechanics, tidal effects, and multi-body resonance for the game's physics engine, using custom integration routines and double-precision floating point for trajectory propagation. Demonstrates systems programming, numerical methods, and integration with a large existing codebase via a native plugin architecture.}{https://github.com/SkiylianSoftware/Principia}
-
-\addproject{RP-1}{}
-{SkiylianSoftware}{2024-04-08}
-{Modular career progression framework for Kerbal Space Program's Realism Overhaul mod stack, implementing historical technology trees and mission milestones through extensive ModuleManager configuration patches. Integrates with RealFuels, Kerbalism, and other realism mods to enforce realistic launch costs and development timelines across thousands of config files. Scales progression from early sounding rockets to interplanetary missions via config-driven architecture and custom contract packs.}{https://github.com/SkiylianSoftware/RP-1}
-
 \addproject{SkiylianSoftware}{}
 {SkiylianSoftware}{2024-04-07}
 {SkiylianSoftware serves as a central GitHub portfolio aggregating personal projects in automation, web applications, and CLI tooling. It curates a collection of tools demonstrating expertise in Python, API integration, event-driven architecture, and CI/CD pipeline deployment. The portfolio features applications for YouTube channel management, context-aware music streaming, and documentation quality assurance.}{https://github.com/SkiylianSoftware/SkiylianSoftware}
-
-\addproject{snap-preload}{}
-{canonical}{2024-04-02}
-{C preload library that intercepts system function calls within snap packages, overriding specific functions to resolve confinement-related compatibility issues. Leverages the LD\_PRELOAD mechanism to transparently hook system libraries, enabling snaps to operate correctly across diverse environments. Demonstrates deep understanding of Linux dynamic linking, snap confinement internals, and low-level system programming.}{https://github.com/canonical/snap-preload}
 
 \addproject{KOS Flight Computer}{code}
 {SkiylianSoftware}{2022-01--2024-04}
@@ -415,14 +370,6 @@
 {SkiylianSoftware}{2024-04}
 {Contributed custom United Kingdom space launch sites and corresponding RemoteTech communications network configurations to the RealSolarSystem mod; improving accuracy and realism for UK-based spaceflight campaigns.}{https://github.com/SkiylianSoftware/RealSolarSystem}
 
-\addproject{ansible-collection}{}
-{Personal}{2024-03-28}
-{We need to write a project description for ansible-collection: Ansible Collection for interacting with MAAS. Language: Python. No other details given. We need to infer typical functionality: provides Ansible modules, plugins for MAAS (Metal as a Service) to manage machines, networks, etc. Should focus on what it does: enables provisioning, configuration, management of MAAS resources via Ansible playbooks. Use technical language. 1-3 sentences, present tense (ongoing). No first person. No em-dashes. No quotes. Provide specifics: uses Ansible collection structure, includes modules for machine deployment, interface configuration, etc., leverages MAAS REST API, written in Python, supports idempotent operations, integrates with Ansible Tower/AWX, etc. Write: "Ansible Collection for MAAS provides a set of Python‑based modules and plugins that enable idempotent provisioning, configuration, and lifecycle management of physical and virtual machines through}{https://github.com/SK1Y101/ansible-collection}
-
-\addproject{test}{}
-{Personal}{2024-03-27--2024-03-28}
-{Internal testing framework for automated validation of CI/CD pipelines. Integrates with GitHub Actions for unit and integration testing, and pylint for code quality checks. Demonstrates pytest fixtures, coverage reporting, and command-line interface design.}{https://github.com/SK1Y101/test}
-
 \addproject{maas.io}{}
 {canonical}{2023-03-29--2024-03-27}
 {Official website for the MAAS (Metal as a Service) project, serving product documentation, release notes, and community resources. Built with responsive HTML/CSS/JS for cross-device accessibility and integrates with the MAAS API for dynamic content delivery. Supports open-source contributions through Hacktoberfest and adheres to web-and-design best practices.}{https://github.com/canonical/maas.io}
@@ -431,7 +378,7 @@
 {}{2024-02}
 {Exploratory project designing a balanced ternary logic computer from first principles. Covers radix economy comparisons between binary and ternary, balanced ternary negation and addition circuits, and practical considerations for hardware implementation. Documented in a technical blog post series.}{https://sk1y101.github.io/blog/2024/ternary-computer/}
 
-\addproject{maas-openapi-yaml}{}
+\addproject{MAAS OpenAPI YAML}{}
 {canonical}{2022-11-21--2023-09-15}
 {Centralised repository for the MAAS OpenAPI YAML specification, serving as the single source of truth for the REST API contract. Enables automated client SDK generation, documentation builds, and contract validation within the CI pipeline. Ensures consistent API versioning and change tracking across all MAAS consumers and internal tooling.}{https://github.com/canonical/maas-openapi-yaml}
 
@@ -443,81 +390,21 @@
 {British Astronomical Association}{2023-09}
 {Computational Modelling of Transit Timing Variations}{https://britastro.org/event/exoplanet-2023sep}
 
-\addproject{maas-ansible-playbook}{}
-{Personal}{2022-09-06--2023-08-18}
-{Ansible playbook for deploying and configuring MAAS (Metal as a Service) environments. Automates installation of MAAS components, network setup, and resource management using Jinja-templated configurations. Enables repeatable, idempotent provisioning of bare-metal orchestration infrastructure.}{https://github.com/SK1Y101/maas-ansible-playbook}
-
-\addproject{python-libmaas}{}
-{Personal}{2023-08-17}
-{Unofficial Python client library for MAAS (Metal as a Service), providing a programmatic interface for provisioning, managing, and automating bare-metal server lifecycles. Enables REST API interaction for tasks such as node discovery, image deployment, and hardware configuration, streamlining infrastructure automation workflows.}{https://github.com/SK1Y101/python-libmaas}
-
-\addproject{Thrive}{}
-{Personal}{2023-08-10}
-{Thrive is an open-source evolution simulation game developed in C\#, implementing a biology engine for speciation, genetics, and ecosystem dynamics. The project features a modular architecture with extensible gameplay systems, leveraging C\# for performance-critical simulation logic.}{https://github.com/SK1Y101/Thrive}
-
-\addproject{maas-site-manager}{}
-{Personal}{2023-04-06--2023-07-12}
-{Python-based management utility for orchestrating MAAS site operations and infrastructure configurations. Facilitates automated deployment workflows and system administration tasks through a centralized interface. Provides integrated bug tracking and lifecycle management via Launchpad integration.}{https://github.com/SK1Y101/maas-site-manager}
-
-\addproject{rebound}{}
-{Personal}{2023-04-15}
-{N-body simulation code in C integrating gravitational dynamics for arbitrary particle systems. Supports multiple integration schemes including symplectic, high-order, and hybrid parallelization with MPI and OpenMP for large-scale astrophysical simulations. Used in research for planetary system dynamics, planetesimal formation, and galactic-scale problems.}{https://github.com/SK1Y101/rebound}
-
-\addproject{reboundx}{}
-{Personal}{2023-04-15}
-{Python library extending the REBOUND N-body integration package to incorporate custom force models. Implements specialized gravitational and non-gravitational accelerations within the integration framework to facilitate high-fidelity astrophysical simulations. Developed and validated using Jupyter Notebooks for interactive prototyping and performance analysis.}{https://github.com/SK1Y101/reboundx}
-
-\addproject{reboundx}{}
-{Personal}{2023-04-15}
-{Python library extending the REBOUND N-body integration package to incorporate custom force models. Implements specialized gravitational and non-gravitational accelerations within the integration framework to facilitate high-fidelity astrophysical simulations. Developed and validated using Jupyter Notebooks for interactive prototyping and performance analysis.}{https://github.com/SK1Y101/reboundx}
-
 \addproject{Season Clock}{}
 {}{2022-09--2023-04}
 {Fitbit clock face displaying seasonal weather information and time. Designed for SDK 4.x devices with a focus on minimalist weather-aware aesthetics.}{https://github.com/SK1Y101/SeasonsClock}
-
-\addproject{maas.io}{}
-{Personal}{2023-03-06}
-{Official website for MAAS (Metal as a Service), delivering product documentation, release notes, and download resources. Static site built with HTML and automated CI/CD deployment, ensuring up-to-date content aligned with software releases. Acts as the primary user-facing entry point for the MAAS community.}{https://github.com/SK1Y101/maas.io}
 
 \addproject{Improved TTV Pipeline}{}
 {}{2023-03}
 {Enhanced pipeline for fitting transit timing variation (TTV) signals to exoplanetary data, building on the methodology developed in the Masters thesis. Improves signal detection and parameter estimation for non-transiting planet perturbations through refined analytical models.}{https://github.com/SK1Y101/Improved-TTV-Pipeline}
 
-\addproject{maas-dev-setup}{}
-{Personal}{2023-01-20}
-{Automation tool that provisions and configures a full MAAS environment with a single command. Handles system dependencies, network setup, and MAAS API initialisation for rapid deployment of a bare-metal provisioning cluster. Streamlines environment setup for development and testing purposes.}{https://github.com/SK1Y101/maas-dev-setup}
-
-\addproject{readthedocs.org}{}
-{Personal}{2022-12-12}
-{Open-source documentation hosting platform that automatically builds, versions, and hosts documentation from Sphinx and MkDocs projects. Integrates with Git repositories (GitHub, GitLab, Bitbucket) via webhooks for continuous deployment, supporting multiple version branches and custom domains. Written in Python, it manages build environments, caching, and static site generation at scale.}{https://github.com/SK1Y101/readthedocs.org}
-
-\addproject{KOS}{}
-{Personal}{2022-12-11}
-{Programmable autopilot framework for Kerbal Space Program implemented in C\#. Provides a highly customizable API for automated orbital mechanics, trajectory management, and spacecraft control through modular mission logic. Enables complex, scriptable flight maneuvers by interfacing directly with the game's physics engine.}{https://github.com/SK1Y101/KOS}
-
-\addproject{tutorial-template}{}
-{Personal}{2022-12-11}
-{Provides a template repository for documentation tutorials using Read the Docs, enabling rapid setup of project documentation with Sphinx and a preconfigured build pipeline. Automates the initial documentation structure and configuration, streamlining the deployment of consistent, versioned tutorials.}{https://github.com/SK1Y101/tutorial-template}
-
 \addproject{ansible-collection}{}
 {canonical}{2022-09-29}
 {Ansible Collection providing modules and roles for automating MAAS (Metal as a Service) infrastructure management. Interfaces with the MAAS API to handle machine discovery, commissioning, deployment, and network configuration, enabling infrastructure-as-code workflows for bare-metal environments. Uses Python and Ansible’s dynamic inventory system for scalable provisioning.}{https://github.com/canonical/ansible-collection}
 
-\addproject{ansible-examples}{}
-{Personal}{2022-09-02}
-{Starter Ansible playbook examples demonstrating feature composition and workflow orchestration across multiple playbooks. Uses Jinja templating for dynamic configuration generation and illustrates integration with community-maintained roles from Ansible Galaxy for deploying common applications. Provides a foundation for learning idempotent infrastructure automation and multi-playbook pipelines.}{https://github.com/SK1Y101/ansible-examples}
-
-\addproject{ExampleDocumentation}{}
-{Personal}{2022-05-26}
-{ExampleDocumentation serves as a centralized guide for writing and maintaining project documentation, providing templates, style conventions, and best practices. Integrates with CI pipelines to automate validation of documentation structure and formatting, ensuring consistency across contributions.}{https://github.com/SK1Y101/ExampleDocumentation}
-
 \addproject{TransitProject}{code}
 {Personal}{2022-02-09--2022-05-24}
 {Python analysis framework for detecting exoplanet transit timing variations (TTVs) from photometric light curves. Implements statistical modeling and signal processing pipelines using NumPy, SciPy, and Astropy to identify deviations from periodic transit schedules. Demonstrates scientific computing and data analysis capabilities applied to exoplanet research.}{https://github.com/SK1Y101/TransitProject}
-
-\addproject{exohammer}{}
-{Personal}{2022-05-09}
-{MCMC-based Python package for inferring exoplanet orbital parameters from transit photometry data. Implements parallel tempering and adaptive sampling to explore high-dimensional parameter spaces, leveraging NumPy and SciPy for numerical computation. Provides CLI and library interfaces for reproducible exoplanet modelling with seed control, trace logging, and support for common data formats.}{https://github.com/SK1Y101/exohammer}
 
 \addproject{Data Science Project}{}
 {AiCore}{2022-05}
@@ -539,41 +426,13 @@
 {AiCore}{2022-02}
 {Interactive Rock-Paper-Scissors game using computer vision. A Keras/TensorFlow model trained via Google Teachable-Machine recognises four gestures (rock, paper, scissors, null) in real-time through a webcam feed processed with OpenCV. Includes both a terminal-based fallback and the full CV-enabled game loop.}{https://github.com/SK1Y101/Computer-Vision-Rock-Paper-Scissors}
 
-\addproject{PySkiylia-1}{}
-{Personal}{2021-03-18--2021-07-05}
-{Dynamically typed, object-oriented programming language implemented in Python with a custom interpreter. Features extensible syntax, runtime type checking, and support for inheritance and polymorphism, demonstrating compiler design and language runtime architecture.}{https://github.com/SK1Y101/PySkiylia-1}
-
-\addproject{Superalgos}{}
-{Personal}{2021-06-27}
-{Open-source cryptocurrency trading bot enabling visual design of algorithmic trading strategies. Integrates real-time charting, data-mining, backtesting, paper trading, and multi-server deployment for automated Bitcoin and cryptocurrency trading, built in JavaScript with a modular architecture.}{https://github.com/SK1Y101/Superalgos}
-
 \addproject{GWProject}{}
 {Personal}{2021-06-03}
 {Analysis framework for LIGO gravitational wave data, implementing matched filtering and parameter estimation pipelines in Jupyter Notebooks. Leveraged public LIGO Open Science Center datasets and PyCBC library for candidate event detection. Demonstrates signal processing, statistical analysis, and scientific computing workflows.}{https://github.com/SK1Y101/GWProject}
 
-\addproject{GxEPD}{}
-{Personal}{2021-06-03}
-{We need to produce a 1-3 sentence description for project GxEPD: an E-Paper display library with common base class and separate IO class for Arduino. Language: C. Should focus on what it does. Use present tense if ongoing; likely ongoing. Provide technical language, mention architecture: base class, IO abstraction, supports various e-paper displays, uses SPI/I2C, etc. No first person, no em-dashes, no quotes. Keep 1-3 sentences. Let's craft: "Provides a C library for Arduino that abstracts e‑paper display hardware through a common base class and pluggable IO layer, enabling drivers for SPI, I2C and parallel interfaces to control a wide range of GDEW015, GDEH029 and similar panels. Supports partial updates, grayscale rendering and font handling while keeping memory footprint low for microcontroller environments." That's 2 sentences. Ensure no em-dashes}{https://github.com/SK1Y101/GxEPD}
-
 \addproject{IMBH Glitch Detection Bachelors Thesis}{pub}
 {University of Portsmouth}{2021-05}
 {Bachelors: \`Distinguishing Intermediate Mass Black Hole Mergers From Short Duration Glitches.'}{https://sk1y101.github.io/assets/pdf/GWProjectFinalReport.pdf}
-
-\addproject{just-the-docs}{}
-{Personal}{2021-04-02}
-{A modern, highly customizable Jekyll theme for documentation sites with built-in search. Implements responsive layout and styling via SCSS, enabling flexible navigation and theming for project documentation.}{https://github.com/SK1Y101/just-the-docs}
-
-\addproject{minimal}{}
-{Personal}{2021-04-01}
-{Minimal generates responsive and customizable websites for GitHub Pages utilizing Jekyll and SCSS for styling. It provides a lightweight foundation for bloggers and developers to create and publish content online. The theme leverages GitHub Pages' static site generation capabilities for efficient deployment and scalability.}{https://github.com/SK1Y101/minimal}
-
-\addproject{LOaBIS}{code}
-{Personal}{2018-10-04--2021-03-27}
-{Local Operations and Basic Intelligence System (LOaBIS) provides automated decision-making and workflow orchestration for GitHub repository management. Implements Mergify-based rule engines and Python event handlers to triage issues, manage pull request queues, and enforce project policies. Demonstrates event-driven architecture and integration with GitHub’s API for intelligent repository operations.}{https://github.com/SK1Y101/LOaBIS}
-
-\addproject{all-contributors}{}
-{Personal}{2021-03-18}
-{Automates the recognition of diverse project contributors by integrating non-code contributions into repository documentation. Facilitates community engagement through standardized workflows for acknowledging documentation, design, and community management efforts. Leverages GitHub actions and automated workflows to maintain up-to-date contributor lists.}{https://github.com/SK1Y101/all-contributors}
 
 % hobbies and interests
 \addhobby{Space \& Spaceflight}{Natural or artificial, if it's found outside of Earth's atmosphere, I probably like it. Exoplanets and deep space probes are my favourite. I keep an eye on every mission that leaves Earth.}

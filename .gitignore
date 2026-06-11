@@ -27,3 +27,4 @@ __pycache__/
 *.swp
 main.pdf
 .opencode
+resume.json

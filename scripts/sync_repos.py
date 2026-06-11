@@ -151,6 +151,58 @@ def log(msg: str):
     print(f"[sync] {msg}", flush=True)
 
 
+# Words that should remain uppercase in project names
+_ACRONYMS = {
+    "maas",
+    "api",
+    "ci",
+    "cli",
+    "dns",
+    "dhcp",
+    "ipmi",
+    "pxe",
+    "url",
+    "http",
+    "ssh",
+    "ssl",
+    "json",
+    "yaml",
+    "html",
+    "css",
+    "js",
+    "ui",
+    "ux",
+    "pdf",
+    "sdk",
+    "rest",
+    "crd",
+    "aws",
+    "ttv",
+    "e2e",
+    "ld",
+    "tf",
+    "sk1y101",
+}
+
+
+def _pretty_project_name(raw: str) -> str:
+    """Convert kebab-case repo name to a readable project title.
+
+    ``maas-terraform-modules`` → ``MAAS Terraform Modules``
+    ``python-youtube`` → ``Python YouTube``
+    """
+    parts = re.split(r"[-_\s]", raw)
+    words = []
+    for p in parts:
+        if not p:
+            continue
+        if p.lower() in _ACRONYMS:
+            words.append(p.upper())
+        else:
+            words.append(p.capitalize())
+    return " ".join(words)
+
+
 # ---------------------------------------------------------------------------
 # Rate-limit state tracking for LLM (OpenRouter) and GitHub API
 # ---------------------------------------------------------------------------
@@ -555,8 +607,8 @@ def user_has_commits(repo_full: str, token: str) -> bool:
     return bool(commits and isinstance(commits, list) and commits)
 
 
-def fetch_readme(repo_full: str, token: str) -> str:
-    """Fetch the first 2000 chars of a repo's README for LLM context."""
+def fetch_readme_or_tree(repo_full: str, token: str) -> str:
+    """Fetch README (first 2000 chars), or fall back to root file listing."""
     if not token:
         return ""
     data = gh_api(f"/repos/{repo_full}/readme", token)
@@ -566,6 +618,15 @@ def fetch_readme(repo_full: str, token: str) -> str:
             return raw[:2000]
         except Exception:
             pass
+
+    # No README — show root file listing for code context
+    contents = gh_api(f"/repos/{repo_full}/contents", token)
+    if isinstance(contents, list) and contents:
+        lines = []
+        for item in contents[:30]:
+            t = "dir" if item.get("type") == "dir" else "file"
+            lines.append(f"  {t}/ {item.get('name', '')}")
+        return "Repository root:\n" + "\n".join(lines)
     return ""
 
 
@@ -607,7 +668,15 @@ def determine_icon(repo: dict) -> str:
 def determine_affiliation(repo: dict) -> str:
     """Determine the affiliation for a repo."""
     owner = repo.get("owner", {}).get("login", "")
-    # Personal repos — use the owner name verbatim for orgs
+
+    # Forks of contribution orgs should use the upstream org name
+    if repo.get("fork"):
+        parent_full = repo.get("parent", {}).get("full_name", "")
+        parent_owner = parent_full.split("/")[0] if "/" in parent_full else ""
+        if parent_owner.lower() in (o.lower() for o in CONTRIBUTION_ORGS):
+            return parent_owner
+
+    # Personal repos
     if owner.lower() in ("sk1y101", "skyecasolw"):
         return "Personal"
     return owner
@@ -1127,7 +1196,7 @@ def generate_addproject(
     endpoint: str = "",
 ) -> str:
     """Generate a full \addproject entry for a repo."""
-    name = _escape_latex(repo.get("name", ""))
+    name = _escape_latex(_pretty_project_name(repo.get("name", "")))
     url = repo.get("html_url", "")
     icon = determine_icon(repo)
     affiliation = _escape_latex(determine_affiliation(repo))
@@ -1140,7 +1209,7 @@ def generate_addproject(
     # Get description
     if llm_key:
         log("    ~ Generating description")
-        readme = fetch_readme(repo_full, gh_token)
+        readme = fetch_readme_or_tree(repo_full, gh_token)
         if readme:
             repo["readme"] = readme
         desc = generate_description_llm(repo, llm_key, model, endpoint)
