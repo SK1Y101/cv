@@ -81,6 +81,10 @@ _ACTIVE_FALLBACKS: list[str] = list(STATIC_FALLBACK_MODELS)
 _LAST_LLM_REQUEST_TIME: dict[str, float] = {}
 _MIN_REQUEST_SPACING_SECS = 0.5  # Minimum gap between requests to same model
 
+# Model health tracking: stores success/failure counts during the run.
+# Used to drop models that fail consistently (> 50% failure rate).
+_MODEL_HEALTH: dict[str, dict[str, int]] = {}  # model -> {success: N, failure: N}
+
 # Icon mapping by repo topics / language
 ICON_MAP = {
     "code": "code",
@@ -331,13 +335,17 @@ def _throttle_llm_request(model: str) -> None:
     """Enforce minimum spacing between LLM requests to the same model.
 
     Tracks per-model request times and sleeps if necessary to maintain
-    _MIN_REQUEST_SPACING_SECS between calls, reducing rate limit collisions.
+    _MIN_REQUEST_SPACING_SECS between calls (with jitter). Reduces rate limit
+    collisions and avoids synchronized request patterns that trigger anti-bot
+    detection.
     """
     now = time.time()
     last_time = _LAST_LLM_REQUEST_TIME.get(model, 0)
     elapsed = now - last_time
     if elapsed < _MIN_REQUEST_SPACING_SECS:
-        sleep_time = _MIN_REQUEST_SPACING_SECS - elapsed
+        # Add jitter (±20%) to avoid synchronized request patterns
+        jitter = random.uniform(0.8, 1.2)
+        sleep_time = (_MIN_REQUEST_SPACING_SECS - elapsed) * jitter
         log(f"    Throttling {model}: sleeping {sleep_time:.2f}s")
         time.sleep(sleep_time)
     _LAST_LLM_REQUEST_TIME[model] = time.time()
@@ -363,11 +371,23 @@ def _api_request(
       proactively before the window is exhausted.
     * Falls back to exponential backoff (5, 10, 20 s) if no retry timing
       information is available.
+    * Tracks model health (success/failure) and skips models with > 50% failure
+      rate to avoid persistent failures.
 
     Returns the response content text, or ``None`` if all models and all
     retries were exhausted.
     """
     for model in models:
+        # Skip unhealthy models (> 50% failure rate)
+        if model in _MODEL_HEALTH:
+            stats = _MODEL_HEALTH[model]
+            total = stats["success"] + stats["failure"]
+            if total >= 3:
+                failure_rate = stats["failure"] / total
+                if failure_rate > 0.5:
+                    log(f"    {model} skipped (failure rate {failure_rate:.0%})")
+                    continue
+
         _proactive_delay(gh=False)
         _throttle_llm_request(model)
 
@@ -396,9 +416,17 @@ def _api_request(
                     content = raw if isinstance(raw, str) else ""
                     stripped = content.strip()
                     if stripped and stripped not in ("None", "null"):
+                        # Track success
+                        if model not in _MODEL_HEALTH:
+                            _MODEL_HEALTH[model] = {"success": 0, "failure": 0}
+                        _MODEL_HEALTH[model]["success"] += 1
                         return stripped
                     # Empty / stub response — try next model
                     log(f"    {model} returned empty content, trying next model")
+                    # Track failure
+                    if model not in _MODEL_HEALTH:
+                        _MODEL_HEALTH[model] = {"success": 0, "failure": 0}
+                    _MODEL_HEALTH[model]["failure"] += 1
                     break
 
             except urllib.error.HTTPError as e:
@@ -419,15 +447,79 @@ def _api_request(
                     continue
 
                 log(f"    {model} failed: HTTP {e.code}- {body[:200]}")
+                # Track failure
+                if model not in _MODEL_HEALTH:
+                    _MODEL_HEALTH[model] = {"success": 0, "failure": 0}
+                _MODEL_HEALTH[model]["failure"] += 1
 
                 # Non-retryable status or retries exhausted — try next model
                 break
 
             except Exception as e:
                 log(f"    {model} failed: {e}")
+                # Track failure
+                if model not in _MODEL_HEALTH:
+                    _MODEL_HEALTH[model] = {"success": 0, "failure": 0}
+                _MODEL_HEALTH[model]["failure"] += 1
                 break
 
     return None
+
+
+def test_model_availability(
+    models: list[str], llm_key: str, endpoint: str
+) -> list[str]:
+    """Quick health check: test each model once to identify which ones work.
+
+    Sends a single simple request to each model and returns only those that
+    respond successfully. Removes dead models before processing repos.
+    Logs results and returns filtered model list.
+    """
+    if not models or not llm_key:
+        return models
+
+    working = []
+    log("Testing model availability...")
+
+    for model in models:
+        _throttle_llm_request(model)
+        payload = {
+            "messages": [{"role": "user", "content": "Say 'ok'."}],
+            "max_tokens": 10,
+        }
+
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {llm_key}",
+                "User-Agent": "cv-sync/1.0",
+            }
+            req = urllib.request.Request(
+                f"{endpoint}/chat/completions",
+                data=json.dumps({**payload, "model": model}).encode(),
+                headers=headers,
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read())
+                content = (
+                    result.get("choices", [{}])[0].get("message", {}).get("content")
+                )
+                if content and isinstance(content, str) and content.strip():
+                    working.append(model)
+                    log(f"  ✓ {model}")
+                else:
+                    log(f"  ✗ {model} (empty response)")
+        except urllib.error.HTTPError as e:
+            log(f"  ✗ {model} (HTTP {e.code})")
+        except Exception as e:
+            log(f"  ✗ {model} ({str(e)[:40]})")
+
+    if not working:
+        log("  WARNING: No models available! Falling back to all models.")
+        return models
+
+    log(f"  {len(working)}/{len(models)} models available")
+    return working
 
 
 def discover_models(endpoint: str, api_key: str) -> list[str]:
@@ -978,6 +1070,10 @@ Rules:
         "max_tokens": 500,
         "temperature": 0.7,
     }
+
+    # Increase max_tokens for north-mini-code (fast, can handle more) to get richer output
+    if model and "north-mini-code" in model.lower():
+        payload["max_tokens"] = 800
 
     models = [model] + [_ for _ in _ACTIVE_FALLBACKS if _.lower() != model.lower()]
     text = _api_request(payload, token, models, endpoint)
@@ -1832,13 +1928,18 @@ def main():
         # Discover models dynamically from the provider
         available = discover_models(llm_endpoint, llm_key)
         if available:
-            llm_model = available[0]
-            _ACTIVE_FALLBACKS.clear()
-            _ACTIVE_FALLBACKS.extend(available)
-            log(
-                f"Discovered {len(available)} models; primary: {llm_model} "
-                f"(set LLM_MODEL to override)"
-            )
+            # Test model availability to filter out dead models early
+            available = test_model_availability(available, llm_key, llm_endpoint)
+            if available:
+                llm_model = available[0]
+                _ACTIVE_FALLBACKS.clear()
+                _ACTIVE_FALLBACKS.extend(available)
+                log(
+                    f"Discovered {len(available)} models; primary: {llm_model} "
+                    f"(set LLM_MODEL to override)"
+                )
+            else:
+                llm_model = STATIC_FALLBACK_MODELS[0]
         else:
             llm_model = STATIC_FALLBACK_MODELS[0]
     else:
