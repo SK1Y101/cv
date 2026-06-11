@@ -1147,7 +1147,7 @@ Write a concise description for this project:
 {commits}
 
 Rules:
-- Write preferably 2, and no more than 3 sentences, that concisely summarizes the project's purpose and impact
+- Write exactly 2 sentences that concisely summarizes the project's purpose and impact
 - Write in present tense for ongoing projects, past tense for completed ones
 - Focus on WHAT the project DOES and WHY it matters (not implementation details)
 - Explain the key problem it solves or capability it provides
