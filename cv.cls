@@ -554,17 +554,31 @@
     \ifthenelse{\getlength{membershiptitle} > 0}{
         \saveentrycolour
         \iconsection{\faIcon{#1}}{Professional Memberships}
-        \foreach \c in {1,8,...,\getlength{membershiptitle}} {
-            \entrytabular
-                {\ifthenelse{\equal{\slimdates}{true}}{%
-                    \defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}%
-                }{%
-                    \getdata[\c+3]{membershiptitle}\space--\space\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}%
-                }}
-                {\ifexistselse{\getdata[\c+6]{membershiptitle}}{\href{\getdata[\c+6]{membershiptitle}}{\getdata[\c]{membershiptitle}}}{\getdata[\c]{membershiptitle}}}
-                {\getdata[\c+1]{membershiptitle}}
-                {\getdata[\c+2]{membershiptitle}}
-            \vspace{0.2em}\par
+        \vspace{0.3em}
+        % Group titles under each institution, showing its logo as a header.
+        \foreach \m in {1,3,...,\getlength{membership}} {
+            \begin{addmargin}[0mm]{0mm}%
+                {\color{grey}\Large\getdata[\m]{membership}%
+                \ifexists{\getdata[\m+1]{membership}}{\hfill%
+                    \raisebox{-\iconoffset}[\iconbox]{\includegraphics[height=\iconheight]{\getdata[\m+1]{membership}}}\vspace{-\iconoffset}%
+                }{}}%
+                \par
+                \foreach \c in {1,8,...,\getlength{membershiptitle}} {
+                    \ifequals{\getdata[\m]{membership}}{\getdata[\c]{membershiptitle}}{%
+                        \entrytabular
+                            {\ifthenelse{\equal{\slimdates}{true}}{%
+                                \defaultexists{\getdata[\c+4]{membershiptitle}}{Present}\newline\getdata[\c+3]{membershiptitle}%
+                            }{%
+                                \getdata[\c+3]{membershiptitle}\space--\space\defaultexists{\getdata[\c+4]{membershiptitle}}{Present}%
+                            }}
+                            {\ifexistselse{\getdata[\c+6]{membershiptitle}}{\href{\getdata[\c+6]{membershiptitle}}{\getdata[\c+1]{membershiptitle}}}{\getdata[\c+1]{membershiptitle}}}
+                            {\getdata[\c+2]{membershiptitle}}
+                            {\getdata[\c+5]{membershiptitle}}
+                        \vspace{0.2em}\par
+                    }%
+                }
+            \end{addmargin}%
+            \vspace{0.3em}
         }
     }{}
 }
@@ -615,11 +629,12 @@
 }
 
 \newcommand{\projicon}[1]{
-    % proj: hardware, pub: paper, code: software, talk: talk
+    % proj: hardware, pub: paper, code: software, talk: talk, blog: writing
     \ifequals{#1}{proj}{\color{highlightcolour}\faIcon{microchip}}%
     \ifequals{#1}{pub}{\color{highlightcolour}\faIcon{newspaper}}%
     \ifequals{#1}{code}{\color{highlightcolour}\faIcon{keyboard}}%
     \ifequals{#1}{talk}{\color{highlightcolour}\faIcon{microphone}}%
+    \ifequals{#1}{blog}{\color{highlightcolour}\faIcon{blog}}%
 }
 \newcommand{\addproject}[6]{
     % \addproject{project name}{proj/pub}{affiliated}{completion date}{details}{link}

@@ -3,6 +3,7 @@
 
 import re
 import json
+import unicodedata
 from pathlib import Path
 
 LATEX_CMD = re.compile(r"\\(?P<name>[a-zA-Z]+)")
@@ -14,7 +15,13 @@ FLUENCY_MAP = {
     "1": "Beginner",
     "-1": "Native",
 }
-ICON_TYPE = {"proj": "hardware", "pub": "paper", "code": "software", "talk": "talk"}
+ICON_TYPE = {
+    "proj": "hardware",
+    "pub": "paper",
+    "code": "software",
+    "talk": "talk",
+    "blog": "writing",
+}
 COUNTRY_MAP = {
     "united kingdom": "GB",
     "uk": "GB",
@@ -106,20 +113,49 @@ def strip_latex(text: str) -> str:
         return ""
     # \href{url}{text} → text
     text = re.sub(r"\\href\{[^}]*\}\{([^}]*)\}", r"\1", text)
-    # \`{text} or \`text → text (backtick accent)
-    text = re.sub(r"\\`(?:'|`)?(\S)", r"\1", text)
-    text = re.sub(r"\\`\{([^}]*)\}", r"\1", text)
-    # \% \& \~ etc
+    # Accent macros (e.g. \'e → é) in both \'e and \'{e} forms
+    text = _convert_accents(text)
+    # \% \& etc
     text = text.replace("\\%", "%").replace("\\&", "&").replace("\\~", " ")
     # \LaTeX → LaTeX
     text = re.sub(r"\\LaTeX", "LaTeX", text)
     # Remove remaining known commands
     text = re.sub(r"\\textbullet\s*", "", text)
+    # LaTeX quotes: ``...'' → "..." and `...' → '...'
+    text = text.replace("``", '"').replace("''", '"')
+    text = text.replace("`", "'")
     # --- →; (em dash)
     text = text.replace("---", "\u2014")
     # -- → – (en dash)
     text = text.replace("--", "\u2013")
     return text.strip()
+
+
+# LaTeX accent macro → combining-character lookup, e.g. \'e → é.
+_ACCENTS = {
+    "'": "\u0301",  # acute
+    "`": "\u0300",  # grave
+    '"': "\u0308",  # umlaut/diaeresis
+    "^": "\u0302",  # circumflex
+    "~": "\u0303",  # tilde
+    "=": "\u0304",  # macron
+    ".": "\u0307",  # dot above
+}
+
+
+def _convert_accents(text: str) -> str:
+    """Convert LaTeX accent macros (\\'e, \\'{e}, etc.) to precomposed Unicode."""
+
+    def repl(m: "re.Match[str]") -> str:
+        accent, letter = m.group(1), m.group(2)
+        combining = _ACCENTS.get(accent)
+        if not combining:
+            return letter
+        return unicodedata.normalize("NFC", letter + combining)
+
+    # Matches \'e, \"o, \^e ... and braced \'{e} forms.
+    pattern = r"\\(['`\"^~=.])\{?([A-Za-z])\}?"
+    return re.sub(pattern, repl, text)
 
 
 def parse_itemize(text: str) -> list[str]:
@@ -391,6 +427,18 @@ def parse_details_tex(filepath: str) -> dict:
     #  Publications & Projects
     publications = []
     projects = []
+
+    def _date_sort_key(start: str, end: str) -> tuple[str, str]:
+        # Sort most-recent-first: ongoing ("Present"/open-ended) entries rank
+        # highest, then by end date, then by start date.
+        if end and end.lower() != "present":
+            end_key = end
+        elif end and end.lower() == "present":
+            end_key = "9999-99-99"
+        else:
+            end_key = start or ""
+        return (end_key, start or "")
+
     for args in collect_commands(content, "addproject", 6):
         name = args[0]
         icon = args[1]
@@ -413,17 +461,22 @@ def parse_details_tex(filepath: str) -> dict:
         if affiliation:
             entry["affiliation"] = affiliation
 
+        sort_key = _date_sort_key(start, end)
         icon_type = ICON_TYPE.get(icon, "")
         if icon_type == "paper" or icon == "pub":
             entry["releaseDate"] = end if end and end.lower() != "present" else start
-            publications.append(entry)
+            publications.append((sort_key, entry))
         else:
             if icon_type:
                 entry["type"] = icon_type
-            projects.append(entry)
+            projects.append((sort_key, entry))
 
-    resume["publications"] = publications
-    resume["projects"] = projects
+    # Most recent entries first.
+    publications.sort(key=lambda pair: pair[0], reverse=True)
+    projects.sort(key=lambda pair: pair[0], reverse=True)
+
+    resume["publications"] = [entry for _, entry in publications]
+    resume["projects"] = [entry for _, entry in projects]
 
     #  Schema
     resume["$schema"] = (

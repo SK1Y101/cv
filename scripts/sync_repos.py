@@ -44,6 +44,23 @@ BLOG_CATEGORIES = [
     "ternary-computer",
 ]
 
+# Month names -> zero-padded number, for parsing dates out of blog post slugs
+# (e.g. "/blog/2025/november-sprint/" -> 2025-11).
+_MONTHS = {
+    "january": "01",
+    "february": "02",
+    "march": "03",
+    "april": "04",
+    "may": "05",
+    "june": "06",
+    "july": "07",
+    "august": "08",
+    "september": "09",
+    "october": "10",
+    "november": "11",
+    "december": "12",
+}
+
 # Minimum start dates per organisation (GitHub owner).
 # When a repo's `created_at` falls after this date, the organisation date is
 # used instead — handles projects that migrated to GitHub long after they
@@ -892,19 +909,35 @@ def determine_icon(repo: dict) -> str:
         if icon is not None:
             return icon
 
-    # Check name keywords
-    for keyword in ["paper", "thesis", "publication", "dissertation"]:
-        if keyword in name:
-            return "pub"
-    for keyword in ["talk", "webinar", "presentation"]:
-        if keyword in name:
-            return "talk"
-    for keyword in ["compiler", "language", "interpreter"]:
-        if keyword in name:
-            return "proj"
+    # Check name keywords (whole-word match so e.g. "rock-paper-scissors"
+    # is not misread as a "paper" publication).
+    name_words = set(re.split(r"[^a-z0-9]+", name))
+    if name_words & {"paper", "thesis", "publication", "dissertation"}:
+        return "pub"
+    if name_words & {"talk", "webinar", "presentation"}:
+        return "talk"
+    if name_words & {"compiler", "language", "interpreter"}:
+        return "proj"
 
     # Default
     return ""
+
+
+def category_icon(category: str) -> str:
+    """Pick a project icon code for a non-GitHub (website/blog) entry.
+
+    Returns one of the icon codes understood by \\projicon in cv.cls
+    ("blog", "code", "pub", "talk", "proj"), or "" for none.
+    """
+    cat = (category or "").lower()
+    if cat == "blog":
+        return "blog"
+    if cat in ("talk", "webinar", "presentation", "seminar"):
+        return "talk"
+    if cat in ("paper", "publication", "thesis"):
+        return "pub"
+    # Website projects are predominantly software/web work.
+    return "code"
 
 
 def determine_affiliation(repo: dict) -> str:
@@ -1049,7 +1082,7 @@ def _generate_blog_category_summary(
         return f"Curated collection of {len(post_titles)} blog posts on {category.replace('-', ' ')}"
 
     post_list = "\n".join([f"- {title}" for title in post_titles])
-    category_display = category.replace('-', ' ').title()
+    category_display = category.replace("-", " ").title()
 
     prompt = f"""You are writing a CV entry for a blog category. Based on these blog post titles, write a 1-2 sentence summary of what this category represents and what topics it covers.
 
@@ -1787,7 +1820,28 @@ def scan_website() -> list[dict]:
         return []
 
 
-def scan_blog_categories(llm_key: str = "", endpoint: str = "", model: str = "") -> list[dict]:
+def _parse_blog_post_date(url: str) -> str:
+    """Extract an ISO date (YYYY-MM-DD) from a Jekyll blog post URL.
+
+    URLs look like '/blog/2025/november-sprint/'. The year is always present;
+    the month is taken from the slug when it begins with a month name,
+    otherwise it falls back to January.
+    """
+    m = re.search(r"/blog/(\d{4})/([^/]+)", url)
+    if not m:
+        return ""
+    year, slug = m.group(1), m.group(2).lower()
+    month = "01"
+    for word in slug.split("-"):
+        if word in _MONTHS:
+            month = _MONTHS[word]
+            break
+    return f"{year}-{month}-01"
+
+
+def scan_blog_categories(
+    llm_key: str = "", endpoint: str = "", model: str = ""
+) -> list[dict]:
     """Scan blog categories and generate summaries via LLM.
 
     For each configured blog category, fetches all posts from the category page,
@@ -1809,8 +1863,7 @@ def scan_blog_categories(llm_key: str = "", endpoint: str = "", model: str = "")
             # Category pages use a table structure with post-link class
             # Format: <td><a class="post-link" href="...">Title</a></td>
             posts = re.findall(
-                r'<a\s+class="post-link"[^>]*href="([^"]*)"[^>]*>([^<]+)</a>',
-                raw_html
+                r'<a\s+class="post-link"[^>]*href="([^"]*)"[^>]*>([^<]+)</a>', raw_html
             )
 
             if not posts:
@@ -1822,25 +1875,43 @@ def scan_blog_categories(llm_key: str = "", endpoint: str = "", model: str = "")
             # Build a list of post titles for the summary
             post_titles = [title.strip() for _, title in posts]
 
+            # Derive a date range from the post URLs (earliest -> latest post).
+            post_dates = sorted(
+                d
+                for d, _ in ((_parse_blog_post_date(url), url) for url, _ in posts)
+                if d
+            )
+            start_date = post_dates[0] if post_dates else ""
+            end_date = post_dates[-1] if post_dates else ""
+
             # Generate summary via LLM if available
-            category_display = category.replace('-', ' ').title()
+            post_count = len(post_titles)
+            category_display = category.replace("-", " ").title()
             if llm_key:
                 summary = _generate_blog_category_summary(
                     category, post_titles, llm_key, model, endpoint
                 )
             else:
-                # Fallback summary
-                summary = f"Curated collection of {len(posts)} blog posts on {category.replace('-', ' ')}"
+                # Fallback summary (pluralise "post" correctly)
+                noun = "post" if post_count == 1 else "posts"
+                summary = (
+                    f"Curated collection of {post_count} blog {noun} "
+                    f"on {category.replace('-', ' ')}"
+                )
 
             # The category page URL serves as the canonical link
-            category_page_url = category_url.rstrip('/')
+            category_page_url = category_url.rstrip("/")
 
-            results.append({
-                "name": category_display,
-                "details": summary,
-                "url": category_page_url,
-                "category": "blog",
-            })
+            results.append(
+                {
+                    "name": category_display,
+                    "details": summary,
+                    "url": category_page_url,
+                    "category": "blog",
+                    "start": start_date,
+                    "end": end_date,
+                }
+            )
             log(f"  -> Generated summary for: {category_display}")
 
         except Exception as e:
@@ -2086,7 +2157,7 @@ def deduplicate_details_tex() -> bool:
         return re.sub(r"[^a-z0-9]", "", n.lower())
 
     def normalize_url(u: str) -> str:
-        return u.rstrip('/')
+        return u.rstrip("/")
 
     seen_urls = set()
     seen_names = set()
@@ -2196,7 +2267,7 @@ def main():
     website_projects = scan_website()
     log(f"Found {len(website_projects)} website-only project candidates")
 
-     # Scan blog categories for project overviews
+    # Scan blog categories for project overviews
     log("Scanning blog categories...")
     blog_projects = scan_blog_categories(llm_key, llm_endpoint, llm_model)
     website_projects.extend(blog_projects)
@@ -2207,7 +2278,7 @@ def main():
 
     def normalize_url(u: str) -> str:
         """Normalize URLs by removing trailing slashes for consistent dedup."""
-        return u.rstrip('/')
+        return u.rstrip("/")
 
     # Fetch existing entries (both URLs and names for dedup)
     existing_urls = {normalize_url(u) for u in extract_existing_urls(DETAILS_TEX)}
@@ -2235,18 +2306,26 @@ def main():
         desc = _escape_latex(wp["details"])
 
         today = date.today().isoformat()[:10]
-        icon = "{}"
+        icon = "{" + category_icon(wp.get("category", "")) + "}"
         affiliation = "{" + wp["category"] + "}"
 
-        # Floor work-category projects to the earliest organisation start date
-        # (handles projects like MAAS that predate their GH migration).
-        start = today
-        if wp.get("category", "").lower() in ("work", "employment"):
-            work_floors = [d for d in ORG_START_DATES.values() if d and d < start]
-            if work_floors:
-                start = min(work_floors)
+        # Blog categories carry an explicit date range derived from their posts;
+        # use it directly (earliest post -> latest post) rather than "Present".
+        if wp.get("start") and wp.get("end"):
+            if wp["start"] == wp["end"]:
+                date_range = wp["start"]
+            else:
+                date_range = f"{wp['start']}--{wp['end']}"
+        else:
+            # Floor work-category projects to the earliest organisation start
+            # date (handles projects like MAAS that predate their GH migration).
+            start = today
+            if wp.get("category", "").lower() in ("work", "employment"):
+                work_floors = [d for d in ORG_START_DATES.values() if d and d < start]
+                if work_floors:
+                    start = min(work_floors)
+            date_range = f"{start}--Present"
 
-        date_range = f"{start}--Present"
         entry = (
             f"\\addproject{{{wp['name']}}}{icon}\n"
             f"{affiliation}{{{date_range}}}\n"
@@ -2409,26 +2488,17 @@ def main():
                 log("  ^ Replaced fork entry with upstream")
         DETAILS_TEX.write_text(text)
 
-    # Update details.tex
-    updated = False
+    # Update details.tex with the new entries
     if new_entries:
-        updated = update_details_tex(new_entries)
-    if replacements:
-        updated = True
-    if updated:
-        run_tex2json()
-        log(
-            f"Synchronisation complete. Added {len(new_entries)} new entries, "
-            f"upgraded {len(replacements)} forks to upstream."
-        )
+        update_details_tex(new_entries)
 
-    # Step 4b: Remove duplicate entries
+    # Remove duplicate entries before generating resume.json so the output
+    # is deduplicated in a single pass.
     log("Checking for duplicate entries...")
     if deduplicate_details_tex():
-        run_tex2json()
         log("Removed duplicate entries.")
 
-    # Step 5: Re-evaluate skill levels based on new repos
+    # Re-evaluate skill levels based on new repos (also mutates details.tex)
     if new_repos_info and llm_key:
         log("Evaluating skill levels from new repos...")
         text = DETAILS_TEX.read_text()
@@ -2439,9 +2509,15 @@ def main():
         if adjustments or new_skills:
             text = update_skills(text, adjustments, new_skills)
             DETAILS_TEX.write_text(text)
-            run_tex2json()
     else:
         log("Skipping skill evaluation (no new repos or no LLM key).")
+
+    # Generate resume.json once, after all details.tex mutations are complete.
+    run_tex2json()
+    log(
+        f"Synchronisation complete. Added {len(new_entries)} new entries, "
+        f"upgraded {len(replacements)} forks to upstream."
+    )
 
 
 if __name__ == "__main__":
