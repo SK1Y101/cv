@@ -181,6 +181,7 @@ _ACRONYMS = {
     "e2e",
     "ld",
     "tf",
+    "hcl",
     "sk1y101",
 }
 
@@ -693,17 +694,25 @@ def determine_affiliation(repo: dict) -> str:
     """Determine the affiliation for a repo."""
     owner = repo.get("owner", {}).get("login", "")
 
+    # Capitalization map for known organisation names
+    AFFILIATION_CAPS = {
+        "canonical": "Canonical",
+        "maas": "Canonical",
+        "sk1y101": "Personal",
+        "skyecasolw": "Personal",
+    }
+
     # Forks of contribution orgs should use the upstream org name
     if repo.get("fork"):
         parent_full = repo.get("parent", {}).get("full_name", "")
         parent_owner = parent_full.split("/")[0] if "/" in parent_full else ""
         if parent_owner.lower() in (o.lower() for o in CONTRIBUTION_ORGS):
-            return parent_owner
+            return AFFILIATION_CAPS.get(parent_owner.lower(), parent_owner)
 
     # Personal repos
     if owner.lower() in ("sk1y101", "skyecasolw"):
         return "Personal"
-    return owner
+    return AFFILIATION_CAPS.get(owner.lower(), owner)
 
 
 def format_date_range(first: Optional[str], last: Optional[str]) -> str:
@@ -1463,25 +1472,34 @@ def parse_existing_projects(text: str) -> list[dict]:
     return projects
 
 
-def find_insert_position(projects: list[dict], new_entry: dict) -> int:
+def find_insert_position(
+    projects: list[dict], new_entry: dict
+) -> tuple[int, list[dict]]:
     """Find where to insert a new project entry to maintain sort order.
 
     Order: ongoing (Present end) by start desc, then completed by end desc.
+    Ties within the same date are resolved alphabetically by name.
     """
-    # Ongoing sort by start DESC, completed by end DESC
+    present = "Present"
+
+    def ongoing_key(p: dict) -> tuple:
+        return (p.get("start") or "0000-00", p.get("name") or "")
+
+    def completed_key(p: dict) -> tuple:
+        return (p.get("end") or "0000-00", p.get("name") or "")
+
     ongoing = sorted(
-        [p for p in projects + [new_entry] if p["end"] == "Present" or p["end"] == ""],
-        key=lambda p: p["start"] or "0000-00",
+        [p for p in projects + [new_entry] if p.get("end") in (present, "")],
+        key=ongoing_key,
         reverse=True,
     )
     completed = sorted(
-        [p for p in projects + [new_entry] if p["end"] and p["end"] != "Present"],
-        key=lambda p: p["end"] or "0000-00",
+        [p for p in projects + [new_entry] if p.get("end") and p.get("end") != present],
+        key=completed_key,
         reverse=True,
     )
     sorted_projects = ongoing + completed
 
-    # Find position of new entry in sorted list
     idx = sorted_projects.index(new_entry)
     return idx, sorted_projects
 
