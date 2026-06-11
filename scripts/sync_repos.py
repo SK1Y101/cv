@@ -909,10 +909,11 @@ def determine_icon(repo: dict) -> str:
         if icon is not None:
             return icon
 
-    # Check name keywords (whole-word match so e.g. "rock-paper-scissors"
-    # is not misread as a "paper" publication).
+    # Check name keywords (whole-word match). "paper" is deliberately excluded
+    # as it is far too generic (e.g. "rock-paper-scissors" is a game, not a
+    # publication); real papers are tagged with the explicit `pub` icon.
     name_words = set(re.split(r"[^a-z0-9]+", name))
-    if name_words & {"paper", "thesis", "publication", "dissertation"}:
+    if name_words & {"thesis", "dissertation", "publication", "preprint", "manuscript"}:
         return "pub"
     if name_words & {"talk", "webinar", "presentation"}:
         return "talk"
@@ -1810,6 +1811,11 @@ def scan_website() -> list[dict]:
             # Only keep personal website projects (urls on sk1y101.github.io domain)
             # Skip GitHub and other external repos
             if not url.startswith("https://sk1y101.github.io"):
+                continue
+            # Skip blog category pages: these are owned by scan_blog_categories,
+            # which produces a richer summary and a real post-derived date range.
+            # (The /projects/ page links to some of them, e.g. Ternary Computer.)
+            if "/blog/category/" in url:
                 continue
             p["url"] = url
             results.append(p)
