@@ -91,6 +91,8 @@ _MIN_REQUEST_SPACING_SECS = 0.5  # Minimum gap between requests to same model
 # Used to drop models that fail consistently (> 50% failure rate).
 _MODEL_HEALTH: dict[str, dict[str, int]] = {}  # model -> {success: N, failure: N}
 
+MAX_TOKENS = 1000
+
 # Icon mapping by repo topics / language
 ICON_MAP = {
     "code": "code",
@@ -1073,13 +1075,13 @@ Rules:
             },
             {"role": "user", "content": prompt},
         ],
-        "max_tokens": 500,
+        "max_tokens": MAX_TOKENS,
         "temperature": 0.7,
     }
 
     # Increase max_tokens for north-mini-code (fast, can handle more) to get richer output
     if model and "north-mini-code" in model.lower():
-        payload["max_tokens"] = 800
+        payload["max_tokens"] = int(MAX_TOKENS*1.5)
 
     models = [model] + [_ for _ in _ACTIVE_FALLBACKS if _.lower() != model.lower()]
     text = _api_request(payload, token, models, endpoint)
@@ -1481,7 +1483,7 @@ Only list changes. Return nothing if no adjustments or new skills needed."""
             },
             {"role": "user", "content": prompt},
         ],
-        "max_tokens": 400,
+        "max_tokens": MAX_TOKENS,
         "temperature": 0.3,
     }
 
