@@ -364,7 +364,7 @@ def _api_request(
                     data=json.dumps({**payload, "model": model}).encode(),
                     headers=headers,
                 )
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with urllib.request.urlopen(req, timeout=60) as resp:
                     _update_rate_limit(resp.headers, gh=False)
                     result = json.loads(resp.read())
                     raw = (
@@ -441,13 +441,6 @@ def discover_models(endpoint: str, api_key: str) -> list[str]:
             mid = m.get("id") if isinstance(m, dict) else str(m)
             if mid:
                 ids.append(mid)
-
-        if not ids:
-            return list(STATIC_FALLBACK_MODELS)
-
-        # Models known to return empty / 401 at the chat completions endpoint
-        BROKEN = {"deepseek-v4-flash-free", "north-mini-code-free"}
-        ids = [m for m in ids if m not in BROKEN]
 
         if not ids:
             return list(STATIC_FALLBACK_MODELS)
