@@ -367,7 +367,17 @@ def _api_request(
                 with urllib.request.urlopen(req, timeout=30) as resp:
                     _update_rate_limit(resp.headers, gh=False)
                     result = json.loads(resp.read())
-                    return result["choices"][0]["message"]["content"].strip()
+                    content = (
+                        result.get("choices", [{}])[0]
+                        .get("message", {})
+                        .get("content", "")
+                    )
+                    stripped = content.strip()
+                    if stripped and stripped not in ("None", "null"):
+                        return stripped
+                    # Empty / stub response — try next model
+                    log(f"    {model} returned empty content, trying next model")
+                    break
 
             except urllib.error.HTTPError as e:
                 body = e.read().decode() if hasattr(e, "read") else ""
