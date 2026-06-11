@@ -1962,6 +1962,13 @@ def main():
                 continue
 
             name = normalize_name(repo.get("name", ""))
+            owner = repo.get("owner", {}).get("login", "")
+
+            # Skip self-named repos (e.g., SK1Y101/SK1Y101, SkiylianSoftware/SkiylianSoftware)
+            # These are GitHub profile repos, not real projects
+            if owner and name and normalize_name(owner) == name:
+                log(f"  -> {repo['name']} (skipped, self-named profile repo)")
+                continue
 
             # Skip if a project with this name is already tracked (from a
             # contribution org or manually added). The upstream is the
