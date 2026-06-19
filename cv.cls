@@ -59,6 +59,13 @@
 \newcommand{\postnomial}{}
 \newcommand{\pronoun}{}
 \newcommand{\tagline}{}
+\newcommand{\summary}{}
+% Lean mode: when true, the job-focused CV hides ancillary content
+% (early education, extra memberships, most hobbies, academic project
+% entries). Set \leantrue in cv-job.tex; \leanfalse (default) is the full
+% website CV.
+\newif\iflean
+\leanfalse
 \newcommand{\email}{}
 \newcommand{\phone}{}
 \newcommand{\address}{}
@@ -501,6 +508,7 @@
         }{%
             \par%
         }}%
+        \par\nopagebreak[4]%
         \ifthenelse{\getlength{#3} < 7}{%
             \ifequals{\getdata[#1]{#2}}{\getdata[1]{#3}}{%
                 \oneitem{1}{#3}%
@@ -514,6 +522,17 @@
         }%
     \end{addmargin}%
     \vspace{-1em}%
+}
+\newcommand{\showsummary}[1]{
+    % Title; renders a Profile/Summary block at the top of the main column.
+    % Only shown when \summary has been set in details.tex.
+    \ifx\summary\empty\else
+        \saveentrycolour
+        \iconsection{\faIcon{user}}{#1}%
+        \vspace{0.3em}%
+        {\raggedright\summary\par}%
+        % \vspace{0.4em}%
+    \fi
 }
 \newcommand{\showcategory}[4]{
     % icon, title, instance name, entry name

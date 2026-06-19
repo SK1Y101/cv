@@ -1,0 +1,21 @@
+% --------------------------------------------------------- %
+% LEAN JOB CV -- a focused, ~2-page CV for job applications. %
+% Shares all content with main.tex via body.tex; the \lean   %
+% flag trims ancillary material. Build WITHOUT running the    %
+% repo sync so the personal-project long tail is excluded.    %
+% --------------------------------------------------------- %
+
+\documentclass[]{cv}
+\usepackage{graphicx}
+\usepackage{pgfkeys}
+
+\title{CV}
+\author{\firstname \lastname \postnomial (\pronoun)}
+\date{July 2023}
+
+\begin{document}
+% Lean job-focused CV (trimmed content).
+\leantrue
+\input{body}
+
+\end{document}

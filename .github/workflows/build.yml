@@ -17,15 +17,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ── Sync repos (skip on PR, where we only want to test the build) ──
+      # ── Lean job CV: built BEFORE sync, so it contains only the curated
+      #    content (no auto-synced personal-project long tail). ──
+      - name: Compile lean job CV
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: cv-job.tex
+          latexmk_use_xelatex: false
+
+      # ── Sync repos (adds the personal-project long tail to the full CV) ──
       - name: Synchronise repos to CV
         run: python3 scripts/sync_repos.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
 
-      # ── Build ──
-      - name: Compile LaTeX document
+      # ── Full website CV: built AFTER sync (exhaustive). ──
+      - name: Compile full website CV
         uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
@@ -34,12 +42,13 @@ jobs:
       - name: Generate resume.json
         run: python3 scripts/tex2json.py
 
-      - name: Upload PDF and JSON
+      - name: Upload PDFs and JSON
         uses: actions/upload-artifact@v4
         with:
           name: CV
           path: |
             main.pdf
+            cv-job.pdf
             resume.json
 
   release:
@@ -60,6 +69,7 @@ jobs:
           tag_name: latest
           files: |
             main.pdf
+            cv-job.pdf
             resume.json
           make_latest: true
           generate_release_notes: false

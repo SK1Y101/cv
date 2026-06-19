@@ -1149,9 +1149,11 @@ Write a concise description for this project:
 Rules:
 - Write exactly 2 sentences, about 40 words, that concisely summarizes the project's purpose and impact
 - Write in present tense for ongoing projects, past tense for completed ones
-- Focus on WHAT the project DOES and WHY it matters (not implementation details)
+- Focus on WHAT the project DOES, WHY it matters, and the technical substance behind it
+- For solo projects, state the scope of what was built directly (e.g. "Built...", "Implements...") rather than describing it abstractly
 - Explain the key problem it solves or capability it provides
 - Use technical language appropriate for a DevOps/Software Engineering CV
+- Keep a modest, factual tone; state achievements plainly without hype or marketing language
 - Do NOT use first person ("I", "my", "we")
 - Mention key technologies if relevant to the CV
 - Do not wrap in quotes; do not use em-dashes (use semicolons instead)

@@ -107,6 +107,21 @@ def extract_renewcommand(text: str, cmd_name: str) -> str | None:
     return None
 
 
+def _resolve_lean(text: str) -> str:
+    """Resolve lean/full content switches, keeping the full branch.
+
+    ``\\iflean <lean>\\else <full>\\fi`` → ``<full>``. The JSON mirrors the
+    exhaustive website CV, so the full branch wins; any stray conditional
+    tokens are then dropped.
+    """
+    if not text:
+        return text
+    text = re.sub(
+        r"\\iflean\b\s*(.*?)\\else\s*(.*?)\\fi\b", r"\2", text, flags=re.DOTALL
+    )
+    return re.sub(r"\\(?:iflean|else|fi)\b\s*", "", text)
+
+
 def strip_latex(text: str) -> str:
     """Strip LaTeX commands, keeping readable text."""
     if not text:
@@ -119,6 +134,12 @@ def strip_latex(text: str) -> str:
     text = text.replace("\\%", "%").replace("\\&", "&").replace("\\~", " ")
     # \LaTeX → LaTeX
     text = re.sub(r"\\LaTeX", "LaTeX", text)
+    # Inline formatting commands → inner text (\textbf{x} → x, \emph{x} → x, etc.)
+    text = re.sub(r"\\(?:textbf|textit|emph|texttt|textsc){([^}]*)}", r"\1", text)
+    # Resolve lean/full switches to the full branch (JSON mirrors the website CV)
+    text = _resolve_lean(text)
+    # $\sim$ → ~ (approximation symbol in inline math)
+    text = re.sub(r"\$\\sim\$", "~", text)
     # Remove remaining known commands
     text = re.sub(r"\\textbullet\s*", "", text)
     # LaTeX quotes: ``...'' → "..." and `...' → '...'
@@ -160,6 +181,7 @@ def _convert_accents(text: str) -> str:
 
 def parse_itemize(text: str) -> list[str]:
     """Extract \\item text from within an itemize environment."""
+    text = _resolve_lean(text)
     items = []
     for line in text.split("\n"):
         line = strip_latex(line.strip())
@@ -394,6 +416,10 @@ def parse_details_tex(filepath: str) -> dict:
                 "DevOps & Cloud",
                 {"level": "Software Engineer", "icon": "fa-solid fa-cloud"},
             ),
+            (
+                "Backend & Distributed Systems",
+                {"level": "Advanced", "icon": "fa-solid fa-network-wired"},
+            ),
             ("Web & Data", {"level": "Intermediate", "icon": "fa-solid fa-chart-bar"}),
         ]
     )
@@ -406,6 +432,13 @@ def parse_details_tex(filepath: str) -> dict:
             if meta["icon"]:
                 entry["icon"] = meta["icon"]
             skills.append(entry)
+    # Fallback: emit any categories not covered by category_meta, so a new
+    # \skill category is never silently dropped from the JSON.
+    for cat in categories:
+        if cat not in category_meta:
+            skills.append(
+                {"name": cat, "level": "Advanced", "keywords": categories[cat]}
+            )
     resume["skills"] = skills
 
     #  Languages

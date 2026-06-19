@@ -11,60 +11,8 @@
 \date{July 2023}
 
 \begin{document}
-% Fetch user details
-\include{details}
-
-% header (spans full width)
-\rhead{\header{\firstname}{\lastname}{\postnomial}{\pronoun}{\middlename}}
-
-% paracol for sidebar + main content flow
-\setcolumnwidth{0.18\paperwidth, 0.78\paperwidth}
-\setlength{\columnsep}{0.02\paperwidth}
-\begin{paracol}{2}
-
-% Left column -- Sidebar (ancillary & personality info)
-\thinfont\color{grey}
-\raggedleft
-
-\sidebarsection{Contact}
-\iconlink{\email}{mailto:}{envelope}
-\iconlink{\address}{}{map-marker-alt}
-
-\sidebarsection{Platforms}
-\iconlink{\website}{https://}{link}
-\iconlink{\linkedinusername}{https://www.linkedin.com/in/}{linkedin}
-\iconlink{\githubusername}{https://github.com/}{github}
-\iconlink{\orcidid}{https://orcid.org/}{orcid}
-
-\sidebarsection{Publications}
-{\small\faIcon{newspaper}\hspace{1mm}\href{https://arxiv.org/abs/2511.14407}{ExoClock DR IV (2025)}}\par
-{\small\faIcon{graduation-cap}\hspace{1mm}2 Academic Theses}\par
-{\small\faIcon{file-alt}\hspace{1mm}Extended Project (2017)}\par
-
-\sidebarsection{Talks \& Conferences}
-{\small\faIcon{comments}\hspace{1mm}\href{https://britastro.org/event/exoplanet-2023sep}{BAA Exoplanet Webinar (2023)}}\par
-{\small\faIcon{chalkboard-teacher}\hspace{1mm}\textit{Computational Modelling of TTVs}}\par
-
-\sidebarsection{Open Source}
-{\small\faIcon{building}\hspace{1mm}\href{https://github.com/canonical/maas}{@canonical -- MAAS}}\par
-{\small\faIcon{code-branch}\hspace{1mm}\href{https://github.com/Skiylia-Lang}{@Skiylia-Lang -- Founder}}\par
-{\small\faIcon{code}\hspace{1mm}\href{https://github.com/SK1Y101}{My GitHub Repositories}}\par
-
-\showsimplelanguages{languages}{Languages}
-\showsidebarhobbies{}
-\newpage\showsidebarskills{Skills}
-
-\switchcolumn
-
-% Right column -- Main body content
-\mainsection{
-    \showcategory{briefcase}{Experience}{jobcompanies}{jobpositions}
-    \showcategory{user-graduate}{Education}{educationschools}{educationcourses}
-    \showproject{book-open}{Projects and Publications}{projects}
-    \showmainmemberships{id-card}
-    \showproject{trophy}{Awards}{awards}
-}
-
-\end{paracol}
+% Full website CV (all content). The leaner job CV is cv-job.tex.
+\leanfalse
+\input{body}
 
 \end{document}
