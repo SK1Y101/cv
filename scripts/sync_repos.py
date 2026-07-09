@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Daily synchronisation script: fetches public repos from configured GitHub owners and
-parses sk1y101.github.io/projects/ for new entries, detects ones not yet in
+parses skyecas.github.io/projects/ for new entries, detects ones not yet in
 details.tex, generates descriptions via LLM, and inserts new \addproject
 entries. Also marks stale projects (6+ months without commits) as completed.
 
@@ -36,8 +36,8 @@ DETAILS_TEX = REPO_DIR / "details.tex"
 TEX2JSON = REPO_DIR / "scripts/tex2json.py"
 
 STALENESS_DAYS = 180  # 6 months
-WEBSITE_URL = "https://sk1y101.github.io/projects/"
-BLOG_BASE_URL = "https://sk1y101.github.io/blog/"
+WEBSITE_URL = "https://skyecas.github.io/projects/"
+BLOG_BASE_URL = "https://skyecas.github.io/blog/"
 # Blog categories to scan for project summaries (if category page exists)
 BLOG_CATEGORIES = [
     "train-travel",
@@ -73,7 +73,7 @@ ORG_START_DATES = {
 
 # GitHub owners to scan for new repos
 OWNERS = [
-    "SK1Y101",
+    "skyecas",
     "SkiylianSoftware",
 ]
 
@@ -82,7 +82,7 @@ CONTRIBUTION_ORGS = ["canonical"]
 
 # The user's GitHub username, used to filter contribution orgs and to find
 # their first/last commit dates in a repo.
-GITHUB_USERNAME = "SK1Y101"
+GITHUB_USERNAME = "skyecas"
 
 # Static fallback models used when dynamic discovery fails (non-Zen providers
 # or network errors during model list fetch).
@@ -218,7 +218,7 @@ _ACRONYMS = {
     "ld",
     "tf",
     "hcl",
-    "sk1y101",
+    "skyecas",
 }
 
 
@@ -424,7 +424,7 @@ def _api_request(
                     "User-Agent": "cv-sync/1.0",
                 }
                 if "openrouter" in endpoint:
-                    headers["HTTP-Referer"] = "https://github.com/SK1Y101/cv"
+                    headers["HTTP-Referer"] = "https://github.com/skyecas/cv"
                     headers["X-Title"] = title
                 req = urllib.request.Request(
                     f"{endpoint}/chat/completions",
@@ -949,7 +949,7 @@ def determine_affiliation(repo: dict) -> str:
     AFFILIATION_CAPS = {
         "canonical": "Canonical",
         "maas": "Canonical",
-        "sk1y101": "Personal",
+        "skyecas": "Personal",
         "skyecasolw": "Personal",
     }
 
@@ -961,7 +961,7 @@ def determine_affiliation(repo: dict) -> str:
             return AFFILIATION_CAPS.get(parent_owner.lower(), parent_owner)
 
     # Personal repos
-    if owner.lower() in ("sk1y101", "skyecasolw"):
+    if owner.lower() in ("skyecas", "skyecasolw"):
         return "Personal"
     return AFFILIATION_CAPS.get(owner.lower(), owner)
 
@@ -1727,7 +1727,7 @@ def generate_addproject(
 
 
 def scan_website() -> list[dict]:
-    """Parse sk1y101.github.io/projects/ for projects linked to GitHub repos.
+    """Parse skyecas.github.io/projects/ for projects linked to GitHub repos.
 
     Returns a list of project dicts with keys: name, details, url, category.
     """
@@ -1803,17 +1803,17 @@ def scan_website() -> list[dict]:
         parser = ProjectParser()
         parser.feed(raw_html)
 
-        # Filter to only projects that link to personal website (sk1y101.github.io domain)
+        # Filter to only projects that link to personal website (skyecas.github.io domain)
         # GitHub repos are scanned separately to avoid duplication
         results = []
         for p in parser.projects:
             url = p["url"]
             # Resolve relative URLs first
             if url.startswith("/"):
-                url = "https://sk1y101.github.io" + url
-            # Only keep personal website projects (urls on sk1y101.github.io domain)
+                url = "https://skyecas.github.io" + url
+            # Only keep personal website projects (urls on skyecas.github.io domain)
             # Skip GitHub and other external repos
-            if not url.startswith("https://sk1y101.github.io"):
+            if not url.startswith("https://skyecas.github.io"):
                 continue
             # Skip blog category pages: these are owned by scan_blog_categories,
             # which produces a richer summary and a real post-derived date range.
@@ -1860,7 +1860,7 @@ def scan_blog_categories(
     results = []
 
     for category in BLOG_CATEGORIES:
-        category_url = f"https://sk1y101.github.io/blog/category/{category}/"
+        category_url = f"https://skyecas.github.io/blog/category/{category}/"
         try:
             req = urllib.request.Request(
                 category_url,
@@ -2432,7 +2432,7 @@ def main():
             name = normalize_name(repo.get("name", ""))
             owner = repo.get("owner", {}).get("login", "")
 
-            # Skip self-named repos (e.g., SK1Y101/SK1Y101, SkiylianSoftware/SkiylianSoftware)
+            # Skip self-named repos (e.g., skyecas/skyecas, SkiylianSoftware/SkiylianSoftware)
             # These are GitHub profile repos, not real projects
             if owner and name and normalize_name(owner) == name:
                 log(f"  -> {repo['name']} (skipped, self-named profile repo)")
