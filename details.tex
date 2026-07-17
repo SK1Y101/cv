@@ -248,6 +248,11 @@
 {\iflean MAAS's end-to-end test platform; a Temporal-based distributed pipeline that builds, tests, and promotes OS images at scale across VMs and real bare-metal hardware.\else Principal engineer behind MAAS's end-to-end test platform. Architected a Temporal-based distributed orchestration system that builds, tests, and promotes OS images at scale across LXD, QEMU, and real bare-metal hardware, engineering production-grade resilience: a custom workflow scheduler, activity heartbeats, execution timeouts, orphaned-workflow termination, and worker drain and health monitoring.\fi}
 {https://maas.io}
 
+\addproject{MAAS Release Automation Bot}{code}
+{Canonical}{2025-02--Present}
+{\iflean A Temporal-based bot that automates MAAS's entire release process end-to-end; orchestrating version bumps, deb and snap builds, GPG signing, Launchpad PPA publishing, Jenkins system tests, and SolQA validation across durable, resumable workflows.\else Principal engineer behind an internal Temporal-based bot that automates the MAAS release process from end to end. Orchestrates a durable, resumable pipeline spanning GitHub version bumps, LXD-driven deb builds, GPG artefact signing, Launchpad PPA creation and publishing, Snapcraft channel promotion, parallel Jenkins system-test execution, and SolQA testplan creation with approval polling; closing out with automated release-note generation and Discourse announcements. Built with Google OIDC worker authentication, dry-run support throughout, and Launchpad object-refresh polling for long-running publish waits, turning a multi-day manual release into a single self-driving workflow.\fi}
+{}
+
 \addproject{MAAS Terraform Modules}{code}
 {Canonical}{2025-09--Present}
 {\iflean Terraform/Terragrunt infrastructure-as-code deploying highly-available Charmed MAAS with HAProxy and Keepalived virtual-IP failover.\else Lead author of the infrastructure-as-code that deploys highly-available Charmed MAAS. Designed three-node region, database, and proxy topologies with HAProxy and Keepalived virtual-IP failover, S3 backup integration, and dependency-ordered Terragrunt stacks; reducing a full HA cluster deployment to a few commands.\fi}
